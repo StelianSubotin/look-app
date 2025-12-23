@@ -12,6 +12,13 @@ import { Upload, ArrowLeft, CheckCircle, XCircle } from "lucide-react"
 import Image from "next/image"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { createClient } from "@/lib/supabase-client"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface Component {
   id: string
@@ -235,23 +242,6 @@ export default function EditComponentPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {successMessage && (
-              <div className="mb-4 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <p className="text-sm text-green-800 dark:text-green-200">{successMessage}</p>
-                </div>
-              </div>
-            )}
-            {errorMessage && (
-              <div className="mb-4 rounded-md bg-destructive/15 border border-destructive/50 p-4">
-                <div className="flex items-center gap-2">
-                  <XCircle className="h-5 w-5 text-destructive" />
-                  <p className="text-sm text-destructive">{errorMessage}</p>
-                </div>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Component Name *</Label>
@@ -445,6 +435,36 @@ export default function EditComponentPage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Success Dialog */}
+        <Dialog open={!!successMessage} onOpenChange={() => setSuccessMessage("")}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                Success
+              </DialogTitle>
+              <DialogDescription>
+                {successMessage}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
+        {/* Error Dialog */}
+        <Dialog open={!!errorMessage} onOpenChange={() => setErrorMessage("")}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <XCircle className="h-5 w-5 text-destructive" />
+                Error
+              </DialogTitle>
+              <DialogDescription>
+                {errorMessage}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
