@@ -17,12 +17,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [verified, setVerified] = useState(false)
+  const [passwordReset, setPasswordReset] = useState(false)
 
   useEffect(() => {
-    // Check if user was redirected after email verification
+    // Check if user was redirected after email verification or password reset
     const params = new URLSearchParams(window.location.search)
     if (params.get('verified') === 'true') {
       setVerified(true)
+      // Clear the URL parameter
+      window.history.replaceState({}, '', '/login')
+    }
+    if (params.get('password_reset') === 'true') {
+      setPasswordReset(true)
       // Clear the URL parameter
       window.history.replaceState({}, '', '/login')
     }
@@ -108,6 +114,11 @@ export default function LoginPage() {
             {verified && (
               <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-800 dark:text-green-200">
                 ✅ Email verified successfully! You can now log in.
+              </div>
+            )}
+            {passwordReset && (
+              <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-800 dark:text-green-200">
+                ✅ Password reset successfully! You can now log in with your new password.
               </div>
             )}
             <div className="grid gap-2">
