@@ -92,9 +92,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 md:p-10">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <Card>
+        <Card className="border-border/50">
           <CardHeader className="space-y-1">
             <div className="mb-4 flex justify-center">
               <Image

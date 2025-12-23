@@ -157,7 +157,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
   return (
     <>
-      <Card className="overflow-hidden" data-component-id={component.id}>
+      <Card className="overflow-hidden border-border/50" data-component-id={component.id}>
         <div className="relative aspect-video bg-muted">
           <Image
             src={normalizeImageUrl(currentImageUrl)}
