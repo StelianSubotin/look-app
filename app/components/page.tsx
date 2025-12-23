@@ -29,15 +29,28 @@ export default function ComponentsPage() {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
-      const plan = user?.user_metadata?.plan || "free"
+      
+      // Check if user is admin - admins always have paid access
+      const isAdmin = user?.user_metadata?.is_admin === true || 
+                     user?.email?.toLowerCase() === "steliansubotin@gmail.com"
+      
+      // Admin always gets paid plan, otherwise use their subscription plan
+      const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")
       setUserPlan(plan as "free" | "paid")
-      fetchComponents(plan as "free" | "paid")
+      
+      // Fetch components with user email for admin check
+      if (user) {
+        fetchComponents(plan as "free" | "paid", user.email || '')
+      } else {
+        fetchComponents(plan as "free" | "paid", '')
+      }
     })
   }, [])
 
-  const fetchComponents = async (plan: "free" | "paid" = "free") => {
+  const fetchComponents = async (plan: "free" | "paid" = "free", email: string = '') => {
     try {
-      const response = await fetch(`/api/components?plan=${plan}`)
+      // Include user email to check admin status on the server
+      const response = await fetch(`/api/components?plan=${plan}&email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
         setComponents(data)
