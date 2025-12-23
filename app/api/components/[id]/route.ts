@@ -4,13 +4,14 @@ import { supabase } from '@/lib/supabase'
 // GET single component
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { data, error } = await supabase
       .from('figma_components')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -33,9 +34,10 @@ export async function GET(
 // PUT update component
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level } = body
 
@@ -50,7 +52,7 @@ export async function PUT(
         image_url_dark: image_url_dark || null,
         access_level: access_level || 'free',
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -70,13 +72,14 @@ export async function PUT(
 // DELETE component
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabase
       .from('figma_components')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
