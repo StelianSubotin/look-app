@@ -1,0 +1,128 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase-server'
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    
+    // Get the current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { plan } = body // 'pro' or 'free'
+
+    if (!plan) {
+      return NextResponse.json(
+        { error: 'Plan is required' },
+        { status: 400 }
+      )
+    }
+
+    // LemonSqueezy API credentials
+    const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY
+    const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID
+    const LEMONSQUEEZY_VARIANT_ID = process.env.LEMONSQUEEZY_VARIANT_ID_PRO // Pro plan variant ID
+
+    if (!LEMONSQUEEZY_API_KEY || !LEMONSQUEEZY_STORE_ID || !LEMONSQUEEZY_VARIANT_ID) {
+      console.error('Missing LemonSqueezy config:', {
+        hasApiKey: !!LEMONSQUEEZY_API_KEY,
+        hasStoreId: !!LEMONSQUEEZY_STORE_ID,
+        hasVariantId: !!LEMONSQUEEZY_VARIANT_ID,
+      })
+      return NextResponse.json(
+        { 
+          error: 'LemonSqueezy not configured. Please check environment variables.',
+          details: 'Missing: ' + [
+            !LEMONSQUEEZY_API_KEY && 'LEMONSQUEEZY_API_KEY',
+            !LEMONSQUEEZY_STORE_ID && 'LEMONSQUEEZY_STORE_ID',
+            !LEMONSQUEEZY_VARIANT_ID && 'LEMONSQUEEZY_VARIANT_ID_PRO',
+          ].filter(Boolean).join(', ')
+        },
+        { status: 500 }
+      )
+    }
+
+    // Use LemonSqueezy API to create checkout
+    // This is more flexible and allows for better customization
+    const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LEMONSQUEEZY_API_KEY}`,
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'application/vnd.api+json',
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'checkouts',
+          attributes: {
+            custom_price: plan === 'pro' ? 900 : 0, // $9.00 in cents
+            product_options: {
+              name: plan === 'pro' ? 'Pro Plan' : 'Free Plan',
+              description: plan === 'pro' 
+                ? 'Unlimited downloads, priority support, and early access to new features'
+                : 'Basic access to all components',
+            },
+            checkout_options: {
+              embed: false,
+              media: false,
+            },
+            checkout_data: {
+              custom: {
+                user_id: user.id,
+                email: user.email,
+                plan: plan,
+              },
+            },
+            expires_at: null,
+            preview: false,
+          },
+          relationships: {
+            store: {
+              data: {
+                type: 'stores',
+                id: LEMONSQUEEZY_STORE_ID,
+              },
+            },
+            variant: {
+              data: {
+                type: 'variants',
+                id: LEMONSQUEEZY_VARIANT_ID,
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('LemonSqueezy API error:', error)
+      return NextResponse.json(
+        { error: 'Failed to create checkout session' },
+        { status: 500 }
+      )
+    }
+
+    const data = await response.json()
+    const checkoutUrl = data.data.attributes.url
+
+    return NextResponse.json({ 
+      checkoutUrl,
+      checkoutId: data.data.id,
+    })
+  } catch (error) {
+    console.error('Checkout error:', error)
+    return NextResponse.json(
+      { error: 'Failed to create checkout' },
+      { status: 500 }
+    )
+  }
+}
+

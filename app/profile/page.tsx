@@ -22,6 +22,8 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState("")
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [plan, setPlan] = useState<"free" | "paid">("free")
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
+  const [upgradeError, setUpgradeError] = useState("")
 
   useEffect(() => {
     const supabase = createClient()
@@ -78,9 +80,41 @@ export default function ProfilePage() {
     }
   }
 
-  const handleUpgrade = () => {
-    // TODO: Implement payment integration (Stripe, etc.)
-    alert("Payment integration coming soon! This will upgrade your account to the paid plan.")
+  const handleUpgrade = async () => {
+    setUpgradeLoading(true)
+    setUpgradeError("")
+    
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan: 'pro' }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to create checkout session'
+        setUpgradeError(errorMessage)
+        console.error('Checkout API error:', errorMessage)
+        setUpgradeLoading(false)
+        return
+      }
+
+      // Redirect to LemonSqueezy checkout
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      } else {
+        setUpgradeError('No checkout URL received')
+        setUpgradeLoading(false)
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      setUpgradeError('Failed to start checkout. Please try again.')
+      setUpgradeLoading(false)
+    }
   }
 
   if (loading) {
@@ -276,10 +310,21 @@ export default function ProfilePage() {
                         Current Plan
                       </Button>
                     ) : (
-                      <Button onClick={handleUpgrade} className="w-full">
-                        <Crown className="mr-2 h-4 w-4" />
-                        Upgrade to Pro
-                      </Button>
+                      <div className="space-y-2">
+                        {upgradeError && (
+                          <div className="rounded-md bg-destructive/15 border border-destructive/50 p-2">
+                            <p className="text-xs text-destructive">{upgradeError}</p>
+                          </div>
+                        )}
+                        <Button 
+                          onClick={handleUpgrade} 
+                          className="w-full" 
+                          disabled={upgradeLoading}
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          {upgradeLoading ? "Loading..." : "Upgrade to Pro"}
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
