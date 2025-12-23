@@ -431,6 +431,36 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="image_url_dark">Dark Mode Image URL (Optional)</Label>
+                  <Input
+                    id="image_url_dark"
+                    value={formData.image_url_dark}
+                    onChange={(e) => {
+                      // Clean up the URL - decode if it's encoded
+                      let url = e.target.value.trim()
+                      try {
+                        // If URL is encoded, decode it
+                        if (url.includes('%')) {
+                          url = decodeURIComponent(url)
+                        }
+                      } catch (err) {
+                        // If decoding fails, use original
+                        console.log('URL decode failed, using original')
+                      }
+                      setFormData({ ...formData, image_url_dark: url })
+                    }}
+                    placeholder="Enter dark mode image URL (optional)"
+                  />
+                  {formData.image_url_dark && !formData.image_url_dark.startsWith('/') && !formData.image_url_dark.startsWith('http') && (
+                    <p className="text-xs text-red-500">
+                      ⚠️ URL should start with / (for local) or http:// / https:// (for external)
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    If provided, this image will be shown when users toggle to dark mode
+                  </p>
+                </div>
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="clipboard_string">Light Mode Clipboard String *</Label>
                     <Button
