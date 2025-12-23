@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Check, Copy, Moon, Sun } from "lucide-react"
+import { Check, Copy, Moon, Sun, Lock } from "lucide-react"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -18,15 +18,20 @@ interface FigmaComponentProps {
     clipboardString: string
     clipboardStringDark?: string
     imageUrlDark?: string
+    accessLevel?: "free" | "paid"
   }
+  userPlan?: "free" | "paid"
 }
 
-export function FigmaComponent({ component }: FigmaComponentProps) {
+export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentProps) {
   const [copied, setCopied] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   
   // Determine if dark mode is available
   const hasDarkMode = !!component.clipboardStringDark
+  
+  // Check if component is locked (paid component for free user)
+  const isLocked = component.accessLevel === "paid" && userPlan !== "paid"
   
   // Get current clipboard string based on mode
   const currentClipboardString = isDarkMode && hasDarkMode 
@@ -39,6 +44,12 @@ export function FigmaComponent({ component }: FigmaComponentProps) {
     : component.imageUrl
 
   const handleCopy = async () => {
+    // If locked, redirect to upgrade
+    if (isLocked) {
+      window.location.href = "/profile"
+      return
+    }
+    
     try {
       const clipboardString = currentClipboardString.trim()
       
@@ -99,21 +110,30 @@ export function FigmaComponent({ component }: FigmaComponentProps) {
   }
 
   return (
-    <Card className="overflow-hidden" data-component-id={component.id}>
+    <Card className={`overflow-hidden ${isLocked ? 'opacity-75' : ''}`} data-component-id={component.id}>
       <div className="relative aspect-video bg-muted">
         <Image
           src={normalizeImageUrl(currentImageUrl)}
           alt={component.name}
           fill
-          className="object-cover"
+          className={`object-cover ${isLocked ? 'blur-sm' : ''}`}
           onError={(e) => {
             // If image fails to load, show placeholder
             console.error('Image load error:', currentImageUrl)
             e.currentTarget.src = '/figma-components/placeholder.svg'
           }}
         />
-        {hasDarkMode && (
-          <div className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5">
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm z-10">
+            <div className="text-center p-4">
+              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm font-semibold mb-1">Pro Component</p>
+              <p className="text-xs text-muted-foreground">Upgrade to unlock</p>
+            </div>
+          </div>
+        )}
+        {hasDarkMode && !isLocked && (
+          <div className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20">
             <Sun className={`h-3.5 w-3.5 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
             <Switch
               checked={isDarkMode}
@@ -121,6 +141,11 @@ export function FigmaComponent({ component }: FigmaComponentProps) {
               id={`theme-${component.id}`}
             />
             <Moon className={`h-3.5 w-3.5 ${isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
+          </div>
+        )}
+        {component.accessLevel === "paid" && !isLocked && (
+          <div className="absolute top-2 left-2 rounded-md bg-primary/90 backdrop-blur-sm px-2 py-1 z-20">
+            <span className="text-xs font-semibold text-primary-foreground">PRO</span>
           </div>
         )}
       </div>
@@ -134,9 +159,15 @@ export function FigmaComponent({ component }: FigmaComponentProps) {
         <Button
           onClick={handleCopy}
           className="w-full"
-          variant={copied ? "default" : "outline"}
+          variant={copied ? "default" : isLocked ? "default" : "outline"}
+          disabled={isLocked}
         >
-          {copied ? (
+          {isLocked ? (
+            <>
+              <Lock className="mr-2 h-4 w-4" />
+              Upgrade to Pro
+            </>
+          ) : copied ? (
             <>
               <Check className="mr-2 h-4 w-4" />
               Copied!

@@ -19,6 +19,7 @@ interface Component {
   image_url: string
   clipboard_string: string
   created_at?: string
+  access_level?: "free" | "paid"
 }
 
 export default function AdminPage() {
@@ -34,6 +35,7 @@ export default function AdminPage() {
     clipboard_string: "",
     clipboard_string_dark: "",
     image_url_dark: "",
+    access_level: "free" as "free" | "paid",
   })
   const [uploading, setUploading] = useState(false)
   const [uploadPreview, setUploadPreview] = useState<string | null>(null)
@@ -175,6 +177,7 @@ export default function AdminPage() {
       clipboard_string: "",
       clipboard_string_dark: "",
       image_url_dark: "",
+      access_level: "free",
     })
     setUploadPreview(null)
     setClipboardFormats({})
@@ -554,6 +557,40 @@ export default function AdminPage() {
                       If provided, users can toggle between light and dark versions
                     </p>
                   </div>
+                <div className="space-y-2">
+                  <Label htmlFor="access_level">Access Level *</Label>
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="access_level"
+                        value="free"
+                        checked={formData.access_level === "free"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, access_level: e.target.value as "free" | "paid" })
+                        }
+                        className="h-4 w-4"
+                      />
+                      <span className="text-sm">Free (accessible to all users)</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="access_level"
+                        value="paid"
+                        checked={formData.access_level === "paid"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, access_level: e.target.value as "free" | "paid" })
+                        }
+                        className="h-4 w-4"
+                      />
+                      <span className="text-sm">Paid (Pro users only)</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Choose whether this component is free for all users or requires a Pro subscription
+                  </p>
+                </div>
                   <div className="space-y-2 rounded-md bg-muted p-3 text-xs">
                     <p className="font-semibold">📋 How to Capture Figma Clipboard Data</p>
                     <p className="text-muted-foreground">

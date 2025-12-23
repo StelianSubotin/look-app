@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { Navbar } from "@/components/navbar"
 import { FigmaComponent } from "@/components/figma-component"
+import { createClient } from "@/lib/supabase-client"
+import type { User } from "@supabase/supabase-js"
 
 interface Component {
   id: string
@@ -12,20 +14,30 @@ interface Component {
   clipboard_string: string
   clipboard_string_dark?: string
   image_url_dark?: string
+  access_level?: "free" | "paid"
 }
 
 export default function ComponentsPage() {
   const [components, setComponents] = useState<Component[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [userPlan, setUserPlan] = useState<"free" | "paid">("free")
 
   useEffect(() => {
-    fetchComponents()
+    // Get user and plan
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      const plan = user?.user_metadata?.plan || "free"
+      setUserPlan(plan as "free" | "paid")
+      fetchComponents(plan as "free" | "paid")
+    })
   }, [])
 
-  const fetchComponents = async () => {
+  const fetchComponents = async (plan: "free" | "paid" = "free") => {
     try {
-      const response = await fetch("/api/components")
+      const response = await fetch(`/api/components?plan=${plan}`)
       if (response.ok) {
         const data = await response.json()
         setComponents(data)
@@ -101,7 +113,9 @@ export default function ComponentsPage() {
                   clipboardString: component.clipboard_string,
                   clipboardStringDark: component.clipboard_string_dark,
                   imageUrlDark: component.image_url_dark,
+                  accessLevel: component.access_level,
                 }}
+                userPlan={userPlan}
               />
             ))}
           </div>

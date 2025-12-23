@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
@@ -28,20 +29,30 @@ export async function POST(request: NextRequest) {
 
     console.log('LemonSqueezy webhook received:', meta.event_name, data.id)
 
-    const supabase = await createClient()
+    // Use service role key for admin operations (webhooks need this)
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
 
     // Handle different event types
     switch (meta.event_name) {
       case 'subscription_created':
       case 'subscription_updated':
       case 'subscription_payment_success':
-        await handleSubscriptionUpdate(supabase, data)
+        await handleSubscriptionUpdate(supabaseAdmin, data)
         break
       
       case 'subscription_cancelled':
       case 'subscription_expired':
       case 'subscription_payment_failed':
-        await handleSubscriptionCancellation(supabase, data)
+        await handleSubscriptionCancellation(supabaseAdmin, data)
         break
       
       default:
@@ -60,16 +71,35 @@ export async function POST(request: NextRequest) {
 
 async function handleSubscriptionUpdate(supabase: any, subscriptionData: any) {
   try {
-    // Extract user ID from custom data
-    const userId = subscriptionData.attributes.custom_data?.user_id || 
-                   subscriptionData.attributes.first_order_item?.order?.user_email
+    // Extract user ID from custom data or order
+    // LemonSqueezy sends custom data in different places depending on event type
+    let userId = subscriptionData.attributes.custom_data?.user_id
+    
+    // If not in custom_data, try to get from order
+    if (!userId && subscriptionData.relationships?.order?.data?.id) {
+      // We'd need to fetch the order to get custom data, but for now try email
+      const email = subscriptionData.attributes.user_email
+      if (email) {
+        // Find user by email
+        const { data: users } = await supabase.auth.admin.listUsers()
+        const user = users?.users?.find((u: any) => u.email === email)
+        userId = user?.id
+      }
+    }
+    
+    // Fallback: try to get from subscription attributes
+    if (!userId) {
+      userId = subscriptionData.attributes.custom_data?.user_id ||
+               subscriptionData.attributes.first_order_item?.order?.user_email
+    }
     
     if (!userId) {
-      console.error('No user ID found in subscription data')
+      console.error('No user ID found in subscription data:', JSON.stringify(subscriptionData, null, 2))
       return
     }
 
     // Update user metadata with subscription info
+    // Note: This requires service role key, not anon key
     const { error } = await supabase.auth.admin.updateUserById(userId, {
       user_metadata: {
         plan: 'paid',
@@ -81,8 +111,10 @@ async function handleSubscriptionUpdate(supabase: any, subscriptionData: any) {
 
     if (error) {
       console.error('Error updating user subscription:', error)
+      // If admin update fails, we might need to use service role key
+      console.log('Make sure SUPABASE_SERVICE_ROLE_KEY is set for webhook handler')
     } else {
-      console.log('User subscription updated:', userId)
+      console.log('✅ User subscription updated successfully:', userId)
     }
   } catch (error) {
     console.error('Error handling subscription update:', error)

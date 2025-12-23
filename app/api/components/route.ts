@@ -1,19 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-// GET all components
-export async function GET() {
+// GET all components (filtered by user plan)
+export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase
+    // Get user plan from request (we'll pass it from the frontend)
+    const { searchParams } = new URL(request.url)
+    const userPlan = searchParams.get('plan') || 'free' // Default to free if not provided
+
+    let query = supabase
       .from('figma_components')
       .select('*')
       .order('created_at', { ascending: false })
+
+    // Filter: show free components to everyone, paid components only to paid users
+    if (userPlan !== 'paid') {
+      query = query.eq('access_level', 'free')
+    }
+    // If user is paid, show all components (no filter)
+
+    const { data, error } = await query
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data || [])
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch components' },
@@ -26,7 +38,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark } = body
+    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level } = body
 
     if (!name || !image_url || !clipboard_string) {
       return NextResponse.json(
@@ -45,6 +57,7 @@ export async function POST(request: NextRequest) {
           clipboard_string,
           clipboard_string_dark: clipboard_string_dark || null,
           image_url_dark: image_url_dark || null,
+          access_level: access_level || 'free',
         },
       ])
       .select()

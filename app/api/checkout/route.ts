@@ -89,13 +89,13 @@ export async function POST(request: NextRequest) {
             store: {
               data: {
                 type: 'stores',
-                id: LEMONSQUEEZY_STORE_ID,
+                id: String(LEMONSQUEEZY_STORE_ID), // Ensure it's a string
               },
             },
             variant: {
               data: {
                 type: 'variants',
-                id: LEMONSQUEEZY_VARIANT_ID,
+                id: String(LEMONSQUEEZY_VARIANT_ID), // Ensure it's a string
               },
             },
           },
