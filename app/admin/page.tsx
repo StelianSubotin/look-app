@@ -156,6 +156,7 @@ export default function AdminPage() {
     const componentWithDark = component as Component & {
       clipboard_string_dark?: string
       image_url_dark?: string
+      access_level?: "free" | "paid"
     }
     setFormData({
       name: component.name,
@@ -164,6 +165,7 @@ export default function AdminPage() {
       clipboard_string: component.clipboard_string,
       clipboard_string_dark: componentWithDark.clipboard_string_dark || "",
       image_url_dark: componentWithDark.image_url_dark || "",
+      access_level: componentWithDark.access_level || "free",
     })
     setUploadPreview(component.image_url)
     setClipboardFormats({})

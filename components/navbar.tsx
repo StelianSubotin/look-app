@@ -23,6 +23,7 @@ export function Navbar() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -30,6 +31,14 @@ export function Navbar() {
     // Get initial session
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
+      // Check if user is admin - only allow specific admin email
+      if (user) {
+        const isAdminUser = user.user_metadata?.is_admin === true || 
+                           user.email?.toLowerCase() === "steliansubotin@gmail.com"
+        setIsAdmin(isAdminUser)
+      } else {
+        setIsAdmin(false)
+      }
       setLoading(false)
     })
 
@@ -37,7 +46,16 @@ export function Navbar() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      // Check if user is admin - only allow specific admin email
+      if (currentUser) {
+        const isAdminUser = currentUser.user_metadata?.is_admin === true || 
+                           currentUser.email?.toLowerCase() === "steliansubotin@gmail.com"
+        setIsAdmin(isAdminUser)
+      } else {
+        setIsAdmin(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -70,7 +88,7 @@ export function Navbar() {
           >
             Components
           </Link>
-          {user && (user.user_metadata?.is_admin === true || user.email === "steliansubotin@gmail.com") && (
+          {user && isAdmin && (
             <Link
               href="/admin"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
