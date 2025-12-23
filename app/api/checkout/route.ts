@@ -49,9 +49,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use LemonSqueezy API to create checkout
-    // This is more flexible and allows for better customization
-    const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+    // Try using LemonSqueezy API first, fallback to direct URL if it fails
+    // Method 1: Use LemonSqueezy API (more flexible)
+    let response: Response
+    try {
+      response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LEMONSQUEEZY_API_KEY}`,
@@ -99,18 +101,55 @@ export async function POST(request: NextRequest) {
           },
         },
       }),
-    })
+      })
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError)
+      // Fallback to direct checkout URL if API fails
+      const directCheckoutUrl = `https://${LEMONSQUEEZY_STORE_ID}.lemonsqueezy.com/checkout/buy/${LEMONSQUEEZY_VARIANT_ID}?checkout[custom][user_id]=${user.id}&checkout[custom][email]=${encodeURIComponent(user.email || '')}`
+      return NextResponse.json({ 
+        checkoutUrl: directCheckoutUrl,
+        method: 'direct',
+      })
+    }
 
     if (!response.ok) {
-      const error = await response.text()
-      console.error('LemonSqueezy API error:', error)
+      const errorText = await response.text()
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { errors: [{ detail: errorText }] }
+      }
+      
+      console.error('LemonSqueezy API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      })
+      
+      const errorMessage = errorData?.errors?.[0]?.detail || 
+                          errorData?.errors?.[0]?.title || 
+                          'Failed to create checkout session'
+      
       return NextResponse.json(
-        { error: 'Failed to create checkout session' },
-        { status: 500 }
+        { 
+          error: errorMessage,
+          details: errorData,
+        },
+        { status: response.status || 500 }
       )
     }
 
     const data = await response.json()
+    
+    if (!data.data?.attributes?.url) {
+      console.error('Invalid LemonSqueezy response:', data)
+      return NextResponse.json(
+        { error: 'Invalid response from LemonSqueezy. Check logs for details.' },
+        { status: 500 }
+      )
+    }
+    
     const checkoutUrl = data.data.attributes.url
 
     return NextResponse.json({ 
