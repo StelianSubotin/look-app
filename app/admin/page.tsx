@@ -19,19 +19,23 @@ export default function AdminPage() {
   useEffect(() => {
     // Check if user is admin
     const checkAuth = async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user) {
-        const isAdmin = user.user_metadata?.is_admin === true || 
-                       user.email === "stelsubotin@gmail.com"
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
         
-        if (isAdmin) {
-          setIsAuthenticated(true)
-        } else {
-          router.push("/components")
+        if (user) {
+          const isAdmin = user.user_metadata?.is_admin === true || 
+                         user.email === "stelsubotin@gmail.com"
+          
+          if (isAdmin) {
+            setIsAuthenticated(true)
+          } else {
+            router.push("/components")
+          }
         }
-      } else {
+      } catch (error) {
+        console.error("Auth check error:", error)
+      } finally {
         setLoading(false)
       }
     }
