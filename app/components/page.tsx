@@ -93,7 +93,7 @@ export default function ComponentsPage() {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Filter by Category</h3>
             <button
               onClick={() => setSelectedCategory("all")}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
                 selectedCategory === "all"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted"
@@ -105,7 +105,7 @@ export default function ComponentsPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
                   selectedCategory === category
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted"

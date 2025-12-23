@@ -159,13 +159,13 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
   return (
     <>
-      <Card className="overflow-hidden border-border/50" data-component-id={component.id}>
-        <div className="relative aspect-video bg-muted">
+      <Card className="overflow-hidden border-border/50 cursor-default" data-component-id={component.id}>
+        <div className="relative aspect-video bg-muted cursor-default">
           <Image
             src={normalizeImageUrl(currentImageUrl)}
             alt={component.name}
             fill
-            className="object-cover"
+            className="object-cover pointer-events-none"
             onError={(e) => {
               // If image fails to load, show placeholder
               console.error('Image load error:', currentImageUrl)
@@ -174,13 +174,13 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
           />
           {/* PRO badge - show for paid components */}
           {component.accessLevel === "paid" && (
-            <div className="absolute top-2 left-2 rounded-md bg-primary/90 backdrop-blur-sm px-2 py-1 z-20">
+            <div className="absolute top-2 left-2 rounded-md bg-primary/90 backdrop-blur-sm px-2 py-1 z-20 cursor-default pointer-events-none">
               <span className="text-xs font-semibold text-primary-foreground">PRO</span>
             </div>
           )}
           {/* Dark mode toggle - show for all components with dark mode */}
           {hasDarkMode && (
-            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20">
+            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20 cursor-pointer">
               <Sun className={`h-3.5 w-3.5 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
               <Switch
                 checked={isDarkMode}
@@ -191,17 +191,17 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
             </div>
           )}
         </div>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-sm">{component.name}</h3>
+        <CardContent className="p-4 cursor-default">
+          <div className="flex items-center justify-between mb-2 cursor-default">
+            <h3 className="font-semibold text-sm cursor-default">{component.name}</h3>
             {component.category && (
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded cursor-default">
                 {component.category}
               </span>
             )}
           </div>
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground cursor-default">
               <Check className="h-3 w-3" />
               <span>{component.category || "Component"}</span>
             </div>
@@ -209,7 +209,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
               onClick={handleCopy}
               size="sm"
               variant={copied ? "default" : "outline"}
-              className="h-8"
+              className="h-8 cursor-pointer"
             >
               {copied ? (
                 <>
