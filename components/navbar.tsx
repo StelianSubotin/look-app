@@ -70,7 +70,7 @@ export function Navbar() {
           >
             Components
           </Link>
-          {user && (
+          {user && (user.user_metadata?.is_admin === true || user.email === "steliansubotin@gmail.com") && (
             <Link
               href="/admin"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"

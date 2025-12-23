@@ -43,24 +43,26 @@ export default function AdminPage() {
   const [showClipboardCapture, setShowClipboardCapture] = useState(false)
 
   useEffect(() => {
-    // Check Supabase auth first
+    // Check if user is admin
     const checkAuth = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
       if (user) {
-        // User is authenticated via Supabase
-        setIsAuthenticated(true)
-        fetchComponents()
-      } else {
-        // Fallback to local admin password
-        const auth = localStorage.getItem("admin_authenticated")
-        if (auth === "true") {
+        // Check if user is admin (via metadata or email)
+        const isAdmin = user.user_metadata?.is_admin === true || 
+                       user.email === "steliansubotin@gmail.com" // Your admin email
+        
+        if (isAdmin) {
           setIsAuthenticated(true)
           fetchComponents()
         } else {
-          setLoading(false)
+          // Not an admin - redirect to components page
+          window.location.href = "/components"
         }
+      } else {
+        // Not logged in - show password form as fallback
+        setLoading(false)
       }
     }
     

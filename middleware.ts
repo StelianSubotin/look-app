@@ -31,10 +31,16 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect admin route
+  // Protect admin route - only admins can access
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
+    }
+    // Check if user is admin
+    const isAdmin = user.user_metadata?.is_admin === true || 
+                   user.email === "steliansubotin@gmail.com"
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL('/components', request.url))
     }
   }
 
