@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut, User as UserIcon } from "lucide-react"
+import { Settings, LogOut } from "lucide-react"
 
 export function Navbar() {
   const router = useRouter()
@@ -106,14 +106,8 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile & Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Account Settings</span>
+                    <span>Profile & Settings</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
