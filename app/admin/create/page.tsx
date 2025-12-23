@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -29,7 +29,11 @@ export default function CreateComponentPage() {
     clipboard_string_dark: "",
     image_url_dark: "",
     access_level: "free" as "free" | "paid",
+    category: "",
+    platform: "web" as "web" | "dashboard" | "mobile",
   })
+  const [existingCategories, setExistingCategories] = useState<string[]>([])
+  const [newCategory, setNewCategory] = useState("")
   const [uploading, setUploading] = useState(false)
   const [uploadingDark, setUploadingDark] = useState(false)
   const [uploadPreview, setUploadPreview] = useState<string | null>(null)
@@ -141,7 +145,10 @@ export default function CreateComponentPage() {
             clipboard_string_dark: "",
             image_url_dark: "",
             access_level: "free",
+            category: "",
+            platform: "web",
           })
+          setNewCategory("")
           setUploadPreview(null)
           setUploadPreviewDark(null)
           setSuccessMessage("")

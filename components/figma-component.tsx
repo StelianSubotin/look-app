@@ -26,6 +26,8 @@ interface FigmaComponentProps {
     clipboardStringDark?: string
     imageUrlDark?: string
     accessLevel?: "free" | "paid"
+    category?: string
+    platform?: "web" | "dashboard" | "mobile"
   }
   userPlan?: "free" | "paid"
 }
@@ -37,8 +39,8 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [upgradeError, setUpgradeError] = useState("")
   
-  // Determine if dark mode is available
-  const hasDarkMode = !!component.clipboardStringDark
+  // Determine if dark mode is available - requires BOTH image and clipboard
+  const hasDarkMode = !!(component.clipboardStringDark && component.imageUrlDark)
   
   // Check if component requires paid access (paid component for free user)
   const requiresPaidAccess = component.accessLevel === "paid" && userPlan !== "paid"
@@ -188,33 +190,42 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
               <Moon className={`h-3.5 w-3.5 ${isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
             </div>
           )}
-      </div>
-      <CardHeader>
-        <CardTitle className="text-lg">{component.name}</CardTitle>
-        {component.description && (
-          <CardDescription>{component.description}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Button
-          onClick={handleCopy}
-          className="w-full"
-          variant={copied ? "default" : "outline"}
-        >
-          {copied ? (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy className="mr-2 h-4 w-4" />
-              Copy in Figma
-            </>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+        </div>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-sm">{component.name}</h3>
+            {component.category && (
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                {component.category}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Check className="h-3 w-3" />
+              <span>{component.category || "Component"}</span>
+            </div>
+            <Button
+              onClick={handleCopy}
+              size="sm"
+              variant={copied ? "default" : "outline"}
+              className="h-8"
+            >
+              {copied ? (
+                <>
+                  <Check className="mr-1 h-3 w-3" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-1 h-3 w-3" />
+                  Copy
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
     {/* Pricing Modal */}
     <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>

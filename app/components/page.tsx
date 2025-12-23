@@ -5,6 +5,8 @@ import { Navbar } from "@/components/navbar"
 import { FigmaComponent } from "@/components/figma-component"
 import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
+import { Check } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface Component {
   id: string
@@ -15,38 +17,52 @@ interface Component {
   clipboard_string_dark?: string
   image_url_dark?: string
   access_level?: "free" | "paid"
+  category?: string
+  platform?: "web" | "dashboard" | "mobile"
 }
 
 export default function ComponentsPage() {
   const [components, setComponents] = useState<Component[]>([])
+  const [filteredComponents, setFilteredComponents] = useState<Component[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [userPlan, setUserPlan] = useState<"free" | "paid">("free")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [selectedPlatform, setSelectedPlatform] = useState<"web" | "dashboard" | "mobile" | "all">("all")
 
   useEffect(() => {
-    // Get user and plan
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
       
-      // Check if user is admin - admins always have paid access
       const isAdmin = user?.user_metadata?.is_admin === true || 
                      user?.email?.toLowerCase() === "stelsubotin@gmail.com"
       
-      // Admin always gets paid plan, otherwise use their subscription plan
       const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")
       setUserPlan(plan as "free" | "paid")
       
-      // Fetch all components (no filtering - all components visible to everyone)
-      // Access control is handled in the component card (PRO badge and pricing modal)
       fetchComponents(plan as "free" | "paid", user?.email || '')
     })
   }, [])
 
+  useEffect(() => {
+    // Filter components based on selected category and platform
+    let filtered = components
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(c => c.category === selectedCategory)
+    }
+
+    if (selectedPlatform !== "all") {
+      filtered = filtered.filter(c => c.platform === selectedPlatform)
+    }
+
+    setFilteredComponents(filtered)
+  }, [components, selectedCategory, selectedPlatform])
+
   const fetchComponents = async (plan: "free" | "paid" = "free", email: string = '') => {
     try {
-      // Fetch all components (no filtering on server - all visible to everyone)
       const response = await fetch(`/api/components?plan=${plan}&email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
@@ -64,74 +80,142 @@ export default function ComponentsPage() {
     }
   }
 
+  // Get unique categories from components
+  const categories = Array.from(new Set(components.map(c => c.category).filter(Boolean))) as string[]
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Figma Components</h1>
-          <p className="text-muted-foreground mt-2">
-            Copy these components directly into your Figma files
-          </p>
-        </div>
-        
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-              <p className="text-muted-foreground">Loading components...</p>
-            </div>
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center max-w-md">
-              <div className="rounded-md bg-destructive/15 border border-destructive/50 p-6">
-                <h3 className="font-semibold text-destructive mb-2">Error Loading Components</h3>
-                <p className="text-sm text-destructive/80 mb-4">{error}</p>
-                <button
-                  onClick={() => {
-                    setLoading(true)
-                    setError(null)
-                    fetchComponents()
-                  }}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Try again
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : components.length === 0 ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-2">No components available yet.</p>
-              <p className="text-sm text-muted-foreground">
-                Components will appear here once they&apos;re added by an admin.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {components.map((component) => (
-              <FigmaComponent
-                key={component.id}
-                component={{
-                  id: component.id,
-                  name: component.name,
-                  description: component.description,
-                  imageUrl: component.image_url,
-                  clipboardString: component.clipboard_string,
-                  clipboardStringDark: component.clipboard_string_dark,
-                  imageUrlDark: component.image_url_dark,
-                  accessLevel: component.access_level,
-                }}
-                userPlan={userPlan}
-              />
+      <div className="flex">
+        {/* Left Sidebar - Categories */}
+        <aside className="w-64 bg-white border-r border-border/50 min-h-[calc(100vh-4rem)] p-6 sticky top-16">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Filter by Category</h3>
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                selectedCategory === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted"
+              }`}
+            >
+              All Categories
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  selectedCategory === category
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
+                }`}
+              >
+                {category}
+              </button>
             ))}
           </div>
-        )}
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1">
+          {/* Top Filter Bar - Platform Tabs */}
+          <div className="bg-white border-b border-border/50 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground mr-4">Platform:</span>
+              <Button
+                variant={selectedPlatform === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedPlatform("all")}
+              >
+                All
+              </Button>
+              <Button
+                variant={selectedPlatform === "web" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedPlatform("web")}
+              >
+                Web
+              </Button>
+              <Button
+                variant={selectedPlatform === "dashboard" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedPlatform("dashboard")}
+              >
+                Dashboard
+              </Button>
+              <Button
+                variant={selectedPlatform === "mobile" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedPlatform("mobile")}
+              >
+                Mobile
+              </Button>
+            </div>
+          </div>
+
+          {/* Components Grid */}
+          <div className="bg-muted/30 p-8 min-h-[calc(100vh-4rem)]">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+                  <p className="text-muted-foreground">Loading components...</p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center max-w-md">
+                  <div className="rounded-md bg-destructive/15 border border-destructive/50 p-6">
+                    <h3 className="font-semibold text-destructive mb-2">Error Loading Components</h3>
+                    <p className="text-sm text-destructive/80 mb-4">{error}</p>
+                    <button
+                      onClick={() => {
+                        setLoading(true)
+                        setError(null)
+                        fetchComponents()
+                      }}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : filteredComponents.length === 0 ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <p className="text-muted-foreground mb-2">No components found.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Try adjusting your filters or check back later.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredComponents.map((component) => (
+                  <FigmaComponent
+                    key={component.id}
+                  component={{
+                    id: component.id,
+                    name: component.name,
+                    description: component.description,
+                    imageUrl: component.image_url,
+                    clipboardString: component.clipboard_string,
+                    clipboardStringDark: component.clipboard_string_dark,
+                    imageUrlDark: component.image_url_dark,
+                    accessLevel: component.access_level,
+                    category: component.category,
+                    platform: component.platform,
+                  }}
+                  userPlan={userPlan}
+                />
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   )
 }
-

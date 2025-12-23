@@ -39,7 +39,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level } = body
+    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level, category, platform } = body
 
     const { data, error } = await supabase
       .from('figma_components')
@@ -51,6 +51,8 @@ export async function PUT(
         clipboard_string_dark: clipboard_string_dark || null,
         image_url_dark: image_url_dark || null,
         access_level: access_level || 'free',
+        category: category || null,
+        platform: platform || 'web',
       })
       .eq('id', id)
       .select()

@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level } = body
+    const { name, description, image_url, clipboard_string, clipboard_string_dark, image_url_dark, access_level, category, platform } = body
 
-    if (!name || !image_url || !clipboard_string) {
+    if (!name || !image_url || !clipboard_string || !category || !platform) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
           clipboard_string_dark: clipboard_string_dark || null,
           image_url_dark: image_url_dark || null,
           access_level: access_level || 'free',
+          category: category || null,
+          platform: platform || 'web',
         },
       ])
       .select()

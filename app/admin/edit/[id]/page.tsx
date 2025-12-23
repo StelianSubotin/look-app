@@ -43,7 +43,11 @@ export default function EditComponentPage() {
     clipboard_string_dark: "",
     image_url_dark: "",
     access_level: "free" as "free" | "paid",
+    category: "",
+    platform: "web" as "web" | "dashboard" | "mobile",
   })
+  const [existingCategories, setExistingCategories] = useState<string[]>([])
+  const [newCategory, setNewCategory] = useState("")
   const [uploading, setUploading] = useState(false)
   const [uploadingDark, setUploadingDark] = useState(false)
   const [uploadPreview, setUploadPreview] = useState<string | null>(null)
@@ -71,6 +75,18 @@ export default function EditComponentPage() {
         return
       }
 
+      // Fetch existing categories
+      try {
+        const catResponse = await fetch("/api/components?plan=paid&email=stelsubotin@gmail.com")
+        if (catResponse.ok) {
+          const catData = await catResponse.json()
+          const categories = Array.from(new Set(catData.map((c: any) => c.category).filter(Boolean))) as string[]
+          setExistingCategories(categories)
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error)
+      }
+
       // Fetch component data
       try {
         const response = await fetch(`/api/components/${componentId}`)
@@ -78,6 +94,8 @@ export default function EditComponentPage() {
           const component = await response.json() as Component & {
             clipboard_string_dark?: string
             image_url_dark?: string
+            category?: string
+            platform?: "web" | "dashboard" | "mobile"
           }
           setFormData({
             name: component.name,
@@ -87,6 +105,8 @@ export default function EditComponentPage() {
             clipboard_string_dark: component.clipboard_string_dark || "",
             image_url_dark: component.image_url_dark || "",
             access_level: component.access_level || "free",
+            category: component.category || "",
+            platform: component.platform || "web",
           })
           setUploadPreview(component.image_url)
           if (component.image_url_dark) {
@@ -295,6 +315,89 @@ export default function EditComponentPage() {
                     />
                     <span className="text-sm">Paid</span>
                   </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="platform">Platform *</Label>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="platform"
+                      value="web"
+                      checked={formData.platform === "web"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, platform: e.target.value as "web" | "dashboard" | "mobile" })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm">Web</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="platform"
+                      value="dashboard"
+                      checked={formData.platform === "dashboard"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, platform: e.target.value as "web" | "dashboard" | "mobile" })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm">Dashboard</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="platform"
+                      value="mobile"
+                      checked={formData.platform === "mobile"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, platform: e.target.value as "web" | "dashboard" | "mobile" })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm">Mobile</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category *</Label>
+                {existingCategories.length > 0 && (
+                  <div className="mb-2">
+                    <Label className="text-xs text-muted-foreground mb-2 block">Select existing category:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {existingCategories.map((cat) => (
+                        <Button
+                          key={cat}
+                          type="button"
+                          variant={formData.category === cat ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setFormData({ ...formData, category: cat })
+                            setNewCategory("")
+                          }}
+                        >
+                          {cat}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Or create new category:</Label>
+                  <Input
+                    id="category"
+                    value={newCategory || formData.category}
+                    onChange={(e) => {
+                      setNewCategory(e.target.value)
+                      setFormData({ ...formData, category: e.target.value })
+                    }}
+                    placeholder="Enter new category name (e.g., Hero, Pricing, Footer)"
+                    required={!formData.category}
+                  />
                 </div>
               </div>
 
