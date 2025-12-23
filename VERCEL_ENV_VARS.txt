@@ -1,0 +1,12 @@
+Copy these environment variables to Vercel:
+
+DATABASE_URL=postgresql://postgres:Y6ExKyGQryPZlimI@db.tqtwfgjzzjtkevitkrnj.supabase.co:5432/postgres
+
+NEXT_PUBLIC_SUPABASE_URL=https://tqtwfgjzzjtkevitkrnj.supabase.co
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_NWJemkI4TS23ttRKSsNa1A_5tt5XbSi
+
+NEXT_PUBLIC_SITE_URL=https://your-app-name.vercel.app
+
+NOTE: For NEXT_PUBLIC_SITE_URL, wait until after first deployment, then replace "your-app-name" with your actual Vercel URL.
+

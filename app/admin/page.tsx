@@ -565,13 +565,13 @@ export default function AdminPage() {
                       <li>Copy component in Figma (Cmd/Ctrl + C)</li>
                       <li>Open <a href="https://evercoder.github.io/clipboard-inspector/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Clipboard Inspector</a> in a new tab</li>
                       <li>Paste in the inspector (Cmd/Ctrl + V)</li>
-                      <li>Find the <strong>"text/html"</strong> section (this is what Figma uses!)</li>
-                      <li>If text/html is not available, use <strong>"text/plain"</strong> as fallback</li>
+                      <li>Find the <strong>&quot;text/html&quot;</strong> section (this is what Figma uses!)</li>
+                      <li>If text/html is not available, use <strong>&quot;text/plain&quot;</strong> as fallback</li>
                       <li>Click the copy button next to the value</li>
                       <li>Come back here and paste into the textarea above</li>
                     </ol>
                     <p className="text-muted-foreground mt-2">
-                      <strong>Tip:</strong> The "Capture from Clipboard" button will try to get the HTML format automatically, but manual copy from clipboard inspector is more reliable.
+                      <strong>Tip:</strong> The &quot;Capture from Clipboard&quot; button will try to get the HTML format automatically, but manual copy from clipboard inspector is more reliable.
                     </p>
                   </div>
                   <div className="space-y-2">

@@ -84,7 +84,7 @@ export default function ComponentsPage() {
             <div className="text-center">
               <p className="text-muted-foreground mb-2">No components available yet.</p>
               <p className="text-sm text-muted-foreground">
-                Components will appear here once they're added by an admin.
+                Components will appear here once they&apos;re added by an admin.
               </p>
             </div>
           </div>

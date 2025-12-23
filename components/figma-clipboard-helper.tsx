@@ -35,7 +35,7 @@ export function FigmaClipboardHelper() {
       <CardHeader>
         <CardTitle>Clipboard Debug Helper</CardTitle>
         <CardDescription>
-          Use this to inspect what's in your clipboard after copying from Figma
+          Use this to inspect what&apos;s in your clipboard after copying from Figma
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
