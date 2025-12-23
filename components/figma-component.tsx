@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Check, Copy, Moon, Sun, Crown } from "lucide-react"
+import { Check, Copy, Moon, Sun, Crown, Eye, X } from "lucide-react"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -36,6 +36,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
   const [copied, setCopied] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [showPricingModal, setShowPricingModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [upgradeError, setUpgradeError] = useState("")
   
@@ -205,24 +206,35 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
               <Check className="h-3 w-3" />
               <span>{component.category || "Component"}</span>
             </div>
-            <Button
-              onClick={handleCopy}
-              size="sm"
-              variant={copied ? "default" : "outline"}
-              className="h-8 cursor-pointer"
-            >
-              {copied ? (
-                <>
-                  <Check className="mr-1 h-3 w-3" />
-                  Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="mr-1 h-3 w-3" />
-                  Copy
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setShowPreviewModal(true)}
+                size="sm"
+                variant="outline"
+                className="h-8 cursor-pointer"
+              >
+                <Eye className="mr-1 h-3 w-3" />
+                Preview
+              </Button>
+              <Button
+                onClick={handleCopy}
+                size="sm"
+                variant={copied ? "default" : "outline"}
+                className="h-8 cursor-pointer"
+              >
+                {copied ? (
+                  <>
+                    <Check className="mr-1 h-3 w-3" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-1 h-3 w-3" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -320,8 +332,94 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
             </Card>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Modal */}
+      <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+        <DialogContent className="sm:max-w-[90vw] max-w-6xl p-0 gap-0 [&>button]:hidden">
+          <div className="relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPreviewModal(false)}
+              className="absolute top-4 right-4 z-50 rounded-full bg-background/80 backdrop-blur-sm p-2 hover:bg-background transition-colors cursor-pointer"
+              aria-label="Close preview"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* PRO Badge - only show if paid component */}
+            {component.accessLevel === "paid" && (
+              <div className="absolute top-4 left-4 z-50 rounded-md bg-primary/90 backdrop-blur-sm px-3 py-1.5">
+                <span className="text-xs font-semibold text-primary-foreground">PRO</span>
+              </div>
+            )}
+
+            {/* Preview Image */}
+            <div className="relative w-full aspect-video bg-muted">
+              <Image
+                src={normalizeImageUrl(currentImageUrl)}
+                alt={component.name}
+                fill
+                className="object-contain"
+                priority
+                onError={(e) => {
+                  console.error('Image load error:', currentImageUrl)
+                  e.currentTarget.src = '/figma-components/placeholder.svg'
+                }}
+              />
+            </div>
+
+            {/* Dark Mode Toggle in Preview - if available */}
+            {hasDarkMode && (
+              <div className="absolute top-4 right-16 z-50 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-3 py-1.5">
+                <Sun className={`h-4 w-4 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
+                <Switch
+                  checked={isDarkMode}
+                  onCheckedChange={setIsDarkMode}
+                  id={`preview-theme-${component.id}`}
+                />
+                <Moon className={`h-4 w-4 ${isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
+              </div>
+            )}
+
+            {/* Footer with Component Info and Copy Button */}
+            <div className="p-6 bg-background border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">{component.name}</h3>
+                  {component.description && (
+                    <p className="text-sm text-muted-foreground">{component.description}</p>
+                  )}
+                  {component.category && (
+                    <span className="inline-block mt-2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                      {component.category}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  onClick={handleCopy}
+                  size="lg"
+                  variant={copied ? "default" : "outline"}
+                  className="cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy Component
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
