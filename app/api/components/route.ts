@@ -9,20 +9,12 @@ export async function GET(request: NextRequest) {
     const userPlan = searchParams.get('plan') || 'free' // Default to free if not provided
     const userEmail = searchParams.get('email') || '' // Get user email to check admin status
 
+    // Show ALL components to everyone (no filtering)
+    // Access control is handled on the frontend (showing PRO badge and pricing modal)
     let query = supabase
       .from('figma_components')
       .select('*')
       .order('created_at', { ascending: false })
-
-    // Check if user is admin - admins always have paid access
-    const isAdmin = userEmail.toLowerCase() === 'steliansubotin@gmail.com'
-    const effectivePlan = isAdmin ? 'paid' : userPlan
-
-    // Filter: show free components to everyone, paid components only to paid users
-    if (effectivePlan !== 'paid') {
-      query = query.eq('access_level', 'free')
-    }
-    // If user is paid (or admin), show all components (no filter)
 
     const { data, error } = await query
 

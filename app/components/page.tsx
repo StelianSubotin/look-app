@@ -38,18 +38,15 @@ export default function ComponentsPage() {
       const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")
       setUserPlan(plan as "free" | "paid")
       
-      // Fetch components with user email for admin check
-      if (user) {
-        fetchComponents(plan as "free" | "paid", user.email || '')
-      } else {
-        fetchComponents(plan as "free" | "paid", '')
-      }
+      // Fetch all components (no filtering - all components visible to everyone)
+      // Access control is handled in the component card (PRO badge and pricing modal)
+      fetchComponents(plan as "free" | "paid", user?.email || '')
     })
   }, [])
 
   const fetchComponents = async (plan: "free" | "paid" = "free", email: string = '') => {
     try {
-      // Include user email to check admin status on the server
+      // Fetch all components (no filtering on server - all visible to everyone)
       const response = await fetch(`/api/components?plan=${plan}&email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
