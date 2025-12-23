@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
     }
     // Check if user is admin
     const isAdmin = user.user_metadata?.is_admin === true || 
-                   user.email === "steliansubotin@gmail.com"
+                   user.email === "stelsubotin@gmail.com"
     if (!isAdmin) {
       return NextResponse.redirect(new URL('/components', request.url))
     }

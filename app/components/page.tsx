@@ -32,7 +32,7 @@ export default function ComponentsPage() {
       
       // Check if user is admin - admins always have paid access
       const isAdmin = user?.user_metadata?.is_admin === true || 
-                     user?.email?.toLowerCase() === "steliansubotin@gmail.com"
+                     user?.email?.toLowerCase() === "stelsubotin@gmail.com"
       
       // Admin always gets paid plan, otherwise use their subscription plan
       const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")

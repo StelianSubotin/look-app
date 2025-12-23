@@ -51,7 +51,7 @@ export default function AdminPage() {
       if (user) {
         // Check if user is admin (via metadata or email)
         const isAdmin = user.user_metadata?.is_admin === true || 
-                       user.email === "steliansubotin@gmail.com" // Your admin email
+                       user.email === "stelsubotin@gmail.com" // Your admin email
         
         if (isAdmin) {
           setIsAuthenticated(true)

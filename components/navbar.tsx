@@ -34,7 +34,7 @@ export function Navbar() {
       // Check if user is admin - only allow specific admin email
       if (user) {
         const isAdminUser = user.user_metadata?.is_admin === true || 
-                           user.email?.toLowerCase() === "steliansubotin@gmail.com"
+                           user.email?.toLowerCase() === "stelsubotin@gmail.com"
         setIsAdmin(isAdminUser)
       } else {
         setIsAdmin(false)
@@ -51,7 +51,7 @@ export function Navbar() {
       // Check if user is admin - only allow specific admin email
       if (currentUser) {
         const isAdminUser = currentUser.user_metadata?.is_admin === true || 
-                           currentUser.email?.toLowerCase() === "steliansubotin@gmail.com"
+                           currentUser.email?.toLowerCase() === "stelsubotin@gmail.com"
         setIsAdmin(isAdminUser)
       } else {
         setIsAdmin(false)
