@@ -391,7 +391,7 @@ export default function AdminPage() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="clipboard_string">Figma Clipboard Data *</Label>
+                    <Label htmlFor="clipboard_string">Light Mode Clipboard String *</Label>
                     <Button
                       type="button"
                       variant="outline"
@@ -472,25 +472,23 @@ export default function AdminPage() {
                       </ul>
                     </div>
                   )}
-                  <div className="space-y-2">
-                    <Label>Light Mode Clipboard String *</Label>
-                    <Textarea
-                      id="clipboard_string"
-                      value={formData.clipboard_string}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          clipboard_string: e.target.value,
-                        })
-                      }
-                      placeholder="Click 'Capture from Clipboard' button after copying from Figma, or paste manually here"
-                      rows={6}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Dark Mode Clipboard String (Optional)</Label>
+                  <Textarea
+                    id="clipboard_string"
+                    value={formData.clipboard_string}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        clipboard_string: e.target.value,
+                      })
+                    }
+                    placeholder="Click 'Capture from Clipboard' button after copying from Figma, or paste manually here"
+                    rows={6}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Dark Mode Clipboard String (Optional)</Label>
                       <Button
                         type="button"
                         variant="outline"
@@ -574,80 +572,6 @@ export default function AdminPage() {
                       <strong>Tip:</strong> The &quot;Capture from Clipboard&quot; button will try to get the HTML format automatically, but manual copy from clipboard inspector is more reliable.
                     </p>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="clipboard_string_dark">Dark Mode Clipboard Data (Optional)</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            const clipboardItems = await navigator.clipboard.read()
-                            const formats: Record<string, string> = {}
-                            const formatDetails: string[] = []
-                            
-                            for (const item of clipboardItems) {
-                              for (const type of item.types) {
-                                formatDetails.push(`Found format: ${type}`)
-                                try {
-                                  const blob = await item.getType(type)
-                                  const text = await blob.text()
-                                  formats[type] = text
-                                  formatDetails.push(`  Length: ${text.length} chars`)
-                                } catch (err) {
-                                  formatDetails.push(`  Error reading ${type}: ${err}`)
-                                }
-                              }
-                            }
-                            
-                            console.log('Clipboard formats found:', formatDetails)
-                            
-                            let bestFormat = formats['text/html'] || formats['text/plain']
-                            
-                            if (formats['text/html']) {
-                              bestFormat = formats['text/html']
-                              alert(`✅ Found HTML format for dark mode!`)
-                            } else if (formats['text/plain']) {
-                              bestFormat = formats['text/plain']
-                              alert(`⚠️ Only found text/plain for dark mode.`)
-                            } else {
-                              alert(`No usable format found.`)
-                              return
-                            }
-                            
-                            if (bestFormat) {
-                              setFormData({
-                                ...formData,
-                                clipboard_string_dark: bestFormat,
-                              })
-                            }
-                          } catch (err) {
-                            console.error('Failed to read clipboard:', err)
-                            alert(`Failed to read clipboard: ${err}`)
-                          }
-                        }}
-                      >
-                        📋 Capture Dark Mode
-                      </Button>
-                    </div>
-                    <Textarea
-                      id="clipboard_string_dark"
-                      value={formData.clipboard_string_dark}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          clipboard_string_dark: e.target.value,
-                        })
-                      }
-                      placeholder="Paste dark mode clipboard string here (optional)"
-                      rows={6}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Optional: If provided, users can toggle between light and dark versions
-                    </p>
-                  </div>
-                </div>
                 <div className="flex gap-2">
                   <Button type="submit" className="flex-1">
                     {editingId ? "Update" : "Add"} Component

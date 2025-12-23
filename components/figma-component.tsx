@@ -131,22 +131,6 @@ export function FigmaComponent({ component }: FigmaComponentProps) {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {hasDarkMode && (
-          <div className="flex items-center justify-between rounded-md border p-2">
-            <Label htmlFor={`theme-${component.id}`} className="text-sm font-normal cursor-pointer">
-              {isDarkMode ? "Dark Mode" : "Light Mode"}
-            </Label>
-            <div className="flex items-center gap-2">
-              <Sun className={`h-4 w-4 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
-              <Switch
-                checked={isDarkMode}
-                onCheckedChange={setIsDarkMode}
-                id={`theme-${component.id}`}
-              />
-              <Moon className={`h-4 w-4 ${isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
-            </div>
-          </div>
-        )}
         <Button
           onClick={handleCopy}
           className="w-full"
