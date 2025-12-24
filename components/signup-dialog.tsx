@@ -158,7 +158,9 @@ export function SignupDialog({ open, onOpenChange, onSwitchToLogin }: SignupDial
                   onClick={() => {
                     setSuccess(false)
                     onOpenChange(false)
-                    onSwitchToLogin?.()
+                    setTimeout(() => {
+                      onSwitchToLogin?.()
+                    }, 100)
                   }}
                   className="w-full"
                 >

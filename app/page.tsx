@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Search, Grid3x3, Image as ImageIcon, Camera, Box, Music as MusicIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { createClient } from "@/lib/supabase-client"
+import type { User } from "@supabase/supabase-js"
 
 type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music"
 
@@ -63,6 +65,27 @@ export default function HubPage() {
   const router = useRouter()
   const [selectedType, setSelectedType] = useState<ContentType>("components")
   const [searchQuery, setSearchQuery] = useState("")
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    // Get initial session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      // Force a refresh when auth state changes
+      router.refresh()
+    })
+
+    return () => subscription.unsubscribe()
+  }, [router])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
