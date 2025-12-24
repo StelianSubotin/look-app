@@ -56,11 +56,10 @@ export function LoginDialog({ open, onOpenChange, onSwitchToSignup }: LoginDialo
         return
       }
 
-      // Close dialog and refresh - small delay to ensure state updates
+      // Close dialog and force reload to update all components
       onOpenChange(false)
-      setTimeout(() => {
-        router.refresh()
-      }, 100)
+      // Use window reload to ensure all components refresh properly
+      window.location.reload()
     } catch (err) {
       setError("An error occurred. Please try again.")
       setLoading(false)

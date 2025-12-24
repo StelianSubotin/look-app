@@ -117,7 +117,7 @@ export default function HubPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar key={user?.id || 'anonymous'} />
       
       {/* Hero Section with Search */}
       <div className="container mx-auto px-4 py-16">
