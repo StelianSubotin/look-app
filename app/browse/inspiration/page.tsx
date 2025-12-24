@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, Suspense } from "react"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -25,7 +25,7 @@ interface Screenshot {
   captured_at: string
 }
 
-export default function InspirationBrowsePage() {
+function InspirationBrowseContent() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get('category') || 'all'
 
@@ -324,6 +324,20 @@ export default function InspirationBrowsePage() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+export default function InspirationBrowsePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center py-20">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <InspirationBrowseContent />
+    </Suspense>
   )
 }
 
