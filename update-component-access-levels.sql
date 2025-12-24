@@ -16,3 +16,4 @@ SELECT id, name, access_level
 FROM figma_components 
 ORDER BY name;
 
+

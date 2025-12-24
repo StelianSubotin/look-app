@@ -13,3 +13,4 @@ WHERE access_level IS NULL;
 -- Create index for faster filtering
 CREATE INDEX IF NOT EXISTS idx_figma_components_access_level ON figma_components(access_level);
 
+

@@ -86,3 +86,4 @@ CREATE INDEX IF NOT EXISTS idx_user_subscriptions_subscription_id ON user_subscr
 - Add billing history page
 - Add email notifications for subscription events
 
+

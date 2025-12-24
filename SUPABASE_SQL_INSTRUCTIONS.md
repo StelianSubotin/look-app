@@ -66,3 +66,4 @@ WHERE table_name = 'figma_components'
 AND column_name = 'access_level';
 ```
 
+

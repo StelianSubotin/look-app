@@ -66,3 +66,4 @@ Open browser console (F12) and check:
 - Run the SQL script in Supabase
 - Or manually set access_level in Supabase dashboard
 
+

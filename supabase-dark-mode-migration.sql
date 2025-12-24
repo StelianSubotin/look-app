@@ -12,3 +12,4 @@ ADD COLUMN IF NOT EXISTS image_url_dark TEXT;
 -- Update existing components to have dark mode fields (set to null initially)
 -- This is safe to run multiple times
 
+

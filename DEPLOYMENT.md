@@ -77,3 +77,4 @@ Same as Vercel, but use your Netlify URL instead
 - **Environment variables not working?** Make sure they're set for the correct environment (Production, Preview, Development)
 - **Email verification not working?** Double-check Supabase redirect URLs match your deployed URL
 
+

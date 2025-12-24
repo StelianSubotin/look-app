@@ -34,3 +34,4 @@ The login page is available at `/login` (or automatically redirects from the hom
 - Responsive design
 - Built with shadcn/ui components
 
+

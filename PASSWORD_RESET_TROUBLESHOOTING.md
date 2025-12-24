@@ -96,3 +96,4 @@ If emails aren't coming through:
 2. **Try Custom SMTP:** Configure your own email service in Supabase
 3. **Contact Support:** Supabase support or check their Discord
 
+

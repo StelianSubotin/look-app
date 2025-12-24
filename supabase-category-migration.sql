@@ -18,3 +18,4 @@ UPDATE figma_components
 SET platform = 'web' 
 WHERE platform IS NULL;
 
+
