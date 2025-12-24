@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ExternalLink, Tag } from "lucide-react"
+import { ExternalLink, Tag, Copy, Check } from "lucide-react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase-client"
@@ -38,6 +38,7 @@ function InspirationBrowseContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
   const [selectedPlatform, setSelectedPlatform] = useState<"web" | "mobile" | "all">("all")
   const [selectedScreenshot, setSelectedScreenshot] = useState<Screenshot | null>(null)
+  const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -103,6 +104,31 @@ function InspirationBrowseContent() {
       return
     }
     setSelectedScreenshot(screenshot)
+    setCopySuccess(false) // Reset copy status
+  }
+
+  const copyScreenshot = async () => {
+    if (!selectedScreenshot) return
+
+    try {
+      // Fetch the image
+      const response = await fetch(selectedScreenshot.image_url)
+      const blob = await response.blob()
+      
+      // Copy to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ])
+      
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy screenshot:', error)
+      // Fallback: open in new tab if copy fails
+      window.open(selectedScreenshot.image_url, '_blank')
+    }
   }
 
   return (
@@ -276,21 +302,41 @@ function InspirationBrowseContent() {
               {/* Header - Fixed */}
               <div className="p-6 border-b border-border shrink-0">
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-2xl font-bold mb-2">{selectedScreenshot.title}</h2>
                     {selectedScreenshot.description && (
                       <p className="text-muted-foreground">{selectedScreenshot.description}</p>
                     )}
                   </div>
-                  <a
-                    href={selectedScreenshot.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline shrink-0 ml-4"
-                  >
-                    Visit Site
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={copyScreenshot}
+                      className="gap-2"
+                    >
+                      {copySuccess ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                    <a
+                      href={selectedScreenshot.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      Visit Site
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-4">
                   {selectedScreenshot.category && (
@@ -311,13 +357,13 @@ function InspirationBrowseContent() {
 
               {/* Scrollable Screenshot - Takes remaining space */}
               <div className="flex-1 overflow-y-auto bg-muted">
-                <div className="relative w-full min-h-full flex items-start justify-center p-6">
+                <div className="relative w-full min-h-full flex items-start justify-center p-3">
                   <Image
                     src={selectedScreenshot.image_url}
                     alt={selectedScreenshot.title}
                     width={1920}
                     height={10000}
-                    className="w-full h-auto max-w-4xl rounded-lg shadow-lg"
+                    className="w-full h-auto rounded shadow-lg"
                     quality={90}
                   />
                 </div>
