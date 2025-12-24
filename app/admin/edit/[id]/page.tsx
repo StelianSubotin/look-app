@@ -416,14 +416,16 @@ export default function EditComponentPage() {
                       className="hidden"
                       id="image-upload"
                     />
-                    <Label htmlFor="image-upload" className="cursor-pointer">
-                      <Button type="button" variant="outline" disabled={uploading} asChild>
-                        <span>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {uploading ? "Uploading..." : "Upload Image"}
-                        </span>
-                      </Button>
-                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('image-upload')?.click()}
+                      className="flex items-center"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploading ? "Uploading..." : "Upload Image"}
+                    </Button>
                     {uploadPreview && (
                       <div className="relative h-16 w-16 rounded border">
                         <Image
@@ -465,14 +467,16 @@ export default function EditComponentPage() {
                       className="hidden"
                       id="image-upload-dark"
                     />
-                    <Label htmlFor="image-upload-dark" className="cursor-pointer">
-                      <Button type="button" variant="outline" disabled={uploadingDark} asChild>
-                        <span>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {uploadingDark ? "Uploading..." : "Upload Dark Image"}
-                        </span>
-                      </Button>
-                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploadingDark}
+                      onClick={() => document.getElementById('image-upload-dark')?.click()}
+                      className="flex items-center"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploadingDark ? "Uploading..." : "Upload Dark Image"}
+                    </Button>
                     {uploadPreviewDark && (
                       <div className="relative h-16 w-16 rounded border">
                         <Image
