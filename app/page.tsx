@@ -152,7 +152,7 @@ export default function HubPage() {
             </div>
 
             {/* Content Type Tabs */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 mb-4 p-1 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm border border-border/50">
               {contentTypes.map((type) => {
                 const Icon = type.icon
                 return (
@@ -161,7 +161,7 @@ export default function HubPage() {
                     variant={selectedType === type.id ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setSelectedType(type.id as ContentType)}
-                    className="gap-1.5 h-9"
+                    className="gap-1.5 h-8"
                   >
                     <Icon className="h-3.5 w-3.5" />
                     {type.label}
@@ -172,14 +172,14 @@ export default function HubPage() {
 
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="mb-4">
-              <div className="relative">
+              <div className="relative shadow-md rounded-lg">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder={getPlaceholder()}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-6 text-base"
+                  className="pl-12 pr-4 py-6 text-base bg-white border-border/50"
                 />
               </div>
             </form>
