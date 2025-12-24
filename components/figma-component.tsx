@@ -342,8 +342,8 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
       {/* Preview Modal */}
       <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-        <DialogContent className="sm:max-w-[90vw] max-w-6xl p-0 gap-0 [&>button]:hidden">
-          <div className="relative">
+        <DialogContent className="max-w-[806px] w-[calc(100vw-2rem)] sm:max-w-[63vw] max-h-[90vh] p-0 gap-0 overflow-hidden [&>button]:hidden">
+          <div className="relative max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
             <button
               onClick={() => setShowPreviewModal(false)}
@@ -361,7 +361,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
             )}
 
             {/* Preview Image */}
-            <div className="relative w-full aspect-video bg-muted">
+            <div className="relative w-full aspect-video bg-muted max-h-[60vh]">
               <Image
                 src={normalizeImageUrl(currentImageUrl)}
                 alt={component.name}
@@ -369,7 +369,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
                 className="object-contain"
                 priority
                 quality={90}
-                sizes="90vw"
+                sizes="(max-width: 768px) calc(100vw - 2rem), 63vw"
                 onError={(e) => {
                   console.error('Image load error:', currentImageUrl)
                   e.currentTarget.src = '/figma-components/placeholder.svg'
