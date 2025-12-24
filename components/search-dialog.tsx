@@ -116,7 +116,7 @@ export function SearchDialog() {
 
   const handleComponentClick = (component: Component) => {
     setOpen(false)
-    router.push("/")
+    router.push("/browse/components")
     // Scroll to component on the page after navigation
     setTimeout(() => {
       const element = document.querySelector(

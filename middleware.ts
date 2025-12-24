@@ -44,9 +44,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect /components to / (homepage)
+  // Redirect /components to /browse/components for backwards compatibility
   if (request.nextUrl.pathname === '/components') {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/browse/components', request.url))
   }
 
   // Redirect authenticated users away from login/signup

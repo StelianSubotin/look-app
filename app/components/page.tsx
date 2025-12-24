@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-// Redirect /components to / (homepage) for backwards compatibility
+// Redirect /components to /browse/components for backwards compatibility
 export default function ComponentsPage() {
-  redirect("/")
+  redirect("/browse/components")
 }

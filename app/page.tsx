@@ -1,259 +1,217 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
-import { FigmaComponent } from "@/components/figma-component"
-import { createClient } from "@/lib/supabase-client"
-import type { User } from "@supabase/supabase-js"
-import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Search, Grid3x3, Image as ImageIcon, Camera, Box, Music as MusicIcon } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 
-interface Component {
-  id: string
-  name: string
-  description?: string
-  image_url: string
-  clipboard_string: string
-  clipboard_string_dark?: string
-  image_url_dark?: string
-  access_level?: "free" | "paid"
-  category?: string
-  platform?: "web" | "dashboard" | "mobile"
-}
+type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music"
 
-export default function Home() {
-  const [components, setComponents] = useState<Component[]>([])
-  const [filteredComponents, setFilteredComponents] = useState<Component[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [userPlan, setUserPlan] = useState<"free" | "paid">("free")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
-  const [selectedPlatform, setSelectedPlatform] = useState<"web" | "dashboard" | "mobile" | "all">("all")
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+const contentTypes = [
+  { id: "components", label: "Components", icon: Grid3x3, available: true },
+  { id: "illustrations", label: "Illustrations", icon: ImageIcon, available: false },
+  { id: "photos", label: "Photos", icon: Camera, available: false },
+  { id: "3d-models", label: "3D Models", icon: Box, available: false },
+  { id: "music", label: "Music", icon: MusicIcon, available: false },
+] as const
 
-  const fetchFavorites = async (userId: string) => {
-    try {
-      const response = await fetch(`/api/favorites?userId=${userId}`)
-      if (response.ok) {
-        const data = await response.json()
-        const favoriteIds = new Set<string>(data.map((item: any) => item.id as string))
-        setFavorites(favoriteIds)
-      }
-    } catch (error) {
-      console.error("Failed to fetch favorites:", error)
+const componentSuggestions = [
+  "Hero",
+  "Footer",
+  "CTA",
+  "Navbar",
+  "Pricing",
+  "Testimonials",
+  "FAQ",
+  "Cards",
+  "Forms",
+  "Buttons",
+]
+
+const categoryCards = [
+  {
+    id: "components",
+    title: "Components",
+    description: "Ready-to-use Figma components",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "100+",
+    available: true,
+  },
+  {
+    id: "illustrations",
+    title: "Illustrations",
+    description: "Beautiful illustrations for your designs",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "Coming soon",
+    available: false,
+  },
+  {
+    id: "templates",
+    title: "Templates",
+    description: "Complete page templates",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "Coming soon",
+    available: false,
+  },
+]
+
+export default function HubPage() {
+  const router = useRouter()
+  const [selectedType, setSelectedType] = useState<ContentType>("components")
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/browse/${selectedType}?search=${encodeURIComponent(searchQuery)}`)
     }
   }
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      
-      const isAdmin = user?.user_metadata?.is_admin === true || 
-                     user?.email?.toLowerCase() === "stelsubotin@gmail.com"
-      
-      const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")
-      setUserPlan(plan as "free" | "paid")
-      
-      fetchComponents(plan as "free" | "paid", user?.email || '')
-      
-      // Fetch favorites if user is logged in
-      if (user) {
-        fetchFavorites(user.id)
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    // Filter components based on selected category and platform
-    let filtered = components
-
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(c => c.category === selectedCategory)
-    }
-
-    if (selectedPlatform !== "all") {
-      filtered = filtered.filter(c => c.platform === selectedPlatform)
-    }
-
-    setFilteredComponents(filtered)
-  }, [components, selectedCategory, selectedPlatform])
-
-  const fetchComponents = async (plan: "free" | "paid" = "free", email: string = '') => {
-    try {
-      const response = await fetch(`/api/components?plan=${plan}&email=${encodeURIComponent(email)}`)
-      if (response.ok) {
-        const data = await response.json()
-        setComponents(data)
-        setError(null)
-      } else {
-        const errorData = await response.json().catch(() => ({}))
-        setError(errorData.error || `Failed to load components (${response.status})`)
-      }
-    } catch (error) {
-      console.error("Failed to fetch components:", error)
-      setError("Failed to connect to server. Please check your connection and try again.")
-    } finally {
-      setLoading(false)
-    }
+  const handleSuggestionClick = (suggestion: string) => {
+    router.push(`/browse/components?category=${encodeURIComponent(suggestion)}`)
   }
 
-  // Get unique categories from components
-  const categories = Array.from(new Set(components.map(c => c.category).filter(Boolean))) as string[]
+  const getPlaceholder = () => {
+    switch (selectedType) {
+      case "components":
+        return "Search components..."
+      case "illustrations":
+        return "Search illustrations..."
+      case "photos":
+        return "Search photos..."
+      case "3d-models":
+        return "Search 3D models..."
+      case "music":
+        return "Search music..."
+      default:
+        return "Search..."
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex">
-        {/* Left Sidebar - Categories */}
-        <aside className="w-64 bg-white border-r border-border/50 min-h-[calc(100vh-4rem)] p-6 sticky top-16">
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Filter by Category</h3>
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
-                selectedCategory === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
-              }`}
-            >
-              All Categories
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
-                  selectedCategory === category
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+      
+      {/* Hero Section with Search */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          {/* Heading */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold mb-4">
+              Design resources for creatives and developers
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              The ultimate design kit for Figma
+            </p>
           </div>
-        </aside>
 
-        {/* Main Content */}
-        <main className="flex-1">
-          {/* Top Filter Bar - Platform Tabs */}
-          <div className="bg-white border-b border-border/50 px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground mr-4">Platform:</span>
-              <Button
-                variant={selectedPlatform === "all" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("all")}
-              >
-                All
-              </Button>
-              <Button
-                variant={selectedPlatform === "web" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("web")}
-              >
-                Web
-              </Button>
-              <Button
-                variant={selectedPlatform === "dashboard" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("dashboard")}
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant={selectedPlatform === "mobile" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("mobile")}
-              >
-                Mobile
-              </Button>
+          {/* Content Type Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            {contentTypes.map((type) => {
+              const Icon = type.icon
+              return (
+                <Button
+                  key={type.id}
+                  variant={selectedType === type.id ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => setSelectedType(type.id as ContentType)}
+                  disabled={!type.available}
+                  className="gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {type.label}
+                  {!type.available && (
+                    <span className="text-xs bg-muted px-2 py-0.5 rounded">Soon</span>
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={getPlaceholder()}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-4 py-6 text-lg"
+              />
             </div>
-          </div>
+          </form>
 
-          {/* Components Grid */}
-          <div className="bg-muted/30 p-8 min-h-[calc(100vh-4rem)]">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="overflow-hidden rounded-lg border border-border/50 bg-card">
-                    <Skeleton className="aspect-video w-full" />
-                    <div className="p-4 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                      <div className="flex justify-between pt-2">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-8 w-20" />
-                      </div>
-                    </div>
-                  </div>
+          {/* Suggestion Tags (only show for components) */}
+          {selectedType === "components" && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">Popular now:</p>
+              <div className="flex flex-wrap gap-2">
+                {componentSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="px-4 py-2 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium transition-colors cursor-pointer"
+                  >
+                    {suggestion}
+                  </button>
                 ))}
               </div>
-            ) : error ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center max-w-md">
-                  <div className="rounded-md bg-destructive/15 border border-destructive/50 p-6">
-                    <h3 className="font-semibold text-destructive mb-2">Error Loading Components</h3>
-                    <p className="text-sm text-destructive/80 mb-4">{error}</p>
-                    <button
-                      onClick={() => {
-                        setLoading(true)
-                        setError(null)
-                        fetchComponents()
-                      }}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Try again
-                    </button>
+            </div>
+          )}
+        </div>
+
+        {/* Category Preview Cards */}
+        <div className="max-w-6xl mx-auto mt-20">
+          <h2 className="text-2xl font-bold mb-8 text-center">Explore our collections</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {categoryCards.map((card) => (
+              <Link
+                key={card.id}
+                href={card.available ? `/browse/${card.id}` : "#"}
+                className={`group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg ${
+                  !card.available ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+                onClick={(e) => {
+                  if (!card.available) {
+                    e.preventDefault()
+                  }
+                }}
+              >
+                <div className="relative aspect-video bg-gradient-to-br from-blue-50 to-purple-50">
+                  <Image
+                    src={card.image}
+                    alt={card.title}
+                    fill
+                    className="object-contain p-8 group-hover:scale-105 transition-transform"
+                  />
+                  {!card.available && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+                      <span className="text-lg font-semibold">Coming Soon</span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-3">{card.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-primary">{card.count}</span>
+                    {card.available && (
+                      <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                        Browse →
+                      </span>
+                    )}
                   </div>
                 </div>
-              </div>
-            ) : filteredComponents.length === 0 ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center">
-                  <p className="text-muted-foreground mb-2">No components found.</p>
-                  <p className="text-sm text-muted-foreground">
-                    Try adjusting your filters or check back later.
-                  </p>
-                </div>
-              </div>
-            ) : (
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                       {filteredComponents.map((component) => (
-                         <FigmaComponent
-                           key={component.id}
-                           component={{
-                             id: component.id,
-                             name: component.name,
-                             description: component.description,
-                             imageUrl: component.image_url,
-                             clipboardString: component.clipboard_string,
-                             clipboardStringDark: component.clipboard_string_dark,
-                             imageUrlDark: component.image_url_dark,
-                             accessLevel: component.access_level,
-                             category: component.category,
-                             platform: component.platform,
-                           }}
-                           userPlan={userPlan}
-                           userId={user?.id}
-                           isFavorited={favorites.has(component.id)}
-                           onFavoriteChange={() => {
-                             // Refresh favorites when changed
-                             if (user) {
-                               fetchFavorites(user.id)
-                             }
-                           }}
-                         />
-                       ))}
-                     </div>
-            )}
+              </Link>
+            ))}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   )
 }
-
