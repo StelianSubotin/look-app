@@ -183,13 +183,13 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
   return (
     <>
-      <Card className="overflow-hidden border-border/50 cursor-default" data-component-id={component.id}>
-        <div className="relative aspect-video bg-muted cursor-default">
+      <Card className="overflow-hidden border-border/50 cursor-pointer hover:border-primary/50 transition-colors" data-component-id={component.id}>
+        <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => setShowPreviewModal(true)}>
           <Image
             src={normalizeImageUrl(currentImageUrl)}
             alt={component.name}
             fill
-            className="object-cover pointer-events-none"
+            className="object-cover"
             loading="lazy"
             quality={75}
             placeholder="blur"
@@ -209,7 +209,10 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
           )}
           {/* Dark mode toggle - show for all components with dark mode */}
           {hasDarkMode && (
-            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20 cursor-pointer">
+            <div 
+              className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20 cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Sun className={`h-3.5 w-3.5 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />
               <Switch
                 checked={isDarkMode}
@@ -220,21 +223,21 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
             </div>
           )}
         </div>
-        <CardContent className="p-4 cursor-default">
-          <div className="flex items-center justify-between mb-2 cursor-default">
-            <h3 className="font-semibold text-sm cursor-default">{component.name}</h3>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-sm">{component.name}</h3>
             {component.category && (
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded cursor-default">
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                 {component.category}
               </span>
             )}
           </div>
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground cursor-default">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Check className="h-3 w-3" />
               <span>{component.category || "Component"}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <Button
                 onClick={() => setShowPreviewModal(true)}
                 size="sm"
