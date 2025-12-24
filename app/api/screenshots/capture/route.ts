@@ -93,9 +93,14 @@ export async function POST(request: NextRequest) {
 
     if (!screenshotResponse.ok) {
       const errorText = await screenshotResponse.text()
-      console.error('ScreenshotOne API error:', errorText)
+      console.error('ScreenshotOne API error:', {
+        status: screenshotResponse.status,
+        statusText: screenshotResponse.statusText,
+        error: errorText,
+        url: screenshotOneUrl.toString()
+      })
       return NextResponse.json(
-        { error: `Screenshot capture failed: ${screenshotResponse.status}` },
+        { error: `Screenshot capture failed: ${screenshotResponse.status} - ${errorText || screenshotResponse.statusText}` },
         { status: 500 }
       )
     }
