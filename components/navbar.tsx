@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase-client"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
 import { SearchDialog } from "@/components/search-dialog"
+import { LoginDialog } from "@/components/login-dialog"
+import { SignupDialog } from "@/components/signup-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +26,8 @@ export function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [showLoginDialog, setShowLoginDialog] = useState(false)
+  const [showSignupDialog, setShowSignupDialog] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -139,14 +143,34 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowLoginDialog(true)}
+            >
+              Login
+            </Button>
           )}
         </div>
       </div>
+
+      {/* Login & Signup Dialogs */}
+      <LoginDialog 
+        open={showLoginDialog} 
+        onOpenChange={setShowLoginDialog}
+        onSwitchToSignup={() => {
+          setShowLoginDialog(false)
+          setShowSignupDialog(true)
+        }}
+      />
+      <SignupDialog 
+        open={showSignupDialog} 
+        onOpenChange={setShowSignupDialog}
+        onSwitchToLogin={() => {
+          setShowSignupDialog(false)
+          setShowLoginDialog(true)
+        }}
+      />
     </nav>
   )
 }
