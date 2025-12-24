@@ -123,7 +123,7 @@ function SignUpForm() {
             {upgrade === 'pro' && (
               <div className="rounded-md bg-primary/10 border border-primary/20 p-3 text-sm text-center">
                 <p className="text-primary font-medium">
-                  After signing up, you'll be able to upgrade to Pro and unlock all premium components!
+                  After signing up, you&apos;ll be able to upgrade to Pro and unlock all premium components!
                 </p>
               </div>
             )}
