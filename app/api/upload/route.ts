@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Initialize Supabase client
+    // Initialize Supabase client with service role key to bypass RLS
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
     // Generate unique filename
