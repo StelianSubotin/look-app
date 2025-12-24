@@ -274,106 +274,119 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
     {/* Pricing Modal */}
     <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-      <DialogContent className="sm:max-w-[480px] p-0 gap-0">
-        <div className="p-8">
-          <DialogHeader className="space-y-3 pb-6">
-            <DialogTitle className="text-3xl font-bold">Subscription</DialogTitle>
-            <DialogDescription className="text-base">
-              Unlock all premium components and features
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Features List */}
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">100+ Premium Components</p>
-                <p className="text-sm text-muted-foreground">Access to all Pro components</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">Light & Dark Mode</p>
-                <p className="text-sm text-muted-foreground">All components in both themes</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">Unlimited Downloads</p>
-                <p className="text-sm text-muted-foreground">Copy as many components as you need</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">No Watermark</p>
-                <p className="text-sm text-muted-foreground">Clean components ready for production</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">Priority Support</p>
-                <p className="text-sm text-muted-foreground">Get help when you need it</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">Commercial Use</p>
-                <p className="text-sm text-muted-foreground">Use in client projects</p>
-              </div>
-            </li>
-          </ul>
-
-          {/* Billing Period Tabs */}
-          <Tabs value={billingPeriod} onValueChange={(value) => setBillingPeriod(value as "monthly" | "yearly")} className="mb-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly">Yearly (-20%)</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Price Display */}
-          <div className="mb-6">
-            {billingPeriod === "monthly" ? (
-              <>
-                <p className="text-4xl font-bold mb-1">${(9).toFixed(0)}/month</p>
-                <p className="text-muted-foreground">billed monthly</p>
-              </>
-            ) : (
-              <>
-                <p className="text-4xl font-bold mb-1">${(9 * 0.8).toFixed(0)}/month</p>
-                <p className="text-muted-foreground">billed yearly (${(9 * 0.8 * 12).toFixed(0)}/year)</p>
-              </>
-            )}
+      <DialogContent className="sm:max-w-[640px] max-h-[70vh] p-0 gap-0 overflow-hidden">
+        <div className="grid md:grid-cols-2 max-h-[70vh]">
+          {/* Left Side - Image */}
+          <div className="hidden md:block relative bg-gradient-to-br from-blue-50 to-purple-50">
+            <Image
+              src="https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp"
+              alt="Subscription"
+              fill
+              className="object-contain p-6"
+              priority
+            />
           </div>
 
-          {/* Error Message */}
-          {upgradeError && (
-            <div className="rounded-md bg-destructive/15 border border-destructive/50 p-3 mb-4">
-              <p className="text-sm text-destructive">{upgradeError}</p>
-            </div>
-          )}
+          {/* Right Side - Pricing Details */}
+          <div className="p-6 overflow-y-auto max-h-[70vh]">
+            <DialogHeader className="space-y-2 pb-4">
+              <DialogTitle className="text-2xl font-bold">Subscription</DialogTitle>
+              <DialogDescription className="text-sm">
+                Unlock all premium components and features
+              </DialogDescription>
+            </DialogHeader>
 
-          {/* Subscribe Button */}
-          <Button 
-            onClick={handleUpgrade} 
-            className="w-full h-12 text-base font-semibold" 
-            size="lg"
-            disabled={upgradeLoading}
-          >
-            {upgradeLoading ? (
-              "Loading..."
-            ) : (
-              <>
-                Subscribe for ${billingPeriod === "monthly" ? "9/month" : `${(9 * 0.8 * 12).toFixed(0)}/year`}
-              </>
+            {/* Features List */}
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">100+ Premium Components</p>
+                  <p className="text-xs text-muted-foreground">Access to all Pro components</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Light & Dark Mode</p>
+                  <p className="text-xs text-muted-foreground">All components in both themes</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Unlimited Downloads</p>
+                  <p className="text-xs text-muted-foreground">Copy as many components as you need</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">No Watermark</p>
+                  <p className="text-xs text-muted-foreground">Clean components ready for production</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Priority Support</p>
+                  <p className="text-xs text-muted-foreground">Get help when you need it</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Commercial Use</p>
+                  <p className="text-xs text-muted-foreground">Use in client projects</p>
+                </div>
+              </li>
+            </ul>
+
+            {/* Billing Period Tabs */}
+            <Tabs value={billingPeriod} onValueChange={(value) => setBillingPeriod(value as "monthly" | "yearly")} className="mb-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                <TabsTrigger value="yearly">Yearly (-20%)</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Price Display */}
+            <div className="mb-4">
+              {billingPeriod === "monthly" ? (
+                <>
+                  <p className="text-3xl font-bold mb-1">${(9).toFixed(0)}/month</p>
+                  <p className="text-sm text-muted-foreground">billed monthly</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold mb-1">${(9 * 0.8).toFixed(0)}/month</p>
+                  <p className="text-sm text-muted-foreground">billed yearly (${(9 * 0.8 * 12).toFixed(0)}/year)</p>
+                </>
+              )}
+            </div>
+
+            {/* Error Message */}
+            {upgradeError && (
+              <div className="rounded-md bg-destructive/15 border border-destructive/50 p-2 mb-4">
+                <p className="text-xs text-destructive">{upgradeError}</p>
+              </div>
             )}
-          </Button>
+
+            {/* Subscribe Button */}
+            <Button 
+              onClick={handleUpgrade} 
+              className="w-full h-11 text-sm font-semibold" 
+              disabled={upgradeLoading}
+            >
+              {upgradeLoading ? (
+                "Loading..."
+              ) : (
+                <>
+                  Subscribe for ${billingPeriod === "monthly" ? "9/month" : `${(9 * 0.8 * 12).toFixed(0)}/year`}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
