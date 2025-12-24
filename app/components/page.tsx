@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Component {
   id: string
@@ -157,11 +158,20 @@ export default function ComponentsPage() {
           {/* Components Grid */}
           <div className="bg-muted/30 p-8 min-h-[calc(100vh-4rem)]">
             {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center">
-                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-                  <p className="text-muted-foreground">Loading components...</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="overflow-hidden rounded-lg border border-border/50 bg-card">
+                    <Skeleton className="aspect-video w-full" />
+                    <div className="p-4 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                      <div className="flex justify-between pt-2">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-8 w-20" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="flex items-center justify-center py-20">

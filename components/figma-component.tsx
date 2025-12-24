@@ -167,6 +167,11 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
             alt={component.name}
             fill
             className="object-cover pointer-events-none"
+            loading="lazy"
+            quality={75}
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={(e) => {
               // If image fails to load, show placeholder
               console.error('Image load error:', currentImageUrl)
@@ -363,6 +368,8 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
                 fill
                 className="object-contain"
                 priority
+                quality={90}
+                sizes="90vw"
                 onError={(e) => {
                   console.error('Image load error:', currentImageUrl)
                   e.currentTarget.src = '/figma-components/placeholder.svg'

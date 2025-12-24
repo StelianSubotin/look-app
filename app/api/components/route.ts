@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+// Enable static caching with revalidation every 60 seconds
+export const revalidate = 60
+
 // GET all components (filtered by user plan)
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +25,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data || [])
+    // Add cache headers for better performance
+    const response = NextResponse.json(data || [])
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    
+    return response
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch components' },

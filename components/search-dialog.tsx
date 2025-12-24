@@ -232,6 +232,11 @@ export function SearchDialog() {
                             alt={component.name}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                            quality={60}
+                            placeholder="blur"
+                            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                             onError={(e) => {
                               console.error('Image load error:', component.image_url)
                               e.currentTarget.src = '/figma-components/placeholder.svg'
