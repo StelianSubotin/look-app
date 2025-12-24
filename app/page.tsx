@@ -31,6 +31,20 @@ export default function Home() {
   const [userPlan, setUserPlan] = useState<"free" | "paid">("free")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedPlatform, setSelectedPlatform] = useState<"web" | "dashboard" | "mobile" | "all">("all")
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+
+  const fetchFavorites = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/favorites?userId=${userId}`)
+      if (response.ok) {
+        const data = await response.json()
+        const favoriteIds = new Set(data.map((item: any) => item.id))
+        setFavorites(favoriteIds)
+      }
+    } catch (error) {
+      console.error("Failed to fetch favorites:", error)
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -44,6 +58,11 @@ export default function Home() {
       setUserPlan(plan as "free" | "paid")
       
       fetchComponents(plan as "free" | "paid", user?.email || '')
+      
+      // Fetch favorites if user is logged in
+      if (user) {
+        fetchFavorites(user.id)
+      }
     })
   }, [])
 
@@ -202,26 +221,34 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredComponents.map((component) => (
-                  <FigmaComponent
-                    key={component.id}
-                    component={{
-                      id: component.id,
-                      name: component.name,
-                      description: component.description,
-                      imageUrl: component.image_url,
-                      clipboardString: component.clipboard_string,
-                      clipboardStringDark: component.clipboard_string_dark,
-                      imageUrlDark: component.image_url_dark,
-                      accessLevel: component.access_level,
-                      category: component.category,
-                      platform: component.platform,
-                    }}
-                    userPlan={userPlan}
-                  />
-                ))}
-              </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                       {filteredComponents.map((component) => (
+                         <FigmaComponent
+                           key={component.id}
+                           component={{
+                             id: component.id,
+                             name: component.name,
+                             description: component.description,
+                             imageUrl: component.image_url,
+                             clipboardString: component.clipboard_string,
+                             clipboardStringDark: component.clipboard_string_dark,
+                             imageUrlDark: component.image_url_dark,
+                             accessLevel: component.access_level,
+                             category: component.category,
+                             platform: component.platform,
+                           }}
+                           userPlan={userPlan}
+                           userId={user?.id}
+                           isFavorited={favorites.has(component.id)}
+                           onFavoriteChange={() => {
+                             // Refresh favorites when changed
+                             if (user) {
+                               fetchFavorites(user.id)
+                             }
+                           }}
+                         />
+                       ))}
+                     </div>
             )}
           </div>
         </main>

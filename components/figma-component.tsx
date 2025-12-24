@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Check, Copy, Moon, Sun, Crown, Eye, X, Sparkles } from "lucide-react"
+import { Check, Copy, Moon, Sun, Crown, Eye, X, Sparkles, Heart } from "lucide-react"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -33,9 +33,12 @@ interface FigmaComponentProps {
     platform?: "web" | "dashboard" | "mobile"
   }
   userPlan?: "free" | "paid"
+  userId?: string
+  isFavorited?: boolean
+  onFavoriteChange?: () => void
 }
 
-export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentProps) {
+export function FigmaComponent({ component, userPlan = "free", userId, isFavorited: initialIsFavorited = false, onFavoriteChange }: FigmaComponentProps) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -44,6 +47,8 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [upgradeError, setUpgradeError] = useState("")
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly")
+  const [isFavorited, setIsFavorited] = useState(initialIsFavorited)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
   
   // Determine if dark mode is available - requires BOTH image and clipboard
   const hasDarkMode = !!(component.clipboardStringDark && component.imageUrlDark)
@@ -60,6 +65,45 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
   const currentImageUrl = isDarkMode && component.imageUrlDark 
     ? component.imageUrlDark 
     : component.imageUrl
+
+  const handleFavoriteToggle = async () => {
+    if (!userId) {
+      // Redirect to login if not authenticated
+      router.push('/login?redirect=/')
+      return
+    }
+
+    setFavoriteLoading(true)
+    try {
+      if (isFavorited) {
+        // Remove from favorites
+        const response = await fetch(`/api/favorites?userId=${userId}&componentId=${component.id}`, {
+          method: 'DELETE',
+        })
+
+        if (response.ok) {
+          setIsFavorited(false)
+          onFavoriteChange?.()
+        }
+      } else {
+        // Add to favorites
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, componentId: component.id }),
+        })
+
+        if (response.ok) {
+          setIsFavorited(true)
+          onFavoriteChange?.()
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    } finally {
+      setFavoriteLoading(false)
+    }
+  }
 
   const handleUpgrade = async () => {
     setUpgradeLoading(true)
@@ -209,10 +253,26 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
               <span className="text-xs font-semibold text-primary-foreground">PRO</span>
             </div>
           )}
+          {/* Favorite button - top right corner */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleFavoriteToggle()
+            }}
+            disabled={favoriteLoading}
+            className="absolute top-2 right-2 z-20 rounded-full bg-background/80 backdrop-blur-sm p-2 hover:bg-background transition-colors cursor-pointer disabled:opacity-50"
+            aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors ${
+                isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'
+              }`}
+            />
+          </button>
           {/* Dark mode toggle - show for all components with dark mode */}
           {hasDarkMode && (
             <div 
-              className="absolute top-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20 cursor-pointer"
+              className="absolute bottom-2 right-2 flex items-center gap-2 rounded-md bg-background/80 backdrop-blur-sm px-2 py-1.5 z-20 cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
               <Sun className={`h-3.5 w-3.5 ${!isDarkMode ? 'text-foreground' : 'text-muted-foreground'}`} />

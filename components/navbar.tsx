@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut } from "lucide-react"
+import { Settings, LogOut, Heart } from "lucide-react"
 
 export function Navbar() {
   const router = useRouter()
@@ -82,6 +82,15 @@ export function Navbar() {
         </Link>
         <div className="flex items-center space-x-6">
           <SearchDialog />
+          {user && (
+            <Link
+              href="/favorites"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
+            >
+              <Heart className="h-4 w-4" />
+              Favorites
+            </Link>
+          )}
           {user && isAdmin && (
             <Link
               href="/admin"
