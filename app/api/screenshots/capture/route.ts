@@ -59,9 +59,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if ScreenshotOne API key is configured
+    console.log('Environment check:', {
+      hasKey: !!process.env.SCREENSHOTONE_API_KEY,
+      keyLength: process.env.SCREENSHOTONE_API_KEY?.length || 0,
+      allEnvKeys: Object.keys(process.env).filter(k => k.includes('SCREENSHOT'))
+    })
+    
     if (!process.env.SCREENSHOTONE_API_KEY) {
       return NextResponse.json(
-        { error: 'ScreenshotOne API key not configured' },
+        { error: 'ScreenshotOne API key not configured. Check Vercel environment variables.' },
         { status: 500 }
       )
     }
