@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Settings, ArrowRight } from "lucide-react"
+import { Plus, Settings, ArrowRight, Camera } from "lucide-react"
 import { createClient } from "@/lib/supabase-client"
 
 export default function AdminPage() {
@@ -101,11 +101,11 @@ export default function AdminPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your Figma components library
+            Manage your Figma components library and design inspiration
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push("/admin/create")}>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -137,6 +137,24 @@ export default function AdminPage() {
             <CardContent>
               <Button className="w-full" variant="outline">
                 Manage Components
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push("/admin/screenshots")}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Capture Screenshot</CardTitle>
+                <Camera className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <CardDescription>
+                Add new design inspiration to the gallery
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" variant="outline">
+                Capture Screenshot
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>

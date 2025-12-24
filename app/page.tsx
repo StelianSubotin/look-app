@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Grid3x3, Image as ImageIcon, Camera, Box, Music as MusicIcon } from "lucide-react"
+import { Search, Grid3x3, Image as ImageIcon, Camera, Box, Music as MusicIcon, Sparkles } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
 
-type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music"
+type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music" | "inspiration"
 
 const contentTypes = [
   { id: "components", label: "Components", icon: Grid3x3 },
@@ -19,6 +19,7 @@ const contentTypes = [
   { id: "photos", label: "Photos", icon: Camera },
   { id: "3d-models", label: "3D Models", icon: Box },
   { id: "music", label: "Music", icon: MusicIcon },
+  { id: "inspiration", label: "Inspiration", icon: Sparkles },
 ] as const
 
 const getSuggestions = (type: ContentType) => {
@@ -33,6 +34,8 @@ const getSuggestions = (type: ContentType) => {
       return ["All 3D Models", "Characters", "Objects", "Buildings", "Nature"]
     case "music":
       return ["All Music", "Background", "Upbeat", "Calm", "Electronic"]
+    case "inspiration":
+      return ["All Inspiration", "Landing Page", "Dashboard", "Hero Section", "Pricing Page"]
     default:
       return ["All Components", "Hero", "Footer", "CTA", "Navbar"]
   }
@@ -48,6 +51,14 @@ const categoryCards = [
     available: true,
   },
   {
+    id: "inspiration",
+    title: "Inspiration",
+    description: "Real website design inspiration",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "New!",
+    available: true,
+  },
+  {
     id: "illustrations",
     title: "Illustrations",
     description: "Beautiful illustrations for your designs",
@@ -59,14 +70,6 @@ const categoryCards = [
     id: "templates",
     title: "Templates",
     description: "Complete page templates",
-    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
-    count: "Coming soon",
-    available: false,
-  },
-  {
-    id: "icons",
-    title: "Icons",
-    description: "Icon sets for your projects",
     image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
     count: "Coming soon",
     available: false,
@@ -127,6 +130,8 @@ export default function HubPage() {
         return "Search 3D models..."
       case "music":
         return "Search music..."
+      case "inspiration":
+        return "Search design inspiration..."
       default:
         return "Search..."
     }
