@@ -59,6 +59,14 @@ const categoryCards = [
     count: "Coming soon",
     available: false,
   },
+  {
+    id: "icons",
+    title: "Icons",
+    description: "Icon sets for your projects",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "Coming soon",
+    available: false,
+  },
 ]
 
 export default function HubPage() {
@@ -120,72 +128,99 @@ export default function HubPage() {
       <Navbar key={user?.id || 'anonymous'} />
       
       {/* Hero Section with Search */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Heading */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold mb-4">
-              Design resources for creatives and developers
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              The ultimate design kit for Figma
-            </p>
-          </div>
-
-          {/* Content Type Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-            {contentTypes.map((type) => {
-              const Icon = type.icon
-              return (
-                <Button
-                  key={type.id}
-                  variant={selectedType === type.id ? "default" : "outline"}
-                  size="lg"
-                  onClick={() => setSelectedType(type.id as ContentType)}
-                  disabled={!type.available}
-                  className="gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {type.label}
-                  {!type.available && (
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded">Soon</span>
-                  )}
-                </Button>
-              )
-            })}
-          </div>
-
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={getPlaceholder()}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-lg"
-              />
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid lg:grid-cols-[1fr,400px] gap-12 items-start max-w-7xl mx-auto">
+          {/* Left Side - Search and Content */}
+          <div>
+            {/* Heading */}
+            <div className="mb-8">
+              <h1 className="text-5xl font-bold mb-4">
+                Design resources for creatives and developers
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                The ultimate design kit for Figma
+              </p>
             </div>
-          </form>
 
-          {/* Suggestion Tags (only show for components) */}
-          {selectedType === "components" && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-muted-foreground">Popular now:</p>
-              <div className="flex flex-wrap gap-2">
-                {componentSuggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-4 py-2 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium transition-colors cursor-pointer"
+            {/* Content Type Tabs */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {contentTypes.map((type) => {
+                const Icon = type.icon
+                return (
+                  <Button
+                    key={type.id}
+                    variant={selectedType === type.id ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setSelectedType(type.id as ContentType)}
+                    disabled={!type.available}
+                    className="gap-1.5 h-9"
                   >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
+                    <Icon className="h-3.5 w-3.5" />
+                    {type.label}
+                    {!type.available && (
+                      <span className="text-xs bg-muted px-1.5 py-0.5 rounded ml-1">Soon</span>
+                    )}
+                  </Button>
+                )
+              })}
             </div>
-          )}
+
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={getPlaceholder()}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 py-6 text-base"
+                />
+              </div>
+            </form>
+
+            {/* Suggestion Tags (only show for components) */}
+            {selectedType === "components" && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">Popular now:</p>
+                <div className="flex flex-wrap gap-2">
+                  {componentSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium transition-colors cursor-pointer"
+                    >
+                      <Search className="h-3 w-3 inline mr-1.5" />
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side - Illustration Cards */}
+          <div className="hidden lg:block">
+            <div className="grid grid-cols-2 gap-3">
+              {categoryCards.slice(0, 4).map((card, index) => (
+                <div
+                  key={card.id}
+                  className="relative aspect-square rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 p-4 flex items-center justify-center"
+                  style={{
+                    transform: index % 2 === 0 ? 'translateY(0)' : 'translateY(20px)'
+                  }}
+                >
+                  <Image
+                    src={card.image}
+                    alt={card.title}
+                    width={150}
+                    height={150}
+                    className="object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Category Preview Cards */}
