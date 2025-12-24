@@ -96,6 +96,13 @@ export default function ProfilePage() {
       const data = await response.json()
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - redirect to signup
+        if (response.status === 401) {
+          setUpgradeLoading(false)
+          router.push('/signup?redirect=/profile&upgrade=pro')
+          return
+        }
+        
         const errorMessage = data.error || 'Failed to create checkout session'
         setUpgradeError(errorMessage)
         console.error('Checkout API error:', errorMessage)

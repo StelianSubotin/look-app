@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,12 +12,17 @@ import { createClient } from "@/lib/supabase-client"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [verified, setVerified] = useState(false)
   const [passwordReset, setPasswordReset] = useState(false)
+  
+  // Get redirect URL from query params
+  const redirectUrl = searchParams.get('redirect') || '/components'
+  const upgrade = searchParams.get('upgrade')
 
   useEffect(() => {
     // Check if user was redirected after email verification or password reset
@@ -58,8 +63,8 @@ export default function LoginPage() {
         return
       }
 
-      // Redirect to components page
-      router.push("/components")
+      // Redirect to the specified URL or components page
+      router.push(redirectUrl)
       router.refresh()
     } catch (err) {
       setError("An error occurred. Please try again.")
@@ -76,7 +81,7 @@ export default function LoginPage() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?next=/components`,
+          redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
         },
       })
 
@@ -203,7 +208,7 @@ export default function LoginPage() {
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link
-                href="/signup"
+                href={`/signup${redirectUrl !== '/components' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
                 className="underline underline-offset-4 hover:text-primary"
               >
                 Sign up

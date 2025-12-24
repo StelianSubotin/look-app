@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
@@ -8,6 +9,7 @@ import { Check, Copy, Moon, Sun, Crown, Eye, X } from "lucide-react"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase-client"
 import {
   Dialog,
   DialogContent,
@@ -33,6 +35,7 @@ interface FigmaComponentProps {
 }
 
 export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentProps) {
+  const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [showPricingModal, setShowPricingModal] = useState(false)
@@ -60,6 +63,18 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
     setUpgradeLoading(true)
     setUpgradeError("")
     
+    // First, check if user is logged in
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      // User is not logged in - redirect to signup
+      setUpgradeLoading(false)
+      setShowPricingModal(false)
+      router.push('/signup?redirect=/components&upgrade=pro')
+      return
+    }
+    
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -72,6 +87,14 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
       const data = await response.json()
 
       if (!response.ok) {
+        // Handle 401 Unauthorized specifically
+        if (response.status === 401) {
+          setUpgradeLoading(false)
+          setShowPricingModal(false)
+          router.push('/signup?redirect=/components&upgrade=pro')
+          return
+        }
+        
         const errorMessage = data.error || 'Failed to create checkout session'
         setUpgradeError(errorMessage)
         setUpgradeLoading(false)

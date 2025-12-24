@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase-client"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -19,6 +20,10 @@ export default function SignUpPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [successEmail, setSuccessEmail] = useState("")
+  
+  // Get redirect URL from query params
+  const redirectUrl = searchParams.get('redirect') || '/components'
+  const upgrade = searchParams.get('upgrade')
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,7 +79,7 @@ export default function SignUpPage() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?next=/components`,
+          redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
         },
       })
 
@@ -105,8 +110,23 @@ export default function SignUpPage() {
             </div>
             <CardTitle className="text-2xl text-center">Create an account</CardTitle>
             <CardDescription className="text-center">
-              Sign up with your Google account
+              {upgrade === 'pro' ? (
+                <>
+                  Sign up to unlock Pro features and access all premium components
+                </>
+              ) : (
+                <>
+                  Sign up with your Google account
+                </>
+              )}
             </CardDescription>
+            {upgrade === 'pro' && (
+              <div className="rounded-md bg-primary/10 border border-primary/20 p-3 text-sm text-center">
+                <p className="text-primary font-medium">
+                  After signing up, you'll be able to upgrade to Pro and unlock all premium components!
+                </p>
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
@@ -221,7 +241,7 @@ export default function SignUpPage() {
             <div className="text-center text-sm">
               Already have an account?{" "}
               <Link
-                href="/login"
+                href={`/login${redirectUrl !== '/components' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
                 className="underline underline-offset-4 hover:text-primary"
               >
                 Login
