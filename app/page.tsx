@@ -38,7 +38,7 @@ export default function Home() {
       const response = await fetch(`/api/favorites?userId=${userId}`)
       if (response.ok) {
         const data = await response.json()
-        const favoriteIds = new Set(data.map((item: any) => item.id))
+        const favoriteIds = new Set<string>(data.map((item: any) => item.id as string))
         setFavorites(favoriteIds)
       }
     } catch (error) {

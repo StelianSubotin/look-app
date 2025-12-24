@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 // GET - Get user's favorites
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient()
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -63,6 +66,7 @@ export async function GET(request: NextRequest) {
 // POST - Add to favorites
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient()
     const { userId, componentId } = await request.json()
 
     if (!userId || !componentId) {
@@ -103,6 +107,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove from favorites
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient()
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const componentId = searchParams.get('componentId')
