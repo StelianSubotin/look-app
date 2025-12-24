@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ExternalLink, Tag, Copy, Check } from "lucide-react"
+import { ExternalLink, Tag, Copy, Check, Download } from "lucide-react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase-client"
@@ -111,8 +111,21 @@ function InspirationBrowseContent() {
     if (!selectedScreenshot) return
 
     try {
-      // Fetch the image
-      const response = await fetch(selectedScreenshot.image_url)
+      // Check if clipboard API is supported
+      if (!navigator.clipboard || !ClipboardItem) {
+        throw new Error('Clipboard API not supported')
+      }
+
+      // Fetch the image with cors mode
+      const response = await fetch(selectedScreenshot.image_url, {
+        mode: 'cors',
+        cache: 'no-cache'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch image')
+      }
+
       const blob = await response.blob()
       
       // Copy to clipboard
@@ -126,9 +139,21 @@ function InspirationBrowseContent() {
       setTimeout(() => setCopySuccess(false), 2000)
     } catch (error) {
       console.error('Failed to copy screenshot:', error)
-      // Fallback: open in new tab if copy fails
-      window.open(selectedScreenshot.image_url, '_blank')
+      // Show error message
+      alert('Could not copy to clipboard. Please use the Download button instead.')
     }
+  }
+
+  const downloadScreenshot = () => {
+    if (!selectedScreenshot) return
+
+    // Create a temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = selectedScreenshot.image_url
+    link.download = `${selectedScreenshot.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
@@ -326,6 +351,15 @@ function InspirationBrowseContent() {
                           Copy
                         </>
                       )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={downloadScreenshot}
+                      className="gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
                     </Button>
                     <a
                       href={selectedScreenshot.url}
