@@ -97,25 +97,36 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <Card className="border-border/50">
-          <CardHeader className="space-y-1">
-            <div className="mb-4 flex justify-center">
-              <Image
-                src="/lookscout-logo.svg"
-                alt="Lookscout"
-                width={150}
-                height={40}
-                className="h-10 w-auto"
-              />
-            </div>
-            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
-            <CardDescription className="text-center">
+    <div className="flex min-h-screen">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-50 to-purple-50">
+        <Image
+          src="https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp"
+          alt="Login"
+          fill
+          className="object-contain p-12"
+          priority
+        />
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-6 md:p-10 bg-background">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <Image
+              src="/lookscout-logo.svg"
+              alt="Lookscout"
+              width={150}
+              height={40}
+              className="h-10 w-auto mb-6"
+            />
+            <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
+            <p className="text-muted-foreground">
               Login with your Google account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+
+          <div className="space-y-4">
             {verified && (
               <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-800 dark:text-green-200">
                 ✅ Email verified successfully! You can now log in.
@@ -205,16 +216,16 @@ function LoginForm() {
                 {loading ? "Logging in..." : "Login"}
               </Button>
             </form>
-            <div className="text-center text-sm">
+            <div className="text-sm mt-4">
               Don&apos;t have an account?{" "}
               <Link
                 href={`/signup${redirectUrl !== '/' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
-                className="underline underline-offset-4 hover:text-primary"
+                className="underline underline-offset-4 hover:text-primary font-medium"
               >
                 Sign up
               </Link>
             </div>
-            <div className="text-center text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground mt-6">
               By clicking continue, you agree to our{" "}
               <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
                 Terms of Service
@@ -225,8 +236,8 @@ function LoginForm() {
               </Link>
               .
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -235,27 +246,22 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          <Card className="border-border/50">
-            <CardHeader className="space-y-1">
-              <div className="mb-4 flex justify-center">
-                <Image
-                  src="/lookscout-logo.svg"
-                  alt="Lookscout"
-                  width={150}
-                  height={40}
-                  className="h-10 w-auto"
-                />
-              </div>
-              <CardTitle className="text-2xl text-center">Login</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center py-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="flex min-h-screen">
+        <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-50 to-purple-50">
+          <Image
+            src="https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp"
+            alt="Login"
+            fill
+            className="object-contain p-12"
+            priority
+          />
+        </div>
+        <div className="flex w-full lg:w-1/2 items-center justify-center p-6 md:p-10 bg-background">
+          <div className="w-full max-w-md">
+            <div className="flex items-center justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            </div>
+          </div>
         </div>
       </div>
     }>
