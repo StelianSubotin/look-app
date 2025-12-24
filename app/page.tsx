@@ -67,12 +67,12 @@ const categoryCards = [
     available: false,
   },
   {
-    id: "templates",
-    title: "Templates",
-    description: "Complete page templates",
+    id: "tools/contrast-checker",
+    title: "Tools",
+    description: "Design tools for accessibility & workflows",
     image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
-    count: "Coming soon",
-    available: false,
+    count: "New!",
+    available: true,
   },
 ]
 
