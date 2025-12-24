@@ -274,8 +274,8 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
     {/* Pricing Modal */}
     <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-      <DialogContent className="sm:max-w-[640px] max-h-[70vh] p-0 gap-0 overflow-hidden">
-        <div className="grid md:grid-cols-2 max-h-[70vh]">
+      <DialogContent className="sm:max-w-[640px] max-h-[85vh] p-0 gap-0 overflow-hidden">
+        <div className="grid md:grid-cols-2 max-h-[85vh]">
           {/* Left Side - Image */}
           <div className="hidden md:block relative bg-gradient-to-br from-blue-50 to-purple-50">
             <Image
@@ -288,7 +288,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
           </div>
 
           {/* Right Side - Pricing Details */}
-          <div className="p-6 overflow-y-auto max-h-[70vh]">
+          <div className="p-6 overflow-y-auto max-h-[85vh]">
             <DialogHeader className="space-y-2 pb-4">
               <DialogTitle className="text-2xl font-bold">Subscription</DialogTitle>
               <DialogDescription className="text-sm">
