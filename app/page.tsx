@@ -14,25 +14,29 @@ import type { User } from "@supabase/supabase-js"
 type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music"
 
 const contentTypes = [
-  { id: "components", label: "Components", icon: Grid3x3, available: true },
-  { id: "illustrations", label: "Illustrations", icon: ImageIcon, available: false },
-  { id: "photos", label: "Photos", icon: Camera, available: false },
-  { id: "3d-models", label: "3D Models", icon: Box, available: false },
-  { id: "music", label: "Music", icon: MusicIcon, available: false },
+  { id: "components", label: "Components", icon: Grid3x3 },
+  { id: "illustrations", label: "Illustrations", icon: ImageIcon },
+  { id: "photos", label: "Photos", icon: Camera },
+  { id: "3d-models", label: "3D Models", icon: Box },
+  { id: "music", label: "Music", icon: MusicIcon },
 ] as const
 
-const componentSuggestions = [
-  "Hero",
-  "Footer",
-  "CTA",
-  "Navbar",
-  "Pricing",
-  "Testimonials",
-  "FAQ",
-  "Cards",
-  "Forms",
-  "Buttons",
-]
+const getSuggestions = (type: ContentType) => {
+  switch (type) {
+    case "components":
+      return ["All Components", "Hero", "Footer", "CTA", "Navbar"]
+    case "illustrations":
+      return ["All Illustrations", "Business", "People", "Nature", "Technology"]
+    case "photos":
+      return ["All Photos", "Business", "Nature", "Technology", "People"]
+    case "3d-models":
+      return ["All 3D Models", "Characters", "Objects", "Buildings", "Nature"]
+    case "music":
+      return ["All Music", "Background", "Upbeat", "Calm", "Electronic"]
+    default:
+      return ["All Components", "Hero", "Footer", "CTA", "Navbar"]
+  }
+}
 
 const categoryCards = [
   {
@@ -102,8 +106,13 @@ export default function HubPage() {
     }
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
-    router.push(`/browse/components?category=${encodeURIComponent(suggestion)}`)
+  const handleSuggestionClick = (suggestion: string, type: ContentType) => {
+    // If "All [Type]", just go to browse page without category filter
+    if (suggestion.startsWith("All ")) {
+      router.push(`/browse/${type}`)
+    } else {
+      router.push(`/browse/${type}?category=${encodeURIComponent(suggestion)}`)
+    }
   }
 
   const getPlaceholder = () => {
@@ -152,14 +161,10 @@ export default function HubPage() {
                     variant={selectedType === type.id ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setSelectedType(type.id as ContentType)}
-                    disabled={!type.available}
                     className="gap-1.5 h-9"
                   >
                     <Icon className="h-3.5 w-3.5" />
                     {type.label}
-                    {!type.available && (
-                      <span className="text-xs bg-muted px-1.5 py-0.5 rounded ml-1">Soon</span>
-                    )}
                   </Button>
                 )
               })}
@@ -179,24 +184,22 @@ export default function HubPage() {
               </div>
             </form>
 
-            {/* Suggestion Tags (only show for components) */}
-            {selectedType === "components" && (
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">Popular now:</p>
-                <div className="flex flex-wrap gap-2">
-                  {componentSuggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium transition-colors cursor-pointer"
-                    >
-                      <Search className="h-3 w-3 inline mr-1.5" />
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
+            {/* Suggestion Tags */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">Popular now:</p>
+              <div className="flex flex-wrap gap-2">
+                {getSuggestions(selectedType).map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion, selectedType)}
+                    className="px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium transition-colors cursor-pointer"
+                  >
+                    <Search className="h-3 w-3 inline mr-1.5" />
+                    {suggestion}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right Side - Illustration Cards */}
