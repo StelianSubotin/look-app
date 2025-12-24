@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Check, Copy, Moon, Sun, Crown, Eye, X } from "lucide-react"
+import { Check, Copy, Moon, Sun, Crown, Eye, X, Sparkles } from "lucide-react"
 import { normalizeImageUrl } from "@/lib/image-url"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface FigmaComponentProps {
   component: {
@@ -42,6 +43,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [upgradeError, setUpgradeError] = useState("")
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly")
   
   // Determine if dark mode is available - requires BOTH image and clipboard
   const hasDarkMode = !!(component.clipboardStringDark && component.imageUrlDark)
@@ -272,99 +274,109 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
 
     {/* Pricing Modal */}
     <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-500" />
-            Upgrade to Pro
-          </DialogTitle>
-          <DialogDescription>
-            This component is available for Pro users. Upgrade to unlock all Pro components.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          {/* Pricing Table */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Free Plan */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Free</CardTitle>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">$0</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Access to free components</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Copy to Figma</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Light & Dark mode</span>
-                  </li>
-                </ul>
-                <Button variant="outline" className="w-full" disabled>
-                  Current Plan
-                </Button>
-              </CardContent>
-            </Card>
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0">
+        <div className="p-8">
+          <DialogHeader className="space-y-3 pb-6">
+            <DialogTitle className="text-3xl font-bold">Subscription</DialogTitle>
+            <DialogDescription className="text-base">
+              Unlock all premium components and features
+            </DialogDescription>
+          </DialogHeader>
 
-            {/* Pro Plan */}
-            <Card className="border-primary border-2">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-yellow-500" />
-                  Pro
-                </CardTitle>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">$9</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Everything in Free</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Access to all Pro components</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Unlimited downloads</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span className="text-sm">Priority support</span>
-                  </li>
-                </ul>
-                {upgradeError && (
-                  <div className="rounded-md bg-destructive/15 border border-destructive/50 p-2">
-                    <p className="text-xs text-destructive">{upgradeError}</p>
-                  </div>
-                )}
-                <Button 
-                  onClick={handleUpgrade} 
-                  className="w-full" 
-                  disabled={upgradeLoading}
-                >
-                  <Crown className="mr-2 h-4 w-4" />
-                  {upgradeLoading ? "Loading..." : "Upgrade to Pro"}
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Features List */}
+          <ul className="space-y-4 mb-8">
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">100+ Premium Components</p>
+                <p className="text-sm text-muted-foreground">Access to all Pro components</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Light & Dark Mode</p>
+                <p className="text-sm text-muted-foreground">All components in both themes</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Unlimited Downloads</p>
+                <p className="text-sm text-muted-foreground">Copy as many components as you need</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">No Watermark</p>
+                <p className="text-sm text-muted-foreground">Clean components ready for production</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Priority Support</p>
+                <p className="text-sm text-muted-foreground">Get help when you need it</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Commercial Use</p>
+                <p className="text-sm text-muted-foreground">Use in client projects</p>
+              </div>
+            </li>
+          </ul>
+
+          {/* Billing Period Tabs */}
+          <Tabs value={billingPeriod} onValueChange={(value) => setBillingPeriod(value as "monthly" | "yearly")} className="mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly">Yearly (-20%)</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* Price Display */}
+          <div className="mb-6">
+            {billingPeriod === "monthly" ? (
+              <>
+                <p className="text-4xl font-bold mb-1">${(9).toFixed(0)}/month</p>
+                <p className="text-muted-foreground">billed monthly</p>
+              </>
+            ) : (
+              <>
+                <p className="text-4xl font-bold mb-1">${(9 * 0.8).toFixed(0)}/month</p>
+                <p className="text-muted-foreground">billed yearly (${(9 * 0.8 * 12).toFixed(0)}/year)</p>
+              </>
+            )}
           </div>
+
+          {/* Error Message */}
+          {upgradeError && (
+            <div className="rounded-md bg-destructive/15 border border-destructive/50 p-3 mb-4">
+              <p className="text-sm text-destructive">{upgradeError}</p>
+            </div>
+          )}
+
+          {/* Subscribe Button */}
+          <Button 
+            onClick={handleUpgrade} 
+            className="w-full h-12 text-base font-semibold" 
+            size="lg"
+            disabled={upgradeLoading}
+          >
+            {upgradeLoading ? (
+              "Loading..."
+            ) : (
+              <>
+                Subscribe for ${billingPeriod === "monthly" ? "9/month" : `${(9 * 0.8 * 12).toFixed(0)}/year`}
+              </>
+            )}
+          </Button>
         </div>
-        </DialogContent>
-      </Dialog>
+      </DialogContent>
+    </Dialog>
 
       {/* Preview Modal */}
       <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
