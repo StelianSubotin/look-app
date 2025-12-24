@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     screenshotOneUrl.searchParams.set('device_scale_factor', '2') // Retina quality
     screenshotOneUrl.searchParams.set('format', 'webp') // Better compression
     screenshotOneUrl.searchParams.set('image_quality', '90')
-    screenshotOneUrl.searchParams.set('full_page', 'false') // Above the fold only
+    screenshotOneUrl.searchParams.set('full_page', 'true') // Capture full page (scrolling)
     screenshotOneUrl.searchParams.set('delay', '3') // Wait 3 seconds for page to load
 
     console.log('Calling ScreenshotOne API:', url)
