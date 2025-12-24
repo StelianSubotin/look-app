@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-client"
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
@@ -262,5 +262,37 @@ export default function SignUpPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 md:p-10">
+        <div className="w-full max-w-sm">
+          <Card>
+            <CardHeader className="space-y-1">
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/lookscout-logo.svg"
+                  alt="Lookscout"
+                  width={150}
+                  height={40}
+                  className="h-10 w-auto"
+                />
+              </div>
+              <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <SignUpForm />
+    </Suspense>
   )
 }
