@@ -270,21 +270,48 @@ function InspirationBrowseContent() {
 
       {/* Screenshot Detail Modal */}
       <Dialog open={!!selectedScreenshot} onOpenChange={() => setSelectedScreenshot(null)}>
-        <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] p-0 flex flex-col">
           {selectedScreenshot && (
-            <div className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto">
-                <div className="relative w-full bg-muted">
-                  <Image
-                    src={selectedScreenshot.image_url}
-                    alt={selectedScreenshot.title}
-                    width={1920}
-                    height={1080}
-                    className="w-full h-auto"
-                    quality={90}
-                  />
+            <>
+              {/* Header - Fixed */}
+              <div className="p-6 border-b border-border shrink-0">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">{selectedScreenshot.title}</h2>
+                    {selectedScreenshot.description && (
+                      <p className="text-muted-foreground">{selectedScreenshot.description}</p>
+                    )}
+                  </div>
+                  <a
+                    href={selectedScreenshot.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline shrink-0 ml-4"
+                  >
+                    Visit Site
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
                 </div>
-                <div className="p-6">
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {selectedScreenshot.category && (
+                    <span className="px-2 py-1 bg-muted rounded text-xs">
+                      {selectedScreenshot.category}
+                    </span>
+                  )}
+                  <span className="px-2 py-1 bg-muted rounded text-xs capitalize">
+                    {selectedScreenshot.platform}
+                  </span>
+                  {selectedScreenshot.style_tags?.map((tag) => (
+                    <span key={tag} className="px-2 py-1 bg-muted rounded text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Scrollable Screenshot - Takes remaining space */}
+              <div className="flex-1 overflow-y-auto bg-muted">
+                <div className="relative w-full min-h-full flex items-start justify-center p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h2 className="text-2xl font-bold mb-2">{selectedScreenshot.title}</h2>
