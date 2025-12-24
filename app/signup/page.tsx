@@ -22,7 +22,7 @@ function SignUpForm() {
   const [successEmail, setSuccessEmail] = useState("")
   
   // Get redirect URL from query params
-  const redirectUrl = searchParams.get('redirect') || '/components'
+  const redirectUrl = searchParams.get('redirect') || '/'
   const upgrade = searchParams.get('upgrade')
 
   const handleEmailSignup = async (e: React.FormEvent) => {
@@ -241,7 +241,7 @@ function SignUpForm() {
             <div className="text-center text-sm">
               Already have an account?{" "}
               <Link
-                href={`/login${redirectUrl !== '/components' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
+                href={`/login${redirectUrl !== '/' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
                 className="underline underline-offset-4 hover:text-primary"
               >
                 Login

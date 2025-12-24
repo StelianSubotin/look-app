@@ -40,13 +40,18 @@ export async function middleware(request: NextRequest) {
     const isAdmin = user.user_metadata?.is_admin === true || 
                    user.email === "stelsubotin@gmail.com"
     if (!isAdmin) {
-      return NextResponse.redirect(new URL('/components', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
+  }
+
+  // Redirect /components to / (homepage)
+  if (request.nextUrl.pathname === '/components') {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // Redirect authenticated users away from login/signup
   if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/components', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return supabaseResponse

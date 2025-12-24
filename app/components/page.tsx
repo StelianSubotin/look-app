@@ -1,28 +1,8 @@
-"use client"
+import { redirect } from "next/navigation"
 
-import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
-import { FigmaComponent } from "@/components/figma-component"
-import { createClient } from "@/lib/supabase-client"
-import type { User } from "@supabase/supabase-js"
-import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-
-interface Component {
-  id: string
-  name: string
-  description?: string
-  image_url: string
-  clipboard_string: string
-  clipboard_string_dark?: string
-  image_url_dark?: string
-  access_level?: "free" | "paid"
-  category?: string
-  platform?: "web" | "dashboard" | "mobile"
-}
-
+// Redirect /components to / (homepage) for backwards compatibility
 export default function ComponentsPage() {
+  redirect("/")
   const [components, setComponents] = useState<Component[]>([])
   const [filteredComponents, setFilteredComponents] = useState<Component[]>([])
   const [loading, setLoading] = useState(true)

@@ -71,7 +71,7 @@ export function Navbar() {
   return (
     <nav className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/components" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
           <Image
             src="/lookscout-logo.svg"
             alt="Lookscout"
@@ -83,7 +83,7 @@ export function Navbar() {
         <div className="flex items-center space-x-6">
           <SearchDialog />
           <Link
-            href="/components"
+            href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Components

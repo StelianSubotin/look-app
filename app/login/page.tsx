@@ -21,7 +21,7 @@ function LoginForm() {
   const [passwordReset, setPasswordReset] = useState(false)
   
   // Get redirect URL from query params
-  const redirectUrl = searchParams.get('redirect') || '/components'
+  const redirectUrl = searchParams.get('redirect') || '/'
   const upgrade = searchParams.get('upgrade')
 
   useEffect(() => {
@@ -208,7 +208,7 @@ function LoginForm() {
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link
-                href={`/signup${redirectUrl !== '/components' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
+                href={`/signup${redirectUrl !== '/' || upgrade ? `?redirect=${encodeURIComponent(redirectUrl)}${upgrade ? `&upgrade=${upgrade}` : ''}` : ''}`}
                 className="underline underline-offset-4 hover:text-primary"
               >
                 Sign up

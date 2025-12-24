@@ -71,7 +71,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
       // User is not logged in - redirect to signup
       setUpgradeLoading(false)
       setShowPricingModal(false)
-      router.push('/signup?redirect=/components&upgrade=pro')
+      router.push('/signup?redirect=/&upgrade=pro')
       return
     }
     
@@ -91,7 +91,7 @@ export function FigmaComponent({ component, userPlan = "free" }: FigmaComponentP
         if (response.status === 401) {
           setUpgradeLoading(false)
           setShowPricingModal(false)
-          router.push('/signup?redirect=/components&upgrade=pro')
+          router.push('/signup?redirect=/&upgrade=pro')
           return
         }
         
