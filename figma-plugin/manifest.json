@@ -1,0 +1,17 @@
+{
+  "name": "Lookscout Dashboard Importer",
+  "id": "lookscout-dashboard-importer",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://look-app-eight.vercel.app",
+      "http://localhost:3000"
+    ]
+  }
+}
+

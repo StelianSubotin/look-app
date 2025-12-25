@@ -363,6 +363,21 @@ export default function DashboardBuilderPage() {
     }
   }, [])
 
+  // Copy for Figma Plugin (JSON format)
+  const copyForFigma = useCallback(() => {
+    const figmaData = {
+      name: 'Lookscout Dashboard',
+      components: components,
+      theme: theme,
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    }
+    
+    navigator.clipboard.writeText(JSON.stringify(figmaData, null, 2))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [components, theme])
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -557,6 +572,10 @@ export default function DashboardBuilderPage() {
                     React Code (.tsx)
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={copyForFigma}>
+                    <Figma className="h-4 w-4 mr-2" />
+                    Copy for Figma Plugin
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsPNG}>
                     <Image className="h-4 w-4 mr-2" />
                     PNG Image (2x)
@@ -567,8 +586,7 @@ export default function DashboardBuilderPage() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                    <Figma className="h-3 w-3 inline mr-1" />
-                    Drag PNG/SVG into Figma
+                    Use Figma Plugin to import JSON
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -834,13 +852,17 @@ export default function DashboardBuilderPage() {
                     React Code
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={copyForFigma}>
+                    <Figma className="h-4 w-4 mr-2" />
+                    Copy for Figma Plugin
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsPNG}>
                     <Image className="h-4 w-4 mr-2" />
-                    PNG for Figma
+                    PNG Image
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsSVG}>
                     <FileImage className="h-4 w-4 mr-2" />
-                    SVG for Figma
+                    SVG Vector
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
