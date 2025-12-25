@@ -3,9 +3,18 @@
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, FileText, PenTool } from "lucide-react"
+import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, FileText, PenTool, LayoutDashboard } from "lucide-react"
 
 const tools = [
+  {
+    id: "dashboard-builder",
+    title: "Dashboard Builder",
+    description: "Build beautiful dashboards with drag-and-drop. Use pre-built components, customize with AI prompts, and export clean React code.",
+    icon: LayoutDashboard,
+    color: "bg-cyan-500",
+    href: "/tools/dashboard-builder",
+    tags: ["New", "AI-Powered"]
+  },
   {
     id: "mood-board",
     title: "Mood Board Creator",
