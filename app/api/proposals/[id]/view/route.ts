@@ -35,21 +35,22 @@ export async function POST(
       console.error('Error logging view:', viewError)
     }
 
-    // Increment view count
-    const { error: updateError } = await supabase.rpc('increment_proposal_views', {
-      proposal_id_param: proposalId
-    })
+    // Increment view count - first get current count, then update
+    const { data: currentProposal } = await supabase
+      .from('proposals')
+      .select('view_count')
+      .eq('id', proposalId)
+      .single()
 
-    if (updateError) {
-      // Fallback: direct update if RPC doesn't exist
-      await supabase
-        .from('proposals')
-        .update({ 
-          view_count: supabase.rpc('coalesce', { val: 'view_count', default_val: 0 }) + 1,
-          last_viewed_at: new Date().toISOString()
-        })
-        .eq('id', proposalId)
-    }
+    const currentCount = currentProposal?.view_count || 0
+
+    await supabase
+      .from('proposals')
+      .update({ 
+        view_count: currentCount + 1,
+        last_viewed_at: new Date().toISOString()
+      })
+      .eq('id', proposalId)
 
     return NextResponse.json({ success: true })
   } catch (error) {
