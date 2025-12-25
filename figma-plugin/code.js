@@ -1,5 +1,4 @@
-// Lookscout Dashboard Importer - Figma Plugin v3
-// Using proper SVG vector paths for 1:1 accuracy
+// Lookscout Dashboard Importer - Figma Plugin v4 (Stable)
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10,17 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 
-// Lucide icon SVG paths (exact paths from lucide.dev)
-const ICON_PATHS = {
-    dollar: "M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
-    cart: "M4 0L0 3V6H18V3L14 0H4ZM0 7V14H18V7H0ZM5.5 11.5C5.5 12.3284 4.82843 13 4 13C3.17157 13 2.5 12.3284 2.5 11.5C2.5 10.6716 3.17157 10 4 10C4.82843 10 5.5 10.6716 5.5 11.5ZM14 13C14.8284 13 15.5 12.3284 15.5 11.5C15.5 10.6716 14.8284 10 14 10C13.1716 10 12.5 10.6716 12.5 11.5C12.5 12.3284 13.1716 13 14 13Z",
-    users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M12 7a4 4 0 1 1-8 0a4 4 0 0 1 8 0ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-    activity: "M22 12h-4l-3 9L9 3l-3 9H2",
-    "trending-up": "M22 7l-8.5 8.5l-5-5L2 17M22 7h-6M22 7v6",
-    "trending-down": "M22 17l-8.5-8.5l-5 5L2 7M22 17h-6M22 17v-6"
-};
-
-// Chart data matching web app exactly
+// Chart data
 const lineChartData = [
     { name: 'Jan', value: 4000 },
     { name: 'Feb', value: 3000 },
@@ -53,122 +42,110 @@ function hexToRgb(hex) {
     } : { r: 0.231, g: 0.510, b: 0.965 };
 }
 
-// Create icon using SVG vector path
-function createIconVector(type, size, color) {
+// Load fonts helper
+function loadFonts() {
     return __awaiter(this, void 0, void 0, function* () {
-        const frame = figma.createFrame();
-        frame.name = `Icon-${type}`;
-        frame.resize(size, size);
-        frame.fills = [];
-        frame.clipsContent = false;
-        
-        const vector = figma.createVector();
-        
-        // Scale factor for 24x24 icons to desired size
-        const scale = size / 24;
-        
-        if (type === 'dollar') {
-            vector.vectorPaths = [{
-                windingRule: "NONZERO",
-                data: "M12 2L12 22M17 5L9.5 5C7.567 5 6 6.567 6 8.5C6 10.433 7.567 12 9.5 12L14.5 12C16.433 12 18 13.567 18 15.5C18 17.433 16.433 19 14.5 19L6 19"
-            }];
-            vector.strokes = [{ type: 'SOLID', color: color }];
-            vector.strokeWeight = 2 * scale;
-            vector.strokeCap = "ROUND";
-            vector.strokeJoin = "ROUND";
-            vector.fills = [];
-        } else if (type === 'cart') {
-            vector.vectorPaths = [{
-                windingRule: "NONZERO", 
-                data: "M1 1L3.3 1L3.3 1C3.86 1 4.14 1 4.37 1.11C4.56 1.2 4.73 1.35 4.84 1.53C4.97 1.74 5 2.02 5.06 2.57L6.37 14.43C6.43 14.98 6.46 15.26 6.59 15.47C6.7 15.65 6.87 15.8 7.06 15.89C7.29 16 7.57 16 8.13 16L17.87 16C18.43 16 18.71 16 18.94 15.89C19.13 15.8 19.3 15.65 19.41 15.47C19.54 15.26 19.57 14.98 19.63 14.43L20.51 6.43C20.59 5.68 20.63 5.31 20.51 5.02C20.4 4.77 20.21 4.56 19.97 4.42C19.7 4.27 19.32 4.27 18.57 4.27L5 4.27M9 20C9 20.55 8.55 21 8 21C7.45 21 7 20.55 7 20C7 19.45 7.45 19 8 19C8.55 19 9 19.45 9 20ZM18 20C18 20.55 17.55 21 17 21C16.45 21 16 20.55 16 20C16 19.45 16.45 19 17 19C17.55 19 18 19.45 18 20Z"
-            }];
-            vector.strokes = [{ type: 'SOLID', color: color }];
-            vector.strokeWeight = 2 * scale;
-            vector.strokeCap = "ROUND";
-            vector.strokeJoin = "ROUND";
-            vector.fills = [];
-        } else if (type === 'users') {
-            vector.vectorPaths = [{
-                windingRule: "NONZERO",
-                data: "M16 21L16 19C16 16.79 14.21 15 12 15L6 15C3.79 15 2 16.79 2 19L2 21M22 21L22 19C22 17.14 20.73 15.56 19 15.13M15 3.13C16.73 3.56 18 5.14 18 7C18 8.86 16.73 10.44 15 10.87M12 7C12 9.21 10.21 11 8 11C5.79 11 4 9.21 4 7C4 4.79 5.79 3 8 3C10.21 3 12 4.79 12 7Z"
-            }];
-            vector.strokes = [{ type: 'SOLID', color: color }];
-            vector.strokeWeight = 2 * scale;
-            vector.strokeCap = "ROUND";
-            vector.strokeJoin = "ROUND";
-            vector.fills = [];
-        } else if (type === 'activity') {
-            vector.vectorPaths = [{
-                windingRule: "NONZERO",
-                data: "M22 12L18 12L15 21L9 3L6 12L2 12"
-            }];
-            vector.strokes = [{ type: 'SOLID', color: color }];
-            vector.strokeWeight = 2 * scale;
-            vector.strokeCap = "ROUND";
-            vector.strokeJoin = "ROUND";
-            vector.fills = [];
-        }
-        
-        vector.resize(size, size);
-        vector.x = 0;
-        vector.y = 0;
-        frame.appendChild(vector);
-        
-        return frame;
+        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
+        yield figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
+        yield figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
     });
 }
 
-// Create smooth line chart path using bezier curves
-function createLineChartPath(points, width, height, chartX, chartY, maxValue) {
-    const scaledPoints = points.map((p, i) => ({
-        x: chartX + (width / (points.length - 1)) * i,
-        y: chartY + height - (p.value / maxValue) * height
-    }));
+// Create simple icon (circle with symbol)
+function createIcon(type, size, color) {
+    const frame = figma.createFrame();
+    frame.name = 'Icon';
+    frame.resize(size, size);
+    frame.fills = [];
     
-    // Create smooth bezier curve path
-    let pathData = `M ${scaledPoints[0].x} ${scaledPoints[0].y}`;
-    
-    for (let i = 0; i < scaledPoints.length - 1; i++) {
-        const p0 = scaledPoints[i];
-        const p1 = scaledPoints[i + 1];
+    if (type === 'dollar') {
+        const circle = figma.createEllipse();
+        circle.resize(size, size);
+        circle.fills = [];
+        circle.strokes = [{ type: 'SOLID', color: color }];
+        circle.strokeWeight = 1.5;
+        frame.appendChild(circle);
         
-        // Control points for smooth curve
-        const tension = 0.3;
-        const cp1x = p0.x + (p1.x - p0.x) * tension;
-        const cp1y = p0.y;
-        const cp2x = p1.x - (p1.x - p0.x) * tension;
-        const cp2y = p1.y;
+        const text = figma.createText();
+        text.characters = '$';
+        text.fontSize = size * 0.6;
+        text.fills = [{ type: 'SOLID', color: color }];
+        text.x = size * 0.32;
+        text.y = size * 0.15;
+        frame.appendChild(text);
+    } else if (type === 'cart') {
+        const rect = figma.createRectangle();
+        rect.resize(size * 0.8, size * 0.6);
+        rect.x = size * 0.1;
+        rect.y = size * 0.2;
+        rect.cornerRadius = 2;
+        rect.fills = [];
+        rect.strokes = [{ type: 'SOLID', color: color }];
+        rect.strokeWeight = 1.5;
+        frame.appendChild(rect);
+    } else if (type === 'users') {
+        const head = figma.createEllipse();
+        head.resize(size * 0.4, size * 0.4);
+        head.x = size * 0.3;
+        head.y = size * 0.1;
+        head.fills = [];
+        head.strokes = [{ type: 'SOLID', color: color }];
+        head.strokeWeight = 1.5;
+        frame.appendChild(head);
         
-        pathData += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p1.x} ${p1.y}`;
+        const body = figma.createRectangle();
+        body.resize(size * 0.6, size * 0.3);
+        body.x = size * 0.2;
+        body.y = size * 0.55;
+        body.topLeftRadius = size * 0.3;
+        body.topRightRadius = size * 0.3;
+        body.fills = [];
+        body.strokes = [{ type: 'SOLID', color: color }];
+        body.strokeWeight = 1.5;
+        frame.appendChild(body);
+    } else {
+        // Activity/default - simple chart icon
+        const line1 = figma.createRectangle();
+        line1.resize(size * 0.15, size * 0.5);
+        line1.x = size * 0.15;
+        line1.y = size * 0.4;
+        line1.cornerRadius = 1;
+        line1.fills = [{ type: 'SOLID', color: color }];
+        frame.appendChild(line1);
+        
+        const line2 = figma.createRectangle();
+        line2.resize(size * 0.15, size * 0.7);
+        line2.x = size * 0.42;
+        line2.y = size * 0.2;
+        line2.cornerRadius = 1;
+        line2.fills = [{ type: 'SOLID', color: color }];
+        frame.appendChild(line2);
+        
+        const line3 = figma.createRectangle();
+        line3.resize(size * 0.15, size * 0.4);
+        line3.x = size * 0.7;
+        line3.y = size * 0.5;
+        line3.cornerRadius = 1;
+        line3.fills = [{ type: 'SOLID', color: color }];
+        frame.appendChild(line3);
     }
     
-    return { pathData, scaledPoints };
+    return frame;
 }
 
-// Create stat card with proper icons
+// Stat Card
 function createStatCard(props, primaryColor) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Stat Card - ${props.title}`;
+        card.name = 'Stat Card - ' + (props.title || 'Metric');
         card.resize(280, 140);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
-        card.effects = [{
-            type: 'DROP_SHADOW',
-            color: { r: 0, g: 0, b: 0, a: 0.05 },
-            offset: { x: 0, y: 1 },
-            radius: 3,
-            spread: 0,
-            visible: true,
-            blendMode: 'NORMAL'
-        }];
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'SemiBold' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
         
         // Title
         const title = figma.createText();
@@ -181,8 +158,7 @@ function createStatCard(props, primaryColor) {
         card.appendChild(title);
         
         // Icon
-        const iconColor = { r: 0.6, g: 0.6, b: 0.6 };
-        const icon = yield createIconVector(props.icon || 'activity', 20, iconColor);
+        const icon = createIcon(props.icon || 'activity', 20, { r: 0.6, g: 0.6, b: 0.6 });
         icon.x = 236;
         icon.y = 18;
         card.appendChild(icon);
@@ -192,81 +168,67 @@ function createStatCard(props, primaryColor) {
         value.characters = props.value || '$0';
         value.fontSize = 30;
         value.fontName = { family: 'Inter', style: 'Bold' };
-        value.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        value.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         value.x = 24;
-        value.y = 48;
+        value.y = 50;
         card.appendChild(value);
         
-        // Change indicator
+        // Change
         const isPositive = props.changeType === 'positive';
         const changeColor = isPositive 
-            ? { r: 0.133, g: 0.545, b: 0.133 }
-            : { r: 0.863, g: 0.078, b: 0.235 };
+            ? { r: 0.13, g: 0.55, b: 0.13 }
+            : { r: 0.86, g: 0.08, b: 0.24 };
         
-        // Trend icon
-        const trendIcon = figma.createVector();
-        if (isPositive) {
-            trendIcon.vectorPaths = [{
-                windingRule: "NONZERO",
-                data: "M1 8L5.5 3.5L8 6L12 2M12 2L9 2M12 2L12 5"
-            }];
-        } else {
-            trendIcon.vectorPaths = [{
-                windingRule: "NONZERO",
-                data: "M1 2L5.5 6.5L8 4L12 8M12 8L9 8M12 8L12 5"
-            }];
-        }
-        trendIcon.strokes = [{ type: 'SOLID', color: changeColor }];
-        trendIcon.strokeWeight = 1.5;
-        trendIcon.strokeCap = "ROUND";
-        trendIcon.strokeJoin = "ROUND";
-        trendIcon.fills = [];
-        trendIcon.resize(12, 10);
-        trendIcon.x = 24;
-        trendIcon.y = 102;
-        card.appendChild(trendIcon);
+        const arrow = figma.createText();
+        arrow.characters = isPositive ? '↗' : '↘';
+        arrow.fontSize = 14;
+        arrow.fontName = { family: 'Inter', style: 'Medium' };
+        arrow.fills = [{ type: 'SOLID', color: changeColor }];
+        arrow.x = 24;
+        arrow.y = 98;
+        card.appendChild(arrow);
         
         const change = figma.createText();
-        change.characters = `${props.change || '+0%'} from last month`;
+        change.characters = (props.change || '+0%') + ' from last month';
         change.fontSize = 12;
         change.fontName = { family: 'Inter', style: 'Regular' };
         change.fills = [{ type: 'SOLID', color: changeColor }];
-        change.x = 40;
-        change.y = 98;
+        change.x = 42;
+        change.y = 100;
         card.appendChild(change);
         
         return card;
     });
 }
 
-// Create mini stat card
+// Mini Stat Card
 function createMiniStatCard(props) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Mini Stat - ${props.label}`;
+        card.name = 'Mini Stat - ' + (props.label || 'Label');
         card.resize(280, 120);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
         
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
-        
         const colorMap = {
-            blue: { bg: { r: 0.92, g: 0.95, b: 1 }, text: { r: 0.231, g: 0.510, b: 0.965 } },
-            green: { bg: { r: 0.92, g: 0.98, b: 0.95 }, text: { r: 0.063, g: 0.725, b: 0.506 } },
-            red: { bg: { r: 1, g: 0.93, b: 0.93 }, text: { r: 0.863, g: 0.078, b: 0.235 } },
-            purple: { bg: { r: 0.95, g: 0.93, b: 1 }, text: { r: 0.545, g: 0.361, b: 0.965 } },
-            orange: { bg: { r: 1, g: 0.96, b: 0.92 }, text: { r: 0.961, g: 0.620, b: 0.357 } },
+            blue: { bg: { r: 0.92, g: 0.95, b: 1 }, text: { r: 0.23, g: 0.51, b: 0.97 } },
+            green: { bg: { r: 0.92, g: 0.98, b: 0.95 }, text: { r: 0.06, g: 0.73, b: 0.51 } },
+            red: { bg: { r: 1, g: 0.93, b: 0.93 }, text: { r: 0.86, g: 0.08, b: 0.24 } },
+            purple: { bg: { r: 0.95, g: 0.93, b: 1 }, text: { r: 0.55, g: 0.36, b: 0.97 } },
+            orange: { bg: { r: 1, g: 0.96, b: 0.92 }, text: { r: 0.96, g: 0.62, b: 0.36 } },
         };
         const colors = colorMap[props.color] || colorMap.blue;
         
         // Badge
         const badge = figma.createFrame();
-        badge.name = 'Badge';
         badge.cornerRadius = 4;
         badge.fills = [{ type: 'SOLID', color: colors.bg }];
+        badge.x = 24;
+        badge.y = 24;
         badge.layoutMode = 'HORIZONTAL';
         badge.paddingLeft = 10;
         badge.paddingRight = 10;
@@ -274,8 +236,6 @@ function createMiniStatCard(props) {
         badge.paddingBottom = 4;
         badge.primaryAxisSizingMode = 'AUTO';
         badge.counterAxisSizingMode = 'AUTO';
-        badge.x = 24;
-        badge.y = 24;
         
         const badgeText = figma.createText();
         badgeText.characters = props.label || 'Label';
@@ -290,7 +250,7 @@ function createMiniStatCard(props) {
         value.characters = props.value || '0';
         value.fontSize = 36;
         value.fontName = { family: 'Inter', style: 'Bold' };
-        value.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        value.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         value.x = 24;
         value.y = 60;
         card.appendChild(value);
@@ -299,27 +259,26 @@ function createMiniStatCard(props) {
     });
 }
 
-// Create line chart with smooth bezier curves
+// Line Chart
 function createLineChart(props, primaryColor) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Line Chart - ${props.title}`;
+        card.name = 'Line Chart - ' + (props.title || 'Chart');
         card.resize(580, 300);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
         card.clipsContent = true;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
         
         // Title
         const title = figma.createText();
         title.characters = props.title || 'Revenue Over Time';
         title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'SemiBold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        title.fontName = { family: 'Inter', style: 'Semi Bold' };
+        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         title.x = 24;
         title.y = 20;
         card.appendChild(title);
@@ -341,7 +300,6 @@ function createLineChart(props, primaryColor) {
             gridLine.y = yPos;
             gridLine.resize(chartWidth, 0);
             gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-            gridLine.strokeWeight = 1;
             gridLine.dashPattern = [4, 4];
             card.appendChild(gridLine);
             
@@ -355,24 +313,37 @@ function createLineChart(props, primaryColor) {
             card.appendChild(yLabel);
         }
         
-        // Create smooth line path
-        const { pathData, scaledPoints } = createLineChartPath(data, chartWidth, chartHeight, chartX, chartY, maxValue);
+        // Calculate points
+        const points = data.map((d, i) => ({
+            x: chartX + (chartWidth / (data.length - 1)) * i,
+            y: chartY + chartHeight - (d.value / maxValue) * chartHeight
+        }));
         
-        const line = figma.createVector();
-        line.vectorPaths = [{ windingRule: "NONZERO", data: pathData }];
-        line.strokes = [{ type: 'SOLID', color: primaryColor }];
-        line.strokeWeight = 2;
-        line.strokeCap = "ROUND";
-        line.strokeJoin = "ROUND";
-        line.fills = [];
-        card.appendChild(line);
+        // Draw line segments
+        for (let i = 0; i < points.length - 1; i++) {
+            const line = figma.createLine();
+            line.x = points[i].x;
+            line.y = points[i].y;
+            
+            const dx = points[i + 1].x - points[i].x;
+            const dy = points[i + 1].y - points[i].y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            line.resize(length, 0);
+            line.rotation = -angle;
+            line.strokes = [{ type: 'SOLID', color: primaryColor }];
+            line.strokeWeight = 2;
+            line.strokeCap = 'ROUND';
+            card.appendChild(line);
+        }
         
-        // Data points
-        for (let i = 0; i < scaledPoints.length; i++) {
+        // Data points and X labels
+        for (let i = 0; i < points.length; i++) {
             const point = figma.createEllipse();
             point.resize(8, 8);
-            point.x = scaledPoints[i].x - 4;
-            point.y = scaledPoints[i].y - 4;
+            point.x = points[i].x - 4;
+            point.y = points[i].y - 4;
             point.fills = [{ type: 'SOLID', color: primaryColor }];
             point.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
             point.strokeWeight = 2;
@@ -383,7 +354,7 @@ function createLineChart(props, primaryColor) {
             xLabel.fontSize = 11;
             xLabel.fontName = { family: 'Inter', style: 'Regular' };
             xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            xLabel.x = scaledPoints[i].x - 10;
+            xLabel.x = points[i].x - 10;
             xLabel.y = chartY + chartHeight + 10;
             card.appendChild(xLabel);
         }
@@ -392,26 +363,24 @@ function createLineChart(props, primaryColor) {
     });
 }
 
-// Create bar chart
+// Bar Chart
 function createBarChart(props, primaryColor) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Bar Chart - ${props.title}`;
+        card.name = 'Bar Chart - ' + (props.title || 'Chart');
         card.resize(580, 300);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'SemiBold' });
         
         const title = figma.createText();
         title.characters = props.title || 'Sales by Day';
         title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'SemiBold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        title.fontName = { family: 'Inter', style: 'Semi Bold' };
+        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         title.x = 24;
         title.y = 20;
         card.appendChild(title);
@@ -423,7 +392,7 @@ function createBarChart(props, primaryColor) {
         const data = barChartData;
         const maxValue = 200;
         
-        // Grid and Y-axis
+        // Grid
         const gridValues = [0, 50, 100, 150, 200];
         for (let i = 0; i < gridValues.length; i++) {
             const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
@@ -461,8 +430,6 @@ function createBarChart(props, primaryColor) {
             bar.resize(barWidth, barHeight);
             bar.topLeftRadius = 4;
             bar.topRightRadius = 4;
-            bar.bottomLeftRadius = 0;
-            bar.bottomRightRadius = 0;
             bar.fills = [{ type: 'SOLID', color: primaryColor }];
             card.appendChild(bar);
             
@@ -476,6 +443,7 @@ function createBarChart(props, primaryColor) {
             valueLabel.y = barY - 18;
             card.appendChild(valueLabel);
             
+            // X label
             const xLabel = figma.createText();
             xLabel.characters = data[i].name;
             xLabel.fontSize = 11;
@@ -490,26 +458,24 @@ function createBarChart(props, primaryColor) {
     });
 }
 
-// Create donut/pie chart with proper segments
+// Pie Chart
 function createPieChart(props, primaryColor) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Pie Chart - ${props.title}`;
+        card.name = 'Pie Chart - ' + (props.title || 'Chart');
         card.resize(580, 300);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'SemiBold' });
         
         const title = figma.createText();
         title.characters = props.title || 'Traffic by Device';
         title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'SemiBold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        title.fontName = { family: 'Inter', style: 'Semi Bold' };
+        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         title.x = 24;
         title.y = 20;
         card.appendChild(title);
@@ -564,7 +530,7 @@ function createPieChart(props, primaryColor) {
             
             const pct = ((data[i].value / total) * 100).toFixed(0);
             const pctText = figma.createText();
-            pctText.characters = `${pct}%`;
+            pctText.characters = pct + '%';
             pctText.fontSize = 12;
             pctText.fontName = { family: 'Inter', style: 'Regular' };
             pctText.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
@@ -577,26 +543,127 @@ function createPieChart(props, primaryColor) {
     });
 }
 
-// Create data table with status badges
+// Area Chart
+function createAreaChart(props, primaryColor) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
+        const card = figma.createFrame();
+        card.name = 'Area Chart - ' + (props.title || 'Chart');
+        card.resize(580, 300);
+        card.cornerRadius = 12;
+        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
+        card.strokeWeight = 1;
+        card.clipsContent = true;
+        
+        const title = figma.createText();
+        title.characters = props.title || 'Traffic Overview';
+        title.fontSize = 16;
+        title.fontName = { family: 'Inter', style: 'Semi Bold' };
+        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
+        title.x = 24;
+        title.y = 20;
+        card.appendChild(title);
+        
+        const chartX = 55;
+        const chartY = 55;
+        const chartWidth = 490;
+        const chartHeight = 180;
+        const data = lineChartData;
+        const maxValue = 6000;
+        
+        // Grid
+        const gridValues = [0, 1500, 3000, 4500, 6000];
+        for (let i = 0; i < gridValues.length; i++) {
+            const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
+            
+            const gridLine = figma.createLine();
+            gridLine.x = chartX;
+            gridLine.y = yPos;
+            gridLine.resize(chartWidth, 0);
+            gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
+            gridLine.dashPattern = [4, 4];
+            card.appendChild(gridLine);
+            
+            const yLabel = figma.createText();
+            yLabel.characters = (gridValues[i] / 1000).toFixed(0) + 'k';
+            yLabel.fontSize = 11;
+            yLabel.fontName = { family: 'Inter', style: 'Regular' };
+            yLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
+            yLabel.x = 20;
+            yLabel.y = yPos - 6;
+            card.appendChild(yLabel);
+        }
+        
+        const points = data.map((d, i) => ({
+            x: chartX + (chartWidth / (data.length - 1)) * i,
+            y: chartY + chartHeight - (d.value / maxValue) * chartHeight
+        }));
+        
+        // Area fill (simplified)
+        for (let i = 0; i < points.length - 1; i++) {
+            const rect = figma.createRectangle();
+            const minY = Math.min(points[i].y, points[i + 1].y);
+            rect.x = points[i].x;
+            rect.y = minY;
+            rect.resize(points[i + 1].x - points[i].x, chartY + chartHeight - minY);
+            rect.fills = [{ type: 'SOLID', color: primaryColor, opacity: 0.15 }];
+            card.appendChild(rect);
+        }
+        
+        // Lines
+        for (let i = 0; i < points.length - 1; i++) {
+            const line = figma.createLine();
+            line.x = points[i].x;
+            line.y = points[i].y;
+            
+            const dx = points[i + 1].x - points[i].x;
+            const dy = points[i + 1].y - points[i].y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            line.resize(length, 0);
+            line.rotation = -angle;
+            line.strokes = [{ type: 'SOLID', color: primaryColor }];
+            line.strokeWeight = 2;
+            card.appendChild(line);
+        }
+        
+        // X labels
+        for (let i = 0; i < data.length; i++) {
+            const xLabel = figma.createText();
+            xLabel.characters = data[i].name;
+            xLabel.fontSize = 11;
+            xLabel.fontName = { family: 'Inter', style: 'Regular' };
+            xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
+            xLabel.x = points[i].x - 10;
+            xLabel.y = chartY + chartHeight + 10;
+            card.appendChild(xLabel);
+        }
+        
+        return card;
+    });
+}
+
+// Data Table
 function createDataTable(props) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const card = figma.createFrame();
-        card.name = `Table - ${props.title}`;
+        card.name = 'Table - ' + (props.title || 'Data');
         card.resize(580, 260);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
+        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
         card.strokeWeight = 1;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'SemiBold' });
         
         const title = figma.createText();
         title.characters = props.title || 'Recent Transactions';
         title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'SemiBold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        title.fontName = { family: 'Inter', style: 'Semi Bold' };
+        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         title.x = 24;
         title.y = 20;
         card.appendChild(title);
@@ -604,7 +671,6 @@ function createDataTable(props) {
         const colX = [24, 130, 310, 420];
         const headers = ['Name', 'Email', 'Amount', 'Status'];
         
-        // Header row
         for (let i = 0; i < headers.length; i++) {
             const h = figma.createText();
             h.characters = headers[i];
@@ -616,7 +682,6 @@ function createDataTable(props) {
             card.appendChild(h);
         }
         
-        // Divider
         const div = figma.createLine();
         div.x = 24;
         div.y = 80;
@@ -670,8 +735,8 @@ function createDataTable(props) {
             badge.fills = [{ 
                 type: 'SOLID', 
                 color: isCompleted 
-                    ? { r: 0.863, g: 0.969, b: 0.898 }
-                    : { r: 1, g: 0.949, b: 0.875 }
+                    ? { r: 0.86, g: 0.97, b: 0.9 }
+                    : { r: 1, g: 0.95, b: 0.88 }
             }];
             badge.layoutMode = 'HORIZONTAL';
             badge.paddingLeft = 10;
@@ -688,8 +753,8 @@ function createDataTable(props) {
             statusText.fills = [{ 
                 type: 'SOLID', 
                 color: isCompleted 
-                    ? { r: 0.133, g: 0.545, b: 0.267 }
-                    : { r: 0.8, g: 0.522, b: 0.133 }
+                    ? { r: 0.13, g: 0.55, b: 0.27 }
+                    : { r: 0.8, g: 0.52, b: 0.13 }
             }];
             badge.appendChild(statusText);
             card.appendChild(badge);
@@ -708,28 +773,26 @@ function createDataTable(props) {
     });
 }
 
-// Create alert card
+// Alert Card
 function createAlertCard(props) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield loadFonts();
+        
         const alertColors = {
-            info: { border: { r: 0.231, g: 0.510, b: 0.965 }, bg: { r: 0.949, g: 0.969, b: 1 } },
-            warning: { border: { r: 0.961, g: 0.620, b: 0.357 }, bg: { r: 1, g: 0.969, b: 0.941 } },
-            error: { border: { r: 0.863, g: 0.078, b: 0.235 }, bg: { r: 1, g: 0.949, b: 0.949 } },
-            success: { border: { r: 0.133, g: 0.545, b: 0.267 }, bg: { r: 0.941, g: 0.984, b: 0.953 } }
+            info: { border: { r: 0.23, g: 0.51, b: 0.97 }, bg: { r: 0.95, g: 0.97, b: 1 } },
+            warning: { border: { r: 0.96, g: 0.62, b: 0.36 }, bg: { r: 1, g: 0.97, b: 0.94 } },
+            error: { border: { r: 0.86, g: 0.08, b: 0.24 }, bg: { r: 1, g: 0.95, b: 0.95 } },
+            success: { border: { r: 0.13, g: 0.55, b: 0.27 }, bg: { r: 0.94, g: 0.98, b: 0.95 } }
         };
         const colors = alertColors[props.type] || alertColors.info;
         
         const card = figma.createFrame();
-        card.name = `Alert - ${props.title}`;
+        card.name = 'Alert - ' + (props.title || 'Alert');
         card.resize(280, 100);
         card.cornerRadius = 12;
         card.fills = [{ type: 'SOLID', color: colors.bg }];
         card.strokes = [{ type: 'SOLID', color: colors.border }];
         card.strokeWeight = 1;
-        card.strokeAlign = 'INSIDE';
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
         
         const title = figma.createText();
         title.characters = props.title || 'Alert';
@@ -753,113 +816,23 @@ function createAlertCard(props) {
     });
 }
 
-// Area chart (similar to line but with fill)
-function createAreaChart(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const card = figma.createFrame();
-        card.name = `Area Chart - ${props.title}`;
-        card.resize(580, 300);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.898, b: 0.898 } }];
-        card.strokeWeight = 1;
-        card.clipsContent = true;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'SemiBold' });
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Traffic Overview';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'SemiBold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const chartX = 55;
-        const chartY = 55;
-        const chartWidth = 490;
-        const chartHeight = 180;
-        const data = lineChartData;
-        const maxValue = 6000;
-        
-        // Grid
-        const gridValues = [0, 1500, 3000, 4500, 6000];
-        for (let i = 0; i < gridValues.length; i++) {
-            const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
-            
-            const gridLine = figma.createLine();
-            gridLine.x = chartX;
-            gridLine.y = yPos;
-            gridLine.resize(chartWidth, 0);
-            gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-            gridLine.dashPattern = [4, 4];
-            card.appendChild(gridLine);
-            
-            const yLabel = figma.createText();
-            yLabel.characters = (gridValues[i] / 1000).toFixed(0) + 'k';
-            yLabel.fontSize = 11;
-            yLabel.fontName = { family: 'Inter', style: 'Regular' };
-            yLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            yLabel.x = 20;
-            yLabel.y = yPos - 6;
-            card.appendChild(yLabel);
-        }
-        
-        const { pathData, scaledPoints } = createLineChartPath(data, chartWidth, chartHeight, chartX, chartY, maxValue);
-        
-        // Area fill
-        const areaPath = pathData + ` L ${scaledPoints[scaledPoints.length - 1].x} ${chartY + chartHeight} L ${scaledPoints[0].x} ${chartY + chartHeight} Z`;
-        const area = figma.createVector();
-        area.vectorPaths = [{ windingRule: "NONZERO", data: areaPath }];
-        area.fills = [{ type: 'SOLID', color: primaryColor, opacity: 0.15 }];
-        area.strokes = [];
-        card.appendChild(area);
-        
-        // Line
-        const line = figma.createVector();
-        line.vectorPaths = [{ windingRule: "NONZERO", data: pathData }];
-        line.strokes = [{ type: 'SOLID', color: primaryColor }];
-        line.strokeWeight = 2;
-        line.fills = [];
-        card.appendChild(line);
-        
-        // X-axis labels
-        for (let i = 0; i < scaledPoints.length; i++) {
-            const xLabel = figma.createText();
-            xLabel.characters = data[i].name;
-            xLabel.fontSize = 11;
-            xLabel.fontName = { family: 'Inter', style: 'Regular' };
-            xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            xLabel.x = scaledPoints[i].x - 10;
-            xLabel.y = chartY + chartHeight + 10;
-            card.appendChild(xLabel);
-        }
-        
-        return card;
-    });
-}
-
-// Main dashboard creation
+// Main create dashboard
 function createDashboard(data) {
     return __awaiter(this, void 0, void 0, function* () {
-        const primaryColor = hexToRgb(data.theme?.primaryColor || '#3b82f6');
+        yield loadFonts();
+        
+        const primaryColor = hexToRgb((data.theme && data.theme.primaryColor) || '#3b82f6');
         
         const dashboard = figma.createFrame();
         dashboard.name = data.name || 'Lookscout Dashboard';
         dashboard.resize(1280, 900);
-        dashboard.fills = [{ type: 'SOLID', color: { r: 0.976, g: 0.980, b: 0.984 } }];
+        dashboard.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
         dashboard.layoutMode = 'VERTICAL';
         dashboard.paddingLeft = 40;
         dashboard.paddingRight = 40;
         dashboard.paddingTop = 40;
         dashboard.paddingBottom = 40;
         dashboard.itemSpacing = 24;
-        
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
         
         // Header
         const header = figma.createFrame();
@@ -873,7 +846,7 @@ function createDashboard(data) {
         heading.characters = 'Dashboard';
         heading.fontSize = 30;
         heading.fontName = { family: 'Inter', style: 'Bold' };
-        heading.fills = [{ type: 'SOLID', color: { r: 0.09, g: 0.09, b: 0.09 } }];
+        heading.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
         header.appendChild(heading);
         
         const subheading = figma.createText();
@@ -898,31 +871,35 @@ function createDashboard(data) {
         for (const comp of data.components) {
             let node = null;
             
-            switch (comp.type) {
-                case 'stat-card':
-                    node = yield createStatCard(comp.props, primaryColor);
-                    break;
-                case 'stat-card-mini':
-                    node = yield createMiniStatCard(comp.props);
-                    break;
-                case 'line-chart':
-                    node = yield createLineChart(comp.props, primaryColor);
-                    break;
-                case 'area-chart':
-                    node = yield createAreaChart(comp.props, primaryColor);
-                    break;
-                case 'bar-chart':
-                    node = yield createBarChart(comp.props, primaryColor);
-                    break;
-                case 'pie-chart':
-                    node = yield createPieChart(comp.props, primaryColor);
-                    break;
-                case 'data-table':
-                    node = yield createDataTable(comp.props);
-                    break;
-                case 'alert-card':
-                    node = yield createAlertCard(comp.props);
-                    break;
+            try {
+                switch (comp.type) {
+                    case 'stat-card':
+                        node = yield createStatCard(comp.props, primaryColor);
+                        break;
+                    case 'stat-card-mini':
+                        node = yield createMiniStatCard(comp.props);
+                        break;
+                    case 'line-chart':
+                        node = yield createLineChart(comp.props, primaryColor);
+                        break;
+                    case 'area-chart':
+                        node = yield createAreaChart(comp.props, primaryColor);
+                        break;
+                    case 'bar-chart':
+                        node = yield createBarChart(comp.props, primaryColor);
+                        break;
+                    case 'pie-chart':
+                        node = yield createPieChart(comp.props, primaryColor);
+                        break;
+                    case 'data-table':
+                        node = yield createDataTable(comp.props);
+                        break;
+                    case 'alert-card':
+                        node = yield createAlertCard(comp.props);
+                        break;
+                }
+            } catch (e) {
+                console.error('Error creating component:', comp.type, e);
             }
             
             if (node) grid.appendChild(node);
@@ -936,19 +913,25 @@ function createDashboard(data) {
     });
 }
 
+// Plugin UI
 figma.showUI(__html__, { width: 400, height: 500 });
 
-figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
-    if (msg.type === 'import-dashboard') {
-        try {
-            const data = JSON.parse(msg.data);
-            yield createDashboard(data);
-            figma.ui.postMessage({ type: 'success', message: 'Dashboard imported!' });
-            figma.notify('Dashboard imported! 🎉');
-        } catch (error) {
-            figma.ui.postMessage({ type: 'error', message: `Error: ${error}` });
-            figma.notify('Failed to import', { error: true });
+figma.ui.onmessage = function(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (msg.type === 'import-dashboard') {
+            try {
+                const data = JSON.parse(msg.data);
+                yield createDashboard(data);
+                figma.ui.postMessage({ type: 'success', message: 'Dashboard imported!' });
+                figma.notify('Dashboard imported! 🎉');
+            } catch (error) {
+                console.error(error);
+                figma.ui.postMessage({ type: 'error', message: 'Error: ' + error.message });
+                figma.notify('Failed to import', { error: true });
+            }
         }
-    }
-    if (msg.type === 'cancel') figma.closePlugin();
-});
+        if (msg.type === 'cancel') {
+            figma.closePlugin();
+        }
+    });
+};
