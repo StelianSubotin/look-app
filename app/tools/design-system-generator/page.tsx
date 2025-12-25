@@ -459,7 +459,7 @@ ${designSystem.colors.neutral.map((c, i) => `- **Neutral ${i + 1}:** ${c}`).join
                   <Layers className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">No design system yet</h3>
                   <p className="text-muted-foreground">
-                    Fill in your brand information and click "Generate Design System" to get started
+                    Fill in your brand information and click &quot;Generate Design System&quot; to get started
                   </p>
                 </CardContent>
               </Card>

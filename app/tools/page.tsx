@@ -130,7 +130,7 @@ export default function ToolsHubPage() {
               <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-2">More Tools Coming Soon</h3>
               <p className="text-muted-foreground mb-4">
-                We're constantly adding new tools to help you design better. Stay tuned!
+                We&apos;re constantly adding new tools to help you design better. Stay tuned!
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {["Gradient Maker", "Icon Generator", "Typography Tester", "Color Blindness Simulator"].map((tool) => (

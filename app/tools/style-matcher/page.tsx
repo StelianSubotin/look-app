@@ -254,7 +254,7 @@ export default function StyleMatcherPage() {
             <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No matches yet</h3>
             <p className="text-muted-foreground">
-              Enter your brand color above and click "Find Matching Components" to get started
+              Enter your brand color above and click &quot;Find Matching Components&quot; to get started
             </p>
           </div>
         )}
