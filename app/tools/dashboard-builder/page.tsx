@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import {
   DndContext,
   closestCenter,
@@ -138,6 +139,7 @@ export default function DashboardBuilderPage() {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [showExport, setShowExport] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [copied, setCopied] = useState(false)
   const [sidebarTab, setSidebarTab] = useState<'components' | 'templates' | 'settings'>('components')
   const [promptInput, setPromptInput] = useState('')
@@ -445,6 +447,15 @@ export default function DashboardBuilderPage() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowPreview(true)}
+                disabled={components.length === 0}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setShowExport(!showExport)}>
                 <Code className="h-4 w-4 mr-2" />
                 {showExport ? 'Hide Code' : 'View Code'}
@@ -680,6 +691,66 @@ export default function DashboardBuilderPage() {
           </div>
         </div>
       </div>
+
+      {/* Full Screen Preview Modal */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            {/* Preview Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-background">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                </div>
+                <span className="text-sm font-medium">Dashboard Preview</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={copyCode}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Code
+                </Button>
+                <Button variant="outline" size="sm" onClick={downloadCode}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-auto bg-background p-8">
+              <div className="max-w-7xl mx-auto">
+                {/* Dashboard Header */}
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                  <p className="text-muted-foreground mt-1">
+                    Welcome back! Here&apos;s what&apos;s happening today.
+                  </p>
+                </div>
+
+                {/* Dashboard Grid */}
+                <div className="grid gap-4 grid-cols-4">
+                  {components.map((component) => {
+                    const isLargeComponent = ['line-chart', 'bar-chart', 'area-chart', 'data-table'].includes(component.type)
+                    return (
+                      <div
+                        key={component.id}
+                        className={isLargeComponent ? 'col-span-2' : ''}
+                      >
+                        {renderDashboardComponent(component)}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
