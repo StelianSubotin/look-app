@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { ProposalTemplate } from "@/components/proposal-template"
@@ -38,7 +38,19 @@ export default async function ProposalViewPage({
 }: { 
   params: { id: string } 
 }) {
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
 
   // Fetch proposal by share link
   const { data: proposal, error } = await supabase
