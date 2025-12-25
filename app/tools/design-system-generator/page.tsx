@@ -8,8 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Layers, Download, Sparkles, Check } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Layers, Download, Sparkles, Check, Copy, Code, FileJson, Palette } from "lucide-react"
 import { generateHarmoniousPalette, hexToHSL, hslToHex } from "@/lib/palette-generator"
+import { 
+  generateTailwindConfig, 
+  generateShadcnCSS, 
+  generateDesignTokens, 
+  generateReactTheme,
+  generateInstructions,
+  getRequiredDependencies
+} from "@/lib/design-system-export"
 
 interface DesignSystem {
   brand: {
@@ -51,6 +60,8 @@ export default function DesignSystemGeneratorPage() {
   const [primaryColor, setPrimaryColor] = useState("#3B82F6")
   const [generating, setGenerating] = useState(false)
   const [designSystem, setDesignSystem] = useState<DesignSystem | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState("preview")
 
   const fontPairings = [
     { heading: "Inter", body: "Inter" },
@@ -142,56 +153,63 @@ export default function DesignSystemGeneratorPage() {
     }, 2000)
   }
 
-  const exportSystem = () => {
-    if (!designSystem) return
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
-    const content = `# ${designSystem.brand.name} Design System
-
-## Brand
-- **Name:** ${designSystem.brand.name}
-- **Industry:** ${designSystem.brand.industry}
-${designSystem.brand.description ? `- **Description:** ${designSystem.brand.description}` : ''}
-
-## Colors
-
-### Primary Colors
-- **Primary:** ${designSystem.colors.primary}
-- **Secondary:** ${designSystem.colors.secondary}
-- **Accent:** ${designSystem.colors.accent}
-
-### Neutral Colors
-${designSystem.colors.neutral.map((c, i) => `- **Neutral ${i + 1}:** ${c}`).join('\n')}
-
-### Semantic Colors
-- **Success:** ${designSystem.colors.success}
-- **Warning:** ${designSystem.colors.warning}
-- **Error:** ${designSystem.colors.error}
-
-## Typography
-- **Heading Font:** ${designSystem.typography.headingFont}
-- **Body Font:** ${designSystem.typography.bodyFont}
-- **Type Scale:** ${designSystem.typography.scale.join('px, ')}px
-
-## Spacing
-- **Base Unit:** ${designSystem.spacing.base}px
-- **Scale:** ${designSystem.spacing.scale.join('px, ')}px
-
-## Border Radius
-- **Small:** ${designSystem.borderRadius.sm}
-- **Medium:** ${designSystem.borderRadius.md}
-- **Large:** ${designSystem.borderRadius.lg}
-- **Extra Large:** ${designSystem.borderRadius.xl}
-`
-
-    const blob = new Blob([content], { type: 'text/markdown' })
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${brandName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-design-system.md`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleExport = (format: string) => {
+    if (!designSystem) return
+
+    const brandSlug = brandName.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+    
+    switch(format) {
+      case 'tailwind':
+        downloadFile(
+          generateTailwindConfig(designSystem), 
+          `tailwind.config.js`, 
+          'text/javascript'
+        )
+        break
+      case 'shadcn':
+        downloadFile(
+          generateShadcnCSS(designSystem), 
+          `globals.css`, 
+          'text/css'
+        )
+        break
+      case 'tokens':
+        downloadFile(
+          generateDesignTokens(designSystem), 
+          `${brandSlug}-tokens.json`, 
+          'application/json'
+        )
+        break
+      case 'react':
+        downloadFile(
+          generateReactTheme(designSystem), 
+          `theme.ts`, 
+          'text/typescript'
+        )
+        break
+    }
   }
 
   return (
@@ -303,17 +321,191 @@ ${designSystem.colors.neutral.map((c, i) => `- **Neutral ${i + 1}:** ${c}`).join
           {/* Right Side - Output */}
           <div className="lg:col-span-3">
             {designSystem ? (
-              <div className="space-y-6">
-                {/* Export Button */}
-                <div className="flex justify-end">
-                  <Button onClick={exportSystem} className="gap-2">
-                    <Download className="h-4 w-4" />
-                    Export as Markdown
-                  </Button>
-                </div>
+              <Card className="overflow-hidden">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <div className="border-b">
+                    <div className="flex items-center justify-between px-6 pt-4">
+                      <TabsList className="h-9">
+                        <TabsTrigger value="preview" className="gap-2">
+                          <Palette className="h-3.5 w-3.5" />
+                          Preview
+                        </TabsTrigger>
+                        <TabsTrigger value="tailwind" className="gap-2">
+                          <Code className="h-3.5 w-3.5" />
+                          Tailwind
+                        </TabsTrigger>
+                        <TabsTrigger value="shadcn" className="gap-2">
+                          <Code className="h-3.5 w-3.5" />
+                          shadcn/ui
+                        </TabsTrigger>
+                        <TabsTrigger value="tokens" className="gap-2">
+                          <FileJson className="h-3.5 w-3.5" />
+                          Tokens
+                        </TabsTrigger>
+                        <TabsTrigger value="react" className="gap-2">
+                          <Code className="h-3.5 w-3.5" />
+                          React
+                        </TabsTrigger>
+                      </TabsList>
+                      {activeTab !== "preview" && (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const content = activeTab === 'tailwind' ? generateTailwindConfig(designSystem) :
+                                            activeTab === 'shadcn' ? generateShadcnCSS(designSystem) :
+                                            activeTab === 'tokens' ? generateDesignTokens(designSystem) :
+                                            activeTab === 'react' ? generateReactTheme(designSystem) : ''
+                              copyToClipboard(content)
+                            }}
+                            className="gap-2"
+                          >
+                            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            {copied ? 'Copied!' : 'Copy'}
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleExport(activeTab)}
+                            className="gap-2"
+                          >
+                            <Download className="h-4 w-4" />
+                            Download
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Colors */}
-                <Card>
+                  {/* Preview Tab */}
+                  <TabsContent value="preview" className="m-0 p-6">
+                    <div className="space-y-6">{/* Live Component Preview */}
+                      <Card className="bg-muted/30">
+                        <CardHeader>
+                          <CardTitle className="text-lg">Live Component Preview</CardTitle>
+                          <CardDescription>See your design system in action</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {/* Button Preview */}
+                          <div>
+                            <p className="text-sm font-medium mb-3">Buttons</p>
+                            <div className="flex flex-wrap gap-3">
+                              <button
+                                style={{ 
+                                  backgroundColor: designSystem.colors.primary,
+                                  color: 'white',
+                                  padding: '8px 16px',
+                                  borderRadius: designSystem.borderRadius.md,
+                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                }}
+                              >
+                                Primary Button
+                              </button>
+                              <button
+                                style={{ 
+                                  backgroundColor: designSystem.colors.secondary,
+                                  color: 'white',
+                                  padding: '8px 16px',
+                                  borderRadius: designSystem.borderRadius.md,
+                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                }}
+                              >
+                                Secondary
+                              </button>
+                              <button
+                                style={{ 
+                                  backgroundColor: designSystem.colors.accent,
+                                  color: 'white',
+                                  padding: '8px 16px',
+                                  borderRadius: designSystem.borderRadius.md,
+                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                }}
+                              >
+                                Accent
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Card Preview */}
+                          <div>
+                            <p className="text-sm font-medium mb-3">Card</p>
+                            <div 
+                              style={{
+                                backgroundColor: designSystem.colors.neutral[0],
+                                border: `1px solid ${designSystem.colors.neutral[2]}`,
+                                borderRadius: designSystem.borderRadius.lg,
+                                padding: designSystem.spacing.scale[5] + 'px'
+                              }}
+                            >
+                              <h3 
+                                style={{
+                                  fontFamily: designSystem.typography.headingFont,
+                                  fontSize: designSystem.typography.scale[4] + 'px',
+                                  marginBottom: designSystem.spacing.scale[2] + 'px',
+                                  color: designSystem.colors.neutral[5]
+                                }}
+                              >
+                                Card Title
+                              </h3>
+                              <p 
+                                style={{
+                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontSize: designSystem.typography.scale[2] + 'px',
+                                  color: designSystem.colors.neutral[4],
+                                  marginBottom: designSystem.spacing.scale[4] + 'px'
+                                }}
+                              >
+                                This is a preview of how a card component would look with your brand&apos;s design system applied.
+                              </p>
+                              <button
+                                style={{ 
+                                  backgroundColor: designSystem.colors.primary,
+                                  color: 'white',
+                                  padding: '6px 12px',
+                                  borderRadius: designSystem.borderRadius.sm,
+                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontSize: designSystem.typography.scale[1] + 'px'
+                                }}
+                              >
+                                Learn More
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Alert Badges */}
+                          <div>
+                            <p className="text-sm font-medium mb-3">Alerts & Badges</p>
+                            <div className="flex flex-wrap gap-3">
+                              {[
+                                { label: 'Success', color: designSystem.colors.success },
+                                { label: 'Warning', color: designSystem.colors.warning },
+                                { label: 'Error', color: designSystem.colors.error }
+                              ].map((item) => (
+                                <div
+                                  key={item.label}
+                                  style={{
+                                    backgroundColor: item.color + '15',
+                                    color: item.color,
+                                    padding: '4px 12px',
+                                    borderRadius: designSystem.borderRadius.sm,
+                                    fontSize: designSystem.typography.scale[1] + 'px',
+                                    fontFamily: designSystem.typography.bodyFont,
+                                    border: `1px solid ${item.color}40`
+                                  }}
+                                >
+                                  {item.label}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Colors */}
+                      <Card>
                   <CardHeader>
                     <CardTitle>Color Palette</CardTitle>
                   </CardHeader>
@@ -450,9 +642,158 @@ ${designSystem.colors.neutral.map((c, i) => `- **Neutral ${i + 1}:** ${c}`).join
                         ))}
                       </div>
                     </CardContent>
-                  </Card>
-                </div>
-              </div>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  {/* Tailwind Config Tab */}
+                  <TabsContent value="tailwind" className="m-0">
+                    <div className="grid md:grid-cols-2 h-[calc(100vh-280px)]">
+                      <div className="border-r">
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">Installation Instructions</h3>
+                          <p className="text-sm text-muted-foreground">Follow these steps to use your Tailwind config</p>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(100vh-360px)] prose prose-sm dark:prose-invert">
+                          <div dangerouslySetInnerHTML={{ 
+                            __html: generateInstructions('tailwind', brandName)
+                              .replace(/```bash\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/```css\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/```jsx\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>')
+                              .replace(/### /g, '<h3 class="text-base font-semibold mt-4 mb-2">')
+                              .replace(/## /g, '</h3><h2 class="text-lg font-bold mt-6 mb-3">')
+                              .replace(/# /g, '</h2><h1 class="text-xl font-bold mb-4">')
+                              .replace(/\n\n/g, '</p><p class="mb-3">')
+                              .replace(/^([^<])/gm, '<p class="mb-3">$1')
+                          }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="p-6 border-b bg-muted/30 flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold mb-1">tailwind.config.js</h3>
+                            <p className="text-sm text-muted-foreground">Your custom Tailwind configuration</p>
+                          </div>
+                        </div>
+                        <div className="relative">
+                          <pre className="p-6 overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto text-xs bg-slate-950 text-slate-50 dark:bg-slate-900">
+                            <code>{generateTailwindConfig(designSystem)}</code>
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* shadcn/ui CSS Tab */}
+                  <TabsContent value="shadcn" className="m-0">
+                    <div className="grid md:grid-cols-2 h-[calc(100vh-280px)]">
+                      <div className="border-r">
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">Installation Instructions</h3>
+                          <p className="text-sm text-muted-foreground">Follow these steps to use shadcn/ui with your brand</p>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(100vh-360px)] prose prose-sm dark:prose-invert">
+                          <div dangerouslySetInnerHTML={{ 
+                            __html: generateInstructions('shadcn', brandName)
+                              .replace(/```bash\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/```css\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/```jsx\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>')
+                              .replace(/### /g, '<h3 class="text-base font-semibold mt-4 mb-2">')
+                              .replace(/## /g, '</h3><h2 class="text-lg font-bold mt-6 mb-3">')
+                              .replace(/# /g, '</h2><h1 class="text-xl font-bold mb-4">')
+                              .replace(/\n\n/g, '</p><p class="mb-3">')
+                              .replace(/^([^<])/gm, '<p class="mb-3">$1')
+                          }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">globals.css</h3>
+                          <p className="text-sm text-muted-foreground">CSS variables for shadcn/ui</p>
+                        </div>
+                        <div className="relative">
+                          <pre className="p-6 overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto text-xs bg-slate-950 text-slate-50 dark:bg-slate-900">
+                            <code>{generateShadcnCSS(designSystem)}</code>
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* Design Tokens Tab */}
+                  <TabsContent value="tokens" className="m-0">
+                    <div className="grid md:grid-cols-2 h-[calc(100vh-280px)]">
+                      <div className="border-r">
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">Installation Instructions</h3>
+                          <p className="text-sm text-muted-foreground">How to use design tokens</p>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(100vh-360px)] prose prose-sm dark:prose-invert">
+                          <div dangerouslySetInnerHTML={{ 
+                            __html: generateInstructions('tokens', brandName)
+                              .replace(/```bash\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/```js\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>')
+                              .replace(/### /g, '<h3 class="text-base font-semibold mt-4 mb-2">')
+                              .replace(/## /g, '</h3><h2 class="text-lg font-bold mt-6 mb-3">')
+                              .replace(/# /g, '</h2><h1 class="text-xl font-bold mb-4">')
+                              .replace(/\n\n/g, '</p><p class="mb-3">')
+                              .replace(/^([^<])/gm, '<p class="mb-3">$1')
+                          }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">tokens.json</h3>
+                          <p className="text-sm text-muted-foreground">Design tokens in JSON format</p>
+                        </div>
+                        <div className="relative">
+                          <pre className="p-6 overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto text-xs bg-slate-950 text-slate-50 dark:bg-slate-900">
+                            <code>{generateDesignTokens(designSystem)}</code>
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* React Theme Tab */}
+                  <TabsContent value="react" className="m-0">
+                    <div className="grid md:grid-cols-2 h-[calc(100vh-280px)]">
+                      <div className="border-r">
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">Installation Instructions</h3>
+                          <p className="text-sm text-muted-foreground">How to use the React theme</p>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(100vh-360px)] prose prose-sm dark:prose-invert">
+                          <div dangerouslySetInnerHTML={{ 
+                            __html: generateInstructions('react', brandName)
+                              .replace(/```tsx\n([\s\S]*?)```/g, '<pre class="bg-muted p-3 rounded text-sm overflow-x-auto"><code>$1</code></pre>')
+                              .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>')
+                              .replace(/### /g, '<h3 class="text-base font-semibold mt-4 mb-2">')
+                              .replace(/## /g, '</h3><h2 class="text-lg font-bold mt-6 mb-3">')
+                              .replace(/# /g, '</h2><h1 class="text-xl font-bold mb-4">')
+                              .replace(/\n\n/g, '</p><p class="mb-3">')
+                              .replace(/^([^<])/gm, '<p class="mb-3">$1')
+                          }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="p-6 border-b bg-muted/30">
+                          <h3 className="font-semibold mb-1">theme.ts</h3>
+                          <p className="text-sm text-muted-foreground">React theme object</p>
+                        </div>
+                        <div className="relative">
+                          <pre className="p-6 overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto text-xs bg-slate-950 text-slate-50 dark:bg-slate-900">
+                            <code>{generateReactTheme(designSystem)}</code>
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </Card>
             ) : (
               <Card className="h-full flex items-center justify-center">
                 <CardContent className="text-center py-12">
