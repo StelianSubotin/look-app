@@ -1,15 +1,26 @@
 "use client"
 
-import { Tldraw } from '@tldraw/tldraw'
-import '@tldraw/tldraw/tldraw.css'
+import { Excalidraw } from '@excalidraw/excalidraw'
+import { useEffect, useState } from 'react'
 
-export default function TldrawWrapper() {
+export default function ExcalidrawWrapper() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="h-full flex items-center justify-center bg-gray-50">
+        <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-gray-600 rounded-full" />
+      </div>
+    )
+  }
+
   return (
-    <div style={{ position: 'absolute', inset: 0 }}>
-      <Tldraw 
-        persistenceKey="lookscout-mood-board"
-      />
+    <div style={{ height: '100%', width: '100%' }}>
+      <Excalidraw />
     </div>
   )
 }
-
