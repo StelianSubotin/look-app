@@ -93,7 +93,9 @@ export default function MoodBoardPage() {
 
     setSaving(true)
     try {
-      const snapshot = editorRef.current.store.getSnapshot()
+      // Get all records from the store
+      const allRecords = editorRef.current.store.allRecords()
+      const snapshot = { store: allRecords }
       const data = JSON.stringify(snapshot)
 
       if (currentBoardId) {
@@ -147,7 +149,18 @@ export default function MoodBoardPage() {
     if (!editorRef.current) return
     try {
       const snapshot = JSON.parse(board.data)
-      editorRef.current.store.loadSnapshot(snapshot)
+      // Clear current content and load new
+      if (snapshot && snapshot.store) {
+        editorRef.current.store.mergeRemoteChanges(() => {
+          // Clear existing shapes first
+          const currentIds = Array.from(editorRef.current.getCurrentPageShapeIds())
+          if (currentIds.length > 0) {
+            editorRef.current.deleteShapes(currentIds)
+          }
+          // Load new content
+          editorRef.current.store.put(snapshot.store)
+        })
+      }
       setBoardName(board.name)
       setCurrentBoardId(board.id)
       setShareLink(board.share_link)
