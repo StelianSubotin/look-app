@@ -40,37 +40,67 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Image is required" }, { status: 400 })
     }
 
-    // Prepare the image for OpenAI
-    const imageContent = imageUrl 
-      ? { type: "image_url", image_url: { url: imageUrl } }
-      : { type: "image_url", image_url: { url: `data:image/png;base64,${imageBase64}` } }
+    // Prepare the image for OpenAI Vision API
+    let imageUrlForApi: string
+    
+    if (imageUrl) {
+      imageUrlForApi = imageUrl
+    } else if (imageBase64) {
+      // Detect image type from base64 header or default to jpeg
+      const mimeType = imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png'
+      imageUrlForApi = `data:${mimeType};base64,${imageBase64}`
+    } else {
+      return NextResponse.json({ error: "No image provided" }, { status: 400 })
+    }
 
-    const systemPrompt = `You are an expert accessibility auditor specializing in WCAG 2.1 guidelines. Analyze the provided UI screenshot and identify accessibility issues.
+    const userPrompt = `Analyze this UI screenshot for accessibility issues based on WCAG 2.1 guidelines.
 
-For each issue found, provide:
-1. Type: contrast, touch-target, color-only, text-size, focus, or other
-2. Severity: critical, serious, moderate, or minor
-3. Title: Brief description
-4. Description: Detailed explanation
-5. WCAG Criteria: The specific WCAG guideline (e.g., "1.4.3 Contrast (Minimum)")
-6. Location: Where in the interface (e.g., "Header navigation", "CTA button")
-7. Suggestion: How to fix it
+Check for:
+- Color contrast issues (text vs background)
+- Touch target sizes (should be 44x44px minimum)
+- Color-only information (info should not rely on color alone)
+- Text size and readability
+- Focus indicators for keyboard navigation
 
-Also provide:
-- An overall accessibility score (0-100)
-- A summary of the main findings
-- Positive aspects of the design
+Return your analysis as JSON with this exact structure:
+{
+  "overallScore": <number 0-100>,
+  "issues": [
+    {
+      "type": "<contrast|touch-target|color-only|text-size|focus|other>",
+      "severity": "<critical|serious|moderate|minor>",
+      "title": "<brief title>",
+      "description": "<detailed explanation>",
+      "wcagCriteria": "<e.g. 1.4.3 Contrast>",
+      "location": "<where in the UI>",
+      "suggestion": "<how to fix>"
+    }
+  ],
+  "summary": "<overall summary>",
+  "positives": ["<good thing 1>", "<good thing 2>"]
+}`
 
-Focus on these WCAG criteria:
-- 1.4.3 Contrast (Minimum) - 4.5:1 for normal text, 3:1 for large text
-- 1.4.6 Contrast (Enhanced) - 7:1 for normal text, 4.5:1 for large text
-- 1.4.11 Non-text Contrast - 3:1 for UI components
-- 2.5.5 Target Size - 44x44px minimum for touch targets
-- 1.4.1 Use of Color - Information not conveyed by color alone
-- 1.4.4 Resize Text - Text should be readable at 200% zoom
-- 2.4.7 Focus Visible - Focus indicators should be visible
+    const requestBody = {
+      model: 'gpt-4o',
+      messages: [
+        { 
+          role: 'user', 
+          content: [
+            { type: 'text', text: userPrompt },
+            { 
+              type: 'image_url', 
+              image_url: { 
+                url: imageUrlForApi,
+                detail: 'high'
+              } 
+            }
+          ]
+        }
+      ],
+      max_tokens: 2000
+    }
 
-Be specific and actionable in your feedback. If you can't determine something from the screenshot, note it as uncertain.`
+    console.log('Sending request to OpenAI, image URL length:', imageUrlForApi.length)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -78,45 +108,56 @@ Be specific and actionable in your feedback. If you can't determine something fr
         'Authorization': `Bearer ${openaiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: [
-              { type: 'text', text: 'Analyze this UI for accessibility issues. Return your analysis as JSON with this structure: { "overallScore": number, "issues": [{ "type": string, "severity": string, "title": string, "description": string, "wcagCriteria": string, "location": string, "suggestion": string }], "summary": string, "positives": string[] }' },
-              imageContent
-            ]
-          }
-        ],
-        max_tokens: 2000,
-        response_format: { type: "json_object" }
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      console.error('OpenAI API error:', errorData)
-      return NextResponse.json({ 
-        error: `OpenAI API error: ${response.status}` 
-      }, { status: response.status })
+      const errorText = await response.text()
+      console.error('OpenAI API error response:', errorText)
+      
+      let errorMessage = `OpenAI API error: ${response.status}`
+      try {
+        const errorJson = JSON.parse(errorText)
+        if (errorJson.error?.message) {
+          errorMessage = errorJson.error.message
+        }
+      } catch {
+        // Keep default error message
+      }
+      
+      return NextResponse.json({ error: errorMessage }, { status: response.status })
     }
 
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content
 
     if (!content) {
+      console.error('No content in OpenAI response:', data)
       return NextResponse.json({ error: "No response from AI" }, { status: 500 })
     }
 
-    // Parse the JSON response
+    console.log('OpenAI response received, length:', content.length)
+
+    // Parse the JSON response - handle markdown code blocks if present
     let analysis: AnalysisResult
     try {
-      analysis = JSON.parse(content)
-    } catch {
+      // Remove markdown code blocks if present
+      let jsonContent = content.trim()
+      if (jsonContent.startsWith('```json')) {
+        jsonContent = jsonContent.slice(7)
+      } else if (jsonContent.startsWith('```')) {
+        jsonContent = jsonContent.slice(3)
+      }
+      if (jsonContent.endsWith('```')) {
+        jsonContent = jsonContent.slice(0, -3)
+      }
+      jsonContent = jsonContent.trim()
+      
+      analysis = JSON.parse(jsonContent)
+    } catch (parseError) {
       console.error('Failed to parse AI response:', content)
-      return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 })
+      console.error('Parse error:', parseError)
+      return NextResponse.json({ error: "Failed to parse AI response. Please try again." }, { status: 500 })
     }
 
     return NextResponse.json(analysis)
