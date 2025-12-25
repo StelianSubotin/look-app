@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import * as htmlToImage from "html-to-image"
 import {
   DndContext,
   closestCenter,
@@ -51,6 +53,10 @@ import {
   Wand2,
   X,
   Check,
+  Image,
+  FileImage,
+  ChevronDown,
+  Figma,
 } from "lucide-react"
 
 // Sortable component wrapper
@@ -144,6 +150,10 @@ export default function DashboardBuilderPage() {
   const [sidebarTab, setSidebarTab] = useState<'components' | 'templates' | 'settings'>('components')
   const [promptInput, setPromptInput] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Ref for the preview content to export
+  const previewRef = useRef<HTMLDivElement>(null)
 
   // Theme settings
   const [theme, setTheme] = useState({
@@ -294,6 +304,64 @@ export default function DashboardBuilderPage() {
     a.click()
     URL.revokeObjectURL(url)
   }, [components])
+
+  // Export as PNG (for Figma)
+  const exportAsPNG = useCallback(async () => {
+    if (!previewRef.current) {
+      // If preview is not open, open it first
+      setShowPreview(true)
+      // Wait for the preview to render
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    
+    const element = previewRef.current
+    if (!element) return
+
+    setIsExporting(true)
+    try {
+      const dataUrl = await htmlToImage.toPng(element, {
+        quality: 1,
+        pixelRatio: 2, // High resolution for Figma
+        backgroundColor: '#ffffff',
+      })
+      
+      const link = document.createElement('a')
+      link.download = 'dashboard.png'
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error('Error exporting PNG:', error)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [])
+
+  // Export as SVG (for Figma - vector format)
+  const exportAsSVG = useCallback(async () => {
+    if (!previewRef.current) {
+      setShowPreview(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    
+    const element = previewRef.current
+    if (!element) return
+
+    setIsExporting(true)
+    try {
+      const dataUrl = await htmlToImage.toSvg(element, {
+        backgroundColor: '#ffffff',
+      })
+      
+      const link = document.createElement('a')
+      link.download = 'dashboard.svg'
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error('Error exporting SVG:', error)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -464,10 +532,46 @@ export default function DashboardBuilderPage() {
                 {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
                 {copied ? 'Copied!' : 'Copy'}
               </Button>
-              <Button size="sm" onClick={downloadCode}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+              
+              {/* Export Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" disabled={components.length === 0 || isExporting}>
+                    {isExporting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={downloadCode}>
+                    <Code className="h-4 w-4 mr-2" />
+                    React Code (.tsx)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={exportAsPNG}>
+                    <Image className="h-4 w-4 mr-2" />
+                    PNG Image (2x)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportAsSVG}>
+                    <FileImage className="h-4 w-4 mr-2" />
+                    SVG Vector
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                    <Figma className="h-3 w-3 inline mr-1" />
+                    Drag PNG/SVG into Figma
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -710,10 +814,36 @@ export default function DashboardBuilderPage() {
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Code
               </Button>
-              <Button variant="outline" size="sm" onClick={downloadCode}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isExporting}>
+                    {isExporting ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={downloadCode}>
+                    <Code className="h-4 w-4 mr-2" />
+                    React Code
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={exportAsPNG}>
+                    <Image className="h-4 w-4 mr-2" />
+                    PNG for Figma
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportAsSVG}>
+                    <FileImage className="h-4 w-4 mr-2" />
+                    SVG for Figma
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>
                 <X className="h-4 w-4" />
               </Button>
@@ -722,12 +852,12 @@ export default function DashboardBuilderPage() {
 
           {/* Preview Content - Scrollable */}
           <div className="flex-1 min-h-0 overflow-y-auto bg-background">
-            <div className="p-8">
+            <div ref={previewRef} className="p-8 bg-white">
               <div className="max-w-7xl mx-auto">
                 {/* Dashboard Header */}
                 <div className="mb-8">
-                  <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                  <p className="text-muted-foreground mt-1">
+                  <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+                  <p className="text-gray-500 mt-1">
                     Welcome back! Here&apos;s what&apos;s happening today.
                   </p>
                 </div>
