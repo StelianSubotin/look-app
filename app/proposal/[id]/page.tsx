@@ -24,16 +24,27 @@ export default async function ProposalViewPage({
     }
   )
 
-  // Fetch proposal by share link
-  const { data: proposal, error } = await supabase
+  // Fetch proposal by share_link or vanity_slug
+  let { data: proposal, error } = await supabase
     .from('proposals')
     .select('*')
     .eq('share_link', params.id)
     .single()
 
+  // If not found by share_link, try vanity_slug
   if (error || !proposal) {
-    console.error('Proposal fetch error:', error)
-    notFound()
+    const { data: vanityProposal, error: vanityError } = await supabase
+      .from('proposals')
+      .select('*')
+      .eq('vanity_slug', params.id)
+      .single()
+    
+    if (vanityError || !vanityProposal) {
+      console.error('Proposal fetch error:', error || vanityError)
+      notFound()
+    }
+    
+    proposal = vanityProposal
   }
 
   // Check if proposal owner is a Pro user

@@ -53,6 +53,7 @@ export default function ProposalGeneratorPage() {
   // Additional Info
   const [aboutUs, setAboutUs] = useState("")
   const [termsConditions, setTermsConditions] = useState("")
+  const [vanitySlug, setVanitySlug] = useState("")
 
   const addDeliverable = () => {
     setDeliverables([...deliverables, { 
@@ -115,6 +116,7 @@ export default function ProposalGeneratorPage() {
           payment_terms: paymentTerms,
           about_us: aboutUs,
           terms_conditions: termsConditions,
+          vanity_slug: vanitySlug || null,
           status: 'draft'
         })
         .select()
@@ -122,8 +124,9 @@ export default function ProposalGeneratorPage() {
 
       if (error) throw error
 
-      // Generate shareable link
-      const shareLink = `${window.location.origin}/proposal/${data.share_link}`
+      // Generate shareable link (use vanity slug if set, otherwise default share_link)
+      const linkId = data.vanity_slug || data.share_link
+      const shareLink = `${window.location.origin}/proposal/${linkId}`
       setGeneratedLink(shareLink)
 
     } catch (error) {
@@ -385,6 +388,24 @@ export default function ProposalGeneratorPage() {
                     onChange={(e) => setTermsConditions(e.target.value)}
                     rows={3}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vanity-slug">Custom URL Slug (Optional)</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      /proposal/
+                    </span>
+                    <Input
+                      id="vanity-slug"
+                      placeholder="acme-rebrand-2024"
+                      value={vanitySlug}
+                      onChange={(e) => setVanitySlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      className="font-mono"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Create a memorable URL for your proposal. Leave empty for auto-generated link.
+                  </p>
                 </div>
               </CardContent>
             </Card>
