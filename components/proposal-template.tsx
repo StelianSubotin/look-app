@@ -1,8 +1,23 @@
 "use client"
 
-import { format } from "date-fns"
 import { CheckCircle2, Calendar, DollarSign, Mail, Building2 } from "lucide-react"
 import Image from "next/image"
+
+// Safe date formatter
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return 'TBD'
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return 'TBD'
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  } catch {
+    return 'TBD'
+  }
+}
 
 interface Deliverable {
   title: string
@@ -87,7 +102,7 @@ export function ProposalTemplate({ proposal, showWatermark }: ProposalTemplatePr
             )}
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              {format(new Date(proposal.created_at), 'MMMM d, yyyy')}
+              {formatDate(proposal.created_at)}
             </div>
           </div>
         </div>
@@ -150,18 +165,14 @@ export function ProposalTemplate({ proposal, showWatermark }: ProposalTemplatePr
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Start Date</p>
                   <p className="text-xl font-semibold">
-                    {proposal.timeline_start 
-                      ? format(new Date(proposal.timeline_start), 'MMMM d, yyyy')
-                      : 'TBD'}
+                    {formatDate(proposal.timeline_start)}
                   </p>
                 </div>
                 <div className="h-px flex-1 mx-8 bg-blue-300"></div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600 mb-1">End Date</p>
                   <p className="text-xl font-semibold">
-                    {proposal.timeline_end 
-                      ? format(new Date(proposal.timeline_end), 'MMMM d, yyyy')
-                      : 'TBD'}
+                    {formatDate(proposal.timeline_end)}
                   </p>
                 </div>
               </div>

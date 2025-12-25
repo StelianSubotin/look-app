@@ -1,44 +1,16 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
-import { ProposalTemplate } from "@/components/proposal-template"
-import { Button } from "@/components/ui/button"
-import { Download, Home } from "lucide-react"
-import Link from "next/link"
+import { ProposalView } from "./proposal-view"
 
-interface Deliverable {
-  title: string
-  description: string
-  timeline: string
-}
-
-interface ProposalData {
-  id: string
-  user_id: string
-  client_name: string
-  client_company: string | null
-  client_email: string | null
-  client_logo_url: string | null
-  project_title: string
-  project_description: string | null
-  project_goals: string[] | null
-  deliverables: Deliverable[]
-  timeline_start: string | null
-  timeline_end: string | null
-  total_price: number | null
-  payment_terms: string | null
-  about_us: string | null
-  terms_conditions: string | null
-  created_at: string
-  updated_at: string
-}
+export const dynamic = 'force-dynamic'
 
 export default async function ProposalViewPage({ 
   params 
 }: { 
   params: { id: string } 
 }) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,6 +32,7 @@ export default async function ProposalViewPage({
     .single()
 
   if (error || !proposal) {
+    console.error('Proposal fetch error:', error)
     notFound()
   }
 
@@ -72,48 +45,14 @@ export default async function ProposalViewPage({
 
   const isPro = profile?.subscription_tier === 'pro'
 
-  // Update viewed_at timestamp
+  // Update viewed_at timestamp (don't await, fire and forget)
   if (!proposal.viewed_at) {
-    await supabase
+    supabase
       .from('proposals')
       .update({ viewed_at: new Date().toISOString() })
       .eq('id', proposal.id)
+      .then(() => {})
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Bar */}
-      <div className="bg-white border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-            <Home className="h-4 w-4" />
-            Lookscout
-          </Link>
-          <div className="flex items-center gap-3">
-            {!isPro && (
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  Remove Watermark
-                </Button>
-              </Link>
-            )}
-            <Button 
-              size="sm" 
-              className="gap-2"
-              onClick={() => window.print()}
-            >
-              <Download className="h-4 w-4" />
-              Download PDF
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Proposal Content */}
-      <div className="py-8">
-        <ProposalTemplate proposal={proposal as ProposalData} showWatermark={!isPro} />
-      </div>
-    </div>
-  )
+  return <ProposalView proposal={proposal} isPro={isPro} />
 }
-
