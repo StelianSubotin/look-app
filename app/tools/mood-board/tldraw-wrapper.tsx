@@ -3,6 +3,9 @@
 import { Excalidraw } from '@excalidraw/excalidraw'
 import { useEffect, useState } from 'react'
 
+// Import Excalidraw styles
+import '@excalidraw/excalidraw/index.css'
+
 export default function ExcalidrawWrapper() {
   const [mounted, setMounted] = useState(false)
 
@@ -19,8 +22,17 @@ export default function ExcalidrawWrapper() {
   }
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <Excalidraw />
+    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <Excalidraw 
+        theme="light"
+        UIOptions={{
+          canvasActions: {
+            saveToActiveFile: false,
+            loadScene: false,
+            export: { saveFileToDisk: true },
+          },
+        }}
+      />
     </div>
   )
 }
