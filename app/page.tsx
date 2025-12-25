@@ -5,37 +5,31 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Grid3x3, Image as ImageIcon, Camera, Box, Music as MusicIcon, Sparkles } from "lucide-react"
+import { Search, Grid3x3, Sparkles, Wrench, Layers } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
 
-type ContentType = "components" | "illustrations" | "photos" | "3d-models" | "music" | "inspiration"
+type ContentType = "components" | "inspiration" | "tools" | "design-system"
 
 const contentTypes = [
   { id: "components", label: "Components", icon: Grid3x3 },
-  { id: "illustrations", label: "Illustrations", icon: ImageIcon },
-  { id: "photos", label: "Photos", icon: Camera },
-  { id: "3d-models", label: "3D Models", icon: Box },
-  { id: "music", label: "Music", icon: MusicIcon },
   { id: "inspiration", label: "Inspiration", icon: Sparkles },
+  { id: "tools", label: "Tools", icon: Wrench },
+  { id: "design-system", label: "Design System", icon: Layers },
 ] as const
 
 const getSuggestions = (type: ContentType) => {
   switch (type) {
     case "components":
       return ["All Components", "Hero", "Footer", "CTA", "Navbar"]
-    case "illustrations":
-      return ["All Illustrations", "Business", "People", "Nature", "Technology"]
-    case "photos":
-      return ["All Photos", "Business", "Nature", "Technology", "People"]
-    case "3d-models":
-      return ["All 3D Models", "Characters", "Objects", "Buildings", "Nature"]
-    case "music":
-      return ["All Music", "Background", "Upbeat", "Calm", "Electronic"]
     case "inspiration":
       return ["All Inspiration", "Landing Page", "Dashboard", "Hero Section", "Pricing Page"]
+    case "tools":
+      return ["Palette Generator", "Contrast Checker", "Color Picker", "Gradient Maker"]
+    case "design-system":
+      return ["Typography", "Colors", "Spacing", "Components", "Guidelines"]
     default:
       return ["All Components", "Hero", "Footer", "CTA", "Navbar"]
   }
@@ -105,16 +99,37 @@ export default function HubPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/browse/${selectedType}?search=${encodeURIComponent(searchQuery)}`)
+      if (selectedType === "tools") {
+        router.push("/tools/palette-generator")
+      } else if (selectedType === "design-system") {
+        alert("Design System coming soon!")
+      } else {
+        router.push(`/browse/${selectedType}?search=${encodeURIComponent(searchQuery)}`)
+      }
     }
   }
 
   const handleSuggestionClick = (suggestion: string, type: ContentType) => {
-    // If "All [Type]", just go to browse page without category filter
-    if (suggestion.startsWith("All ")) {
-      router.push(`/browse/${type}`)
+    // Handle different content types
+    if (type === "tools") {
+      // Navigate to specific tools
+      if (suggestion === "Palette Generator") {
+        router.push("/tools/palette-generator")
+      } else if (suggestion === "Contrast Checker") {
+        router.push("/tools/contrast-checker")
+      } else {
+        router.push("/tools/palette-generator") // Default to palette generator
+      }
+    } else if (type === "design-system") {
+      // Coming soon page - just stay on homepage for now
+      alert("Design System coming soon!")
     } else {
-      router.push(`/browse/${type}?category=${encodeURIComponent(suggestion)}`)
+      // For components and inspiration
+      if (suggestion.startsWith("All ")) {
+        router.push(`/browse/${type}`)
+      } else {
+        router.push(`/browse/${type}?category=${encodeURIComponent(suggestion)}`)
+      }
     }
   }
 
@@ -122,16 +137,12 @@ export default function HubPage() {
     switch (selectedType) {
       case "components":
         return "Search components..."
-      case "illustrations":
-        return "Search illustrations..."
-      case "photos":
-        return "Search photos..."
-      case "3d-models":
-        return "Search 3D models..."
-      case "music":
-        return "Search music..."
       case "inspiration":
         return "Search design inspiration..."
+      case "tools":
+        return "Search design tools..."
+      case "design-system":
+        return "Search design system..."
       default:
         return "Search..."
     }
