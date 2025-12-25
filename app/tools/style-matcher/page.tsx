@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Palette, Search, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-client"
-import { hexToHSL } from "@/lib/contrast-checker"
+import { hexToHSL } from "@/lib/palette-generator"
 import type { User } from "@supabase/supabase-js"
 
 interface Component {
