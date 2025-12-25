@@ -1,28 +1,23 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useCallback, useState } from 'react'
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Home, Download, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-// Dynamic import for tldraw
-const Tldraw = dynamic(
-  async () => {
-    const mod = await import('@tldraw/tldraw')
-    return mod.Tldraw
-  },
+// Dynamic import for tldraw wrapper
+const TldrawEditor = dynamic(
+  () => import('@/components/tldraw-editor').then(mod => mod.TldrawEditor),
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full flex items-center justify-center bg-muted">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="h-full flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
       </div>
     )
   }
 )
-
-import '@tldraw/tldraw/tldraw.css'
 
 interface Board {
   id: string
@@ -38,39 +33,23 @@ interface SharedBoardViewProps {
 }
 
 export function SharedBoardView({ board }: SharedBoardViewProps) {
-  const [editor, setEditor] = useState<any>(null)
+  const editorRef = useRef<any>(null)
 
-  const handleMount = useCallback((editorInstance: any) => {
-    setEditor(editorInstance)
-    
-    // Load the board data
-    try {
-      const snapshot = typeof board.data === 'string' 
-        ? JSON.parse(board.data) 
-        : board.data
-      
-      if (snapshot && Object.keys(snapshot).length > 0) {
-        editorInstance.store.loadSnapshot(snapshot)
-      }
-    } catch (error) {
-      console.error('Error loading board data:', error)
-    }
-
-    // Set to read-only mode
-    editorInstance.updateInstanceState({ isReadonly: true })
-  }, [board.data])
+  const handleMount = (editor: any) => {
+    editorRef.current = editor
+  }
 
   const exportPNG = async () => {
-    if (!editor) return
+    if (!editorRef.current) return
 
     try {
-      const shapeIds = editor.getCurrentPageShapeIds()
+      const shapeIds = editorRef.current.getCurrentPageShapeIds()
       if (shapeIds.size === 0) {
         alert('No content to export')
         return
       }
 
-      const blob = await editor.getSvg(Array.from(shapeIds))
+      const blob = await editorRef.current.getSvg(Array.from(shapeIds))
       if (blob) {
         const svgString = new XMLSerializer().serializeToString(blob)
         const canvas = document.createElement('canvas')
@@ -101,40 +80,41 @@ export function SharedBoardView({ board }: SharedBoardViewProps) {
     }
   }
 
+  // Parse board data for initial load
+  const initialData = typeof board.data === 'string' ? board.data : JSON.stringify(board.data)
+
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-white">
       {/* Header */}
-      <div className="h-14 border-b flex items-center justify-between px-4 bg-background z-10">
+      <div className="h-14 border-b flex items-center justify-between px-4 bg-white z-10 shrink-0">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
+          <Link href="/" className="flex items-center gap-2 text-sm font-medium hover:text-blue-600">
             <Home className="h-4 w-4" />
             Lookscout
           </Link>
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-gray-200" />
           <h1 className="font-medium">{board.name}</h1>
-          <span className="text-xs bg-muted px-2 py-1 rounded">View Only</span>
+          <span className="text-xs bg-gray-100 px-2 py-1 rounded">View Only</span>
         </div>
         
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={exportPNG}
-          >
+          <Button variant="outline" size="sm" onClick={exportPNG}>
             <Download className="h-4 w-4 mr-2" />
             Export PNG
           </Button>
           <Link href="/tools/mood-board">
-            <Button size="sm">
-              Create Your Own
-            </Button>
+            <Button size="sm">Create Your Own</Button>
           </Link>
         </div>
       </div>
 
       {/* Canvas (Read-only) */}
-      <div className="flex-1">
-        <Tldraw onMount={handleMount} />
+      <div className="flex-1 relative">
+        <TldrawEditor 
+          onMount={handleMount} 
+          readOnly={true}
+          initialData={initialData}
+        />
       </div>
     </div>
   )
