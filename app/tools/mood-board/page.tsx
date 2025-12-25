@@ -1,9 +1,8 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -26,6 +25,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+// Import tldraw styles
+import '@tldraw/tldraw/tldraw.css'
+
 // Dynamic import for tldraw to avoid SSR issues
 const Tldraw = dynamic(
   async () => {
@@ -42,9 +44,6 @@ const Tldraw = dynamic(
   }
 )
 
-// Import tldraw styles
-import '@tldraw/tldraw/tldraw.css'
-
 interface Board {
   id: string
   name: string
@@ -56,7 +55,7 @@ interface Board {
 
 export default function MoodBoardPage() {
   const router = useRouter()
-  const [editor, setEditor] = useState<any>(null)
+  const editorRef = useRef<any>(null)
   const [boardName, setBoardName] = useState('Untitled Board')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -68,27 +67,37 @@ export default function MoodBoardPage() {
   const [loadingBoards, setLoadingBoards] = useState(false)
   const [copied, setCopied] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [mounted, setMounted] = useState(false)
 
-  const supabase = createBrowserClient(
+  // Create supabase client once
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  ), [])
+
+  // Track mounted state
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   // Check auth on mount
   useEffect(() => {
+    if (!mounted) return
+    
     supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
+      if (mounted) setUser(user)
     })
-  }, [])
+  }, [mounted, supabase])
 
   // Handle editor mount
   const handleMount = useCallback((editorInstance: any) => {
-    setEditor(editorInstance)
+    editorRef.current = editorInstance
   }, [])
 
   // Save board
   const saveBoard = async () => {
-    if (!editor || !user) {
+    if (!editorRef.current || !user) {
       if (!user) {
         router.push('/login?redirect=/tools/mood-board')
       }
@@ -97,7 +106,7 @@ export default function MoodBoardPage() {
 
     setSaving(true)
     try {
-      const snapshot = editor.store.getSnapshot()
+      const snapshot = editorRef.current.store.getSnapshot()
       const data = JSON.stringify(snapshot)
 
       if (currentBoardId) {
@@ -162,11 +171,11 @@ export default function MoodBoardPage() {
 
   // Load a specific board
   const loadBoard = async (board: Board) => {
-    if (!editor) return
+    if (!editorRef.current) return
 
     try {
       const snapshot = JSON.parse(board.data)
-      editor.store.loadSnapshot(snapshot)
+      editorRef.current.store.loadSnapshot(snapshot)
       setBoardName(board.name)
       setCurrentBoardId(board.id)
       setShareLink(board.share_link)
@@ -179,8 +188,8 @@ export default function MoodBoardPage() {
 
   // Create new board
   const newBoard = () => {
-    if (editor) {
-      editor.store.clear()
+    if (editorRef.current) {
+      editorRef.current.store.clear()
     }
     setBoardName('Untitled Board')
     setCurrentBoardId(null)
@@ -189,16 +198,16 @@ export default function MoodBoardPage() {
 
   // Export as PNG
   const exportPNG = async () => {
-    if (!editor) return
+    if (!editorRef.current) return
 
     try {
-      const shapeIds = editor.getCurrentPageShapeIds()
+      const shapeIds = editorRef.current.getCurrentPageShapeIds()
       if (shapeIds.size === 0) {
         alert('Add some content to export!')
         return
       }
 
-      const blob = await editor.getSvg(Array.from(shapeIds))
+      const blob = await editorRef.current.getSvg(Array.from(shapeIds))
       if (blob) {
         // Convert SVG to PNG using canvas
         const svgString = new XMLSerializer().serializeToString(blob)
