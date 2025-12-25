@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -64,12 +64,49 @@ export default function DesignSystemGeneratorPage() {
   const [activeTab, setActiveTab] = useState("preview")
 
   const fontPairings = [
+    { heading: "Geist", body: "Geist" }, // Default
     { heading: "Inter", body: "Inter" },
     { heading: "Poppins", body: "Inter" },
     { heading: "Playfair Display", body: "Source Sans Pro" },
     { heading: "Montserrat", body: "Open Sans" },
     { heading: "Space Grotesk", body: "IBM Plex Sans" },
   ]
+
+  // Load Google Fonts dynamically
+  useEffect(() => {
+    if (!designSystem) return
+
+    const fonts = [
+      designSystem.typography.headingFont,
+      designSystem.typography.bodyFont
+    ]
+
+    // Remove duplicates
+    const uniqueFonts = [...new Set(fonts)]
+
+    // Load each font from Google Fonts or CDN
+    uniqueFonts.forEach(font => {
+      const linkId = `font-${font.replace(/ /g, '-')}`
+
+      // Check if already loaded
+      if (document.getElementById(linkId)) return
+
+      const link = document.createElement('link')
+      link.id = linkId
+      link.rel = 'stylesheet'
+
+      // Load Geist from Vercel CDN
+      if (font === 'Geist') {
+        link.href = 'https://cdn.jsdelivr.net/npm/geist@1.2.2/dist/font.css'
+      } else {
+        // Load from Google Fonts
+        const fontName = font.replace(/ /g, '+')
+        link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700;800;900&display=swap`
+      }
+
+      document.head.appendChild(link)
+    })
+  }, [designSystem])
 
   const generateSystem = () => {
     if (!brandName || !industry) {
@@ -104,16 +141,18 @@ export default function DesignSystemGeneratorPage() {
       const warning = "#F59E0B" // Amber
       const error = "#EF4444" // Red
 
-      // Select font pairing based on industry
-      let fontPair = fontPairings[0]
+      // Select font pairing based on industry (Geist is default for tech)
+      let fontPair = fontPairings[0] // Default: Geist
       if (industry.toLowerCase().includes("tech") || industry.toLowerCase().includes("software")) {
-        fontPair = fontPairings[1]
+        fontPair = fontPairings[0] // Geist for tech
+      } else if (industry.toLowerCase().includes("startup") || industry.toLowerCase().includes("saas")) {
+        fontPair = fontPairings[1] // Inter for startups
       } else if (industry.toLowerCase().includes("fashion") || industry.toLowerCase().includes("luxury")) {
-        fontPair = fontPairings[2]
+        fontPair = fontPairings[3] // Playfair Display for luxury
       } else if (industry.toLowerCase().includes("finance") || industry.toLowerCase().includes("professional")) {
-        fontPair = fontPairings[3]
+        fontPair = fontPairings[4] // Montserrat for professional
       } else if (industry.toLowerCase().includes("creative") || industry.toLowerCase().includes("design")) {
-        fontPair = fontPairings[4]
+        fontPair = fontPairings[5] // Space Grotesk for creative
       }
 
       const system: DesignSystem = {
@@ -323,26 +362,26 @@ export default function DesignSystemGeneratorPage() {
             {designSystem ? (
               <Card className="overflow-hidden">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <div className="border-b">
-                    <div className="flex items-center justify-between px-6 pt-4">
-                      <TabsList className="h-9">
-                        <TabsTrigger value="preview" className="gap-2">
+                  <div className="border-b bg-muted/30">
+                    <div className="flex items-center justify-between px-6 py-3">
+                      <TabsList className="h-10 bg-background">
+                        <TabsTrigger value="preview" className="gap-2 px-4">
                           <Palette className="h-3.5 w-3.5" />
                           Preview
                         </TabsTrigger>
-                        <TabsTrigger value="tailwind" className="gap-2">
+                        <TabsTrigger value="tailwind" className="gap-2 px-4">
                           <Code className="h-3.5 w-3.5" />
                           Tailwind
                         </TabsTrigger>
-                        <TabsTrigger value="shadcn" className="gap-2">
+                        <TabsTrigger value="shadcn" className="gap-2 px-4">
                           <Code className="h-3.5 w-3.5" />
                           shadcn/ui
                         </TabsTrigger>
-                        <TabsTrigger value="tokens" className="gap-2">
+                        <TabsTrigger value="tokens" className="gap-2 px-4">
                           <FileJson className="h-3.5 w-3.5" />
                           Tokens
                         </TabsTrigger>
-                        <TabsTrigger value="react" className="gap-2">
+                        <TabsTrigger value="react" className="gap-2 px-4">
                           <Code className="h-3.5 w-3.5" />
                           React
                         </TabsTrigger>
@@ -397,8 +436,11 @@ export default function DesignSystemGeneratorPage() {
                                   color: 'white',
                                   padding: '8px 16px',
                                   borderRadius: designSystem.borderRadius.md,
-                                  fontFamily: designSystem.typography.bodyFont,
-                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                  fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
+                                  fontSize: designSystem.typography.scale[2] + 'px',
+                                  fontWeight: 500,
+                                  border: 'none',
+                                  cursor: 'pointer'
                                 }}
                               >
                                 Primary Button
@@ -409,8 +451,11 @@ export default function DesignSystemGeneratorPage() {
                                   color: 'white',
                                   padding: '8px 16px',
                                   borderRadius: designSystem.borderRadius.md,
-                                  fontFamily: designSystem.typography.bodyFont,
-                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                  fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
+                                  fontSize: designSystem.typography.scale[2] + 'px',
+                                  fontWeight: 500,
+                                  border: 'none',
+                                  cursor: 'pointer'
                                 }}
                               >
                                 Secondary
@@ -421,8 +466,11 @@ export default function DesignSystemGeneratorPage() {
                                   color: 'white',
                                   padding: '8px 16px',
                                   borderRadius: designSystem.borderRadius.md,
-                                  fontFamily: designSystem.typography.bodyFont,
-                                  fontSize: designSystem.typography.scale[2] + 'px'
+                                  fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
+                                  fontSize: designSystem.typography.scale[2] + 'px',
+                                  fontWeight: 500,
+                                  border: 'none',
+                                  cursor: 'pointer'
                                 }}
                               >
                                 Accent
@@ -443,8 +491,9 @@ export default function DesignSystemGeneratorPage() {
                             >
                               <h3 
                                 style={{
-                                  fontFamily: designSystem.typography.headingFont,
+                                  fontFamily: `'${designSystem.typography.headingFont}', sans-serif`,
                                   fontSize: designSystem.typography.scale[4] + 'px',
+                                  fontWeight: 700,
                                   marginBottom: designSystem.spacing.scale[2] + 'px',
                                   color: designSystem.colors.neutral[5]
                                 }}
@@ -453,10 +502,11 @@ export default function DesignSystemGeneratorPage() {
                               </h3>
                               <p 
                                 style={{
-                                  fontFamily: designSystem.typography.bodyFont,
+                                  fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
                                   fontSize: designSystem.typography.scale[2] + 'px',
                                   color: designSystem.colors.neutral[4],
-                                  marginBottom: designSystem.spacing.scale[4] + 'px'
+                                  marginBottom: designSystem.spacing.scale[4] + 'px',
+                                  lineHeight: '1.5'
                                 }}
                               >
                                 This is a preview of how a card component would look with your brand&apos;s design system applied.
@@ -467,8 +517,11 @@ export default function DesignSystemGeneratorPage() {
                                   color: 'white',
                                   padding: '6px 12px',
                                   borderRadius: designSystem.borderRadius.sm,
-                                  fontFamily: designSystem.typography.bodyFont,
-                                  fontSize: designSystem.typography.scale[1] + 'px'
+                                  fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
+                                  fontSize: designSystem.typography.scale[1] + 'px',
+                                  fontWeight: 500,
+                                  border: 'none',
+                                  cursor: 'pointer'
                                 }}
                               >
                                 Learn More
@@ -493,7 +546,8 @@ export default function DesignSystemGeneratorPage() {
                                     padding: '4px 12px',
                                     borderRadius: designSystem.borderRadius.sm,
                                     fontSize: designSystem.typography.scale[1] + 'px',
-                                    fontFamily: designSystem.typography.bodyFont,
+                                    fontFamily: `'${designSystem.typography.bodyFont}', sans-serif`,
+                                    fontWeight: 500,
                                     border: `1px solid ${item.color}40`
                                   }}
                                 >
@@ -579,13 +633,13 @@ export default function DesignSystemGeneratorPage() {
                         <CardContent className="space-y-4">
                           <div>
                             <p className="text-sm text-muted-foreground mb-2">Heading Font</p>
-                            <p className="text-3xl font-bold" style={{ fontFamily: designSystem.typography.headingFont }}>
+                            <p className="text-3xl font-bold" style={{ fontFamily: `'${designSystem.typography.headingFont}', sans-serif` }}>
                               {designSystem.typography.headingFont}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground mb-2">Body Font</p>
-                            <p className="text-lg" style={{ fontFamily: designSystem.typography.bodyFont }}>
+                            <p className="text-lg" style={{ fontFamily: `'${designSystem.typography.bodyFont}', sans-serif` }}>
                               {designSystem.typography.bodyFont}
                             </p>
                           </div>
