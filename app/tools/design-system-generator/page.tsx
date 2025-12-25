@@ -379,7 +379,8 @@ export default function DesignSystemGeneratorPage() {
 
                   {/* Preview Tab */}
                   <TabsContent value="preview" className="m-0 p-6">
-                    <div className="space-y-6">{/* Live Component Preview */}
+                    <div className="space-y-6">
+                      {/* Live Component Preview */}
                       <Card className="bg-muted/30">
                         <CardHeader>
                           <CardTitle className="text-lg">Live Component Preview</CardTitle>
