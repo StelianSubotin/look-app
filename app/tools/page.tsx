@@ -3,9 +3,18 @@
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight } from "lucide-react"
+import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, FileText } from "lucide-react"
 
 const tools = [
+  {
+    id: "proposal-generator",
+    title: "Proposal Generator",
+    description: "Create professional client proposals with shareable links and PDF export. Impress your clients with beautiful, branded proposals.",
+    icon: FileText,
+    color: "bg-indigo-500",
+    href: "/tools/proposal-generator",
+    tags: ["New", "Business"]
+  },
   {
     id: "palette-generator",
     title: "Palette Generator",
