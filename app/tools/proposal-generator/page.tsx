@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { FileText, Plus, Trash2, Upload, Link as LinkIcon, Download, Sparkles } from "lucide-react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createBrowserClient } from "@supabase/ssr"
 
 interface Deliverable {
   id: string
@@ -20,7 +20,10 @@ interface Deliverable {
 
 export default function ProposalGeneratorPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   
   const [loading, setLoading] = useState(false)
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
