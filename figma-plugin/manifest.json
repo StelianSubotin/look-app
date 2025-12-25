@@ -9,9 +9,12 @@
   "editorType": ["figma"],
   "networkAccess": {
     "allowedDomains": [
-      "https://look-app-eight.vercel.app",
+      "https://look-app-eight.vercel.app"
+    ],
+    "devAllowedDomains": [
       "http://localhost:3000"
-    ]
+    ],
+    "reasoning": "Fetches dashboard data from Lookscout web app"
   }
 }
 
