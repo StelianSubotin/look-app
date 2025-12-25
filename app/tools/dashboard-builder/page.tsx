@@ -238,52 +238,47 @@ export default function DashboardBuilderPage() {
     }
   }
 
-  // Generate from prompt (mock AI)
+  // Generate from prompt using AI
   const generateFromPrompt = useCallback(async () => {
     if (!promptInput.trim()) return
     setIsGenerating(true)
 
-    // Simulate AI thinking
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const response = await fetch('/api/dashboard/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptInput }),
+      })
 
-    const prompt = promptInput.toLowerCase()
-    const generated: DashboardComponentConfig[] = []
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to generate dashboard')
+      }
 
-    // Simple rule-based generation
-    if (prompt.includes('sales') || prompt.includes('revenue') || prompt.includes('ecommerce')) {
-      generated.push(
-        { id: `stat-${Date.now()}-1`, type: 'stat-card', props: { title: 'Total Revenue', value: '$45,231', change: '+20.1%', changeType: 'positive', icon: 'dollar' } },
-        { id: `stat-${Date.now()}-2`, type: 'stat-card', props: { title: 'Orders', value: '2,350', change: '+15%', changeType: 'positive', icon: 'cart' } },
-        { id: `chart-${Date.now()}-1`, type: 'line-chart', props: { title: 'Revenue Over Time', color: theme.primaryColor } },
-        { id: `table-${Date.now()}-1`, type: 'data-table', props: { title: 'Recent Transactions' } }
-      )
-    } else if (prompt.includes('analytics') || prompt.includes('traffic') || prompt.includes('website')) {
-      generated.push(
-        { id: `stat-${Date.now()}-1`, type: 'stat-card-mini', props: { label: 'Page Views', value: '124,592', color: 'blue' } },
-        { id: `stat-${Date.now()}-2`, type: 'stat-card-mini', props: { label: 'Visitors', value: '45,201', color: 'green' } },
-        { id: `chart-${Date.now()}-1`, type: 'area-chart', props: { title: 'Traffic Overview', color: theme.primaryColor } },
-        { id: `pie-${Date.now()}-1`, type: 'pie-chart', props: { title: 'Traffic by Device' } }
-      )
-    } else if (prompt.includes('user') || prompt.includes('customer')) {
-      generated.push(
-        { id: `stat-${Date.now()}-1`, type: 'stat-card', props: { title: 'Total Users', value: '12,543', change: '+8.2%', changeType: 'positive', icon: 'users' } },
-        { id: `stat-${Date.now()}-2`, type: 'stat-card', props: { title: 'Active Today', value: '2,350', change: '+12%', changeType: 'positive', icon: 'activity' } },
-        { id: `chart-${Date.now()}-1`, type: 'bar-chart', props: { title: 'User Growth', color: theme.primaryColor } },
-        { id: `table-${Date.now()}-1`, type: 'data-table', props: { title: 'Recent Users' } }
-      )
-    } else {
-      // Default dashboard
-      generated.push(
-        { id: `stat-${Date.now()}-1`, type: 'stat-card', props: { title: 'Metric 1', value: '1,234', change: '+5%', changeType: 'positive', icon: 'activity' } },
-        { id: `stat-${Date.now()}-2`, type: 'stat-card', props: { title: 'Metric 2', value: '567', change: '+3%', changeType: 'positive', icon: 'users' } },
-        { id: `chart-${Date.now()}-1`, type: 'line-chart', props: { title: 'Performance', color: theme.primaryColor } }
-      )
+      const data = await response.json()
+      
+      // Apply the generated components
+      if (data.components && Array.isArray(data.components)) {
+        setComponents(data.components)
+      }
+      
+      // Apply theme if provided
+      if (data.theme) {
+        setTheme({
+          primaryColor: data.theme.primaryColor || theme.primaryColor,
+          radius: data.theme.borderRadius || theme.radius,
+          spacing: theme.spacing
+        })
+      }
+      
+      setPromptInput('')
+    } catch (error) {
+      console.error('Error generating dashboard:', error)
+      alert(error instanceof Error ? error.message : 'Failed to generate dashboard. Please try again.')
+    } finally {
+      setIsGenerating(false)
     }
-
-    setComponents(generated)
-    setIsGenerating(false)
-    setPromptInput('')
-  }, [promptInput, theme.primaryColor])
+  }, [promptInput, theme])
 
   // Copy code
   const copyCode = useCallback(() => {
