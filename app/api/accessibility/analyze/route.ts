@@ -21,13 +21,17 @@ interface AnalysisResult {
 
 export async function POST(request: NextRequest) {
   try {
-    const openaiKey = process.env.OPENAI_API_KEY
+    // Check for API key (try both common naming conventions)
+    const openaiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_KEY
 
     if (!openaiKey) {
+      console.error('OpenAI API key missing. Available env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI') || k.includes('API')))
       return NextResponse.json({ 
-        error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." 
+        error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your Vercel environment variables and redeploy." 
       }, { status: 500 })
     }
+
+    console.log('OpenAI key found, length:', openaiKey.length)
 
     const body = await request.json()
     const { imageBase64, imageUrl } = body
