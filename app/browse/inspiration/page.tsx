@@ -5,40 +5,38 @@ import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ExternalLink, Tag, Copy, Check, Download } from "lucide-react"
+import { Tag, ExternalLink } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
 
-interface Screenshot {
+interface Site {
   id: string
-  url: string
-  title: string
+  name: string
+  slug: string
   description?: string
-  category?: string
-  platform: "web" | "mobile"
+  logo_url?: string
+  website_url?: string
+  industry?: string
   style_tags?: string[]
-  image_url: string
+  screenshot_count: number
   access_level: "free" | "paid"
-  captured_at: string
+  featured: boolean
 }
 
 function InspirationBrowseContent() {
   const searchParams = useSearchParams()
-  const initialCategory = searchParams.get('category') || 'all'
+  const initialIndustry = searchParams.get('industry') || 'all'
 
-  const [screenshots, setScreenshots] = useState<Screenshot[]>([])
-  const [filteredScreenshots, setFilteredScreenshots] = useState<Screenshot[]>([])
+  const [sites, setSites] = useState<Site[]>([])
+  const [filteredSites, setFilteredSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [userPlan, setUserPlan] = useState<"free" | "paid">("free")
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
-  const [selectedPlatform, setSelectedPlatform] = useState<"web" | "mobile" | "all">("all")
-  const [selectedScreenshot, setSelectedScreenshot] = useState<Screenshot | null>(null)
-  const [copySuccess, setCopySuccess] = useState(false)
+  const [selectedIndustry, setSelectedIndustry] = useState<string>(initialIndustry)
 
   useEffect(() => {
     const supabase = createClient()
@@ -49,142 +47,78 @@ function InspirationBrowseContent() {
       const plan = isAdmin ? "paid" : (user?.user_metadata?.plan || "free")
       setUserPlan(plan as "free" | "paid")
     })
-    fetchScreenshots()
+    fetchSites()
   }, [])
 
   useEffect(() => {
-    const newCategory = searchParams.get('category') || 'all'
-    if (newCategory !== selectedCategory) {
-      setSelectedCategory(newCategory)
+    const newIndustry = searchParams.get('industry') || 'all'
+    if (newIndustry !== selectedIndustry) {
+      setSelectedIndustry(newIndustry)
     }
-  }, [searchParams])
+  }, [searchParams, selectedIndustry])
 
   useEffect(() => {
-    let filtered = screenshots
+    let filtered = sites
 
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(s => s.category === selectedCategory)
+    if (selectedIndustry !== "all") {
+      filtered = filtered.filter(s => s.industry === selectedIndustry)
     }
 
-    if (selectedPlatform !== "all") {
-      filtered = filtered.filter(s => s.platform === selectedPlatform)
-    }
+    setFilteredSites(filtered)
+  }, [sites, selectedIndustry])
 
-    setFilteredScreenshots(filtered)
-  }, [screenshots, selectedCategory, selectedPlatform])
-
-  const fetchScreenshots = async () => {
+  const fetchSites = async () => {
     try {
-      const response = await fetch('/api/screenshots')
+      const response = await fetch('/api/sites')
       if (response.ok) {
         const data = await response.json()
-        setScreenshots(data)
+        setSites(data)
         setError(null)
       } else {
         const errorData = await response.json().catch(() => ({}))
-        setError(errorData.error || `Failed to load inspiration (${response.status})`)
+        setError(errorData.error || `Failed to load sites (${response.status})`)
       }
     } catch (error) {
-      console.error("Failed to fetch screenshots:", error)
+      console.error("Failed to fetch sites:", error)
       setError("Failed to connect to server. Please check your connection and try again.")
     } finally {
       setLoading(false)
     }
   }
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(screenshots.map(s => s.category).filter(Boolean))) as string[]
-  }, [screenshots])
-
-  const openScreenshot = (screenshot: Screenshot) => {
-    // Check if user has access
-    if (screenshot.access_level === "paid" && userPlan === "free") {
-      // Show upgrade modal or redirect
-      alert("This is a Pro feature. Please upgrade to access premium inspiration.")
-      return
-    }
-    setSelectedScreenshot(screenshot)
-    setCopySuccess(false) // Reset copy status
-  }
-
-  const copyScreenshot = async () => {
-    if (!selectedScreenshot) return
-
-    try {
-      // Check if clipboard API is supported
-      if (!navigator.clipboard || !ClipboardItem) {
-        throw new Error('Clipboard API not supported')
-      }
-
-      // Fetch the image with cors mode
-      const response = await fetch(selectedScreenshot.image_url, {
-        mode: 'cors',
-        cache: 'no-cache'
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch image')
-      }
-
-      const blob = await response.blob()
-      
-      // Copy to clipboard
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob
-        })
-      ])
-      
-      setCopySuccess(true)
-      setTimeout(() => setCopySuccess(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy screenshot:', error)
-      // Show error message
-      alert('Could not copy to clipboard. Please use the Download button instead.')
-    }
-  }
-
-  const downloadScreenshot = () => {
-    if (!selectedScreenshot) return
-
-    // Create a temporary link and trigger download
-    const link = document.createElement('a')
-    link.href = selectedScreenshot.image_url
-    link.download = `${selectedScreenshot.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+  const industries = useMemo(() => {
+    return Array.from(new Set(sites.map(s => s.industry).filter(Boolean))) as string[]
+  }, [sites])
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex">
-        {/* Left Sidebar - Categories */}
+        {/* Left Sidebar - Industries */}
         <aside className="w-64 bg-white border-r border-border/50 min-h-[calc(100vh-4rem)] p-6 sticky top-16">
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Filter by Category</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Browse by Industry</h3>
             <button
-              onClick={() => setSelectedCategory("all")}
+              onClick={() => setSelectedIndustry("all")}
               className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
-                selectedCategory === "all"
+                selectedIndustry === "all"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted"
               }`}
             >
-              All Categories
+              All Industries
             </button>
-            {categories.map((category) => (
+            {industries.map((industry) => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
+                key={industry}
+                onClick={() => setSelectedIndustry(industry)}
                 className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
-                  selectedCategory === category
+                  selectedIndustry === industry
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted"
                 }`}
               >
-                {category}
+                {industry}
               </button>
             ))}
           </div>
@@ -192,35 +126,15 @@ function InspirationBrowseContent() {
 
         {/* Main Content */}
         <main className="flex-1">
-          {/* Top Filter Bar - Platform Tabs */}
-          <div className="bg-white border-b border-border/50 px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground mr-4">Platform:</span>
-              <Button
-                variant={selectedPlatform === "all" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("all")}
-              >
-                All
-              </Button>
-              <Button
-                variant={selectedPlatform === "web" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("web")}
-              >
-                Web
-              </Button>
-              <Button
-                variant={selectedPlatform === "mobile" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPlatform("mobile")}
-              >
-                Mobile
-              </Button>
-            </div>
+          {/* Header */}
+          <div className="bg-white border-b border-border/50 px-8 py-6">
+            <h1 className="text-3xl font-bold mb-2">Design Inspiration</h1>
+            <p className="text-muted-foreground">
+              Browse screenshots from {filteredSites.length} {filteredSites.length === 1 ? 'product' : 'products'}
+            </p>
           </div>
 
-          {/* Screenshots Grid */}
+          {/* Sites Grid */}
           <div className="bg-muted/30 p-8 min-h-[calc(100vh-4rem)]">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -228,8 +142,12 @@ function InspirationBrowseContent() {
                   <div key={i} className="overflow-hidden rounded-lg border border-border/50 bg-card">
                     <Skeleton className="aspect-video w-full" />
                     <div className="p-4 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-lg" />
+                        <Skeleton className="h-5 w-32" />
+                      </div>
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
                   </div>
                 ))}
@@ -238,13 +156,13 @@ function InspirationBrowseContent() {
               <div className="flex items-center justify-center py-20">
                 <div className="text-center max-w-md">
                   <div className="rounded-md bg-destructive/15 border border-destructive/50 p-6">
-                    <h3 className="font-semibold text-destructive mb-2">Error Loading Screenshots</h3>
+                    <h3 className="font-semibold text-destructive mb-2">Error Loading Sites</h3>
                     <p className="text-sm text-destructive/80 mb-4">{error}</p>
                     <button
                       onClick={() => {
                         setLoading(true)
                         setError(null)
-                        fetchScreenshots()
+                        fetchSites()
                       }}
                       className="text-sm text-primary hover:underline"
                     >
@@ -253,10 +171,10 @@ function InspirationBrowseContent() {
                   </div>
                 </div>
               </div>
-            ) : filteredScreenshots.length === 0 ? (
+            ) : filteredSites.length === 0 ? (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
-                  <p className="text-muted-foreground mb-2">No inspiration found.</p>
+                  <p className="text-muted-foreground mb-2">No sites found.</p>
                   <p className="text-sm text-muted-foreground">
                     Try adjusting your filters or check back later.
                   </p>
@@ -264,148 +182,100 @@ function InspirationBrowseContent() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredScreenshots.map((screenshot) => (
-                  <Card
-                    key={screenshot.id}
-                    className="overflow-hidden cursor-pointer hover:border-primary/50 transition-colors group"
-                    onClick={() => openScreenshot(screenshot)}
-                  >
-                    <div className="relative aspect-video bg-muted">
-                      <Image
-                        src={screenshot.image_url}
-                        alt={screenshot.title}
-                        fill
-                        className="object-cover object-top"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        loading="lazy"
-                        quality={75}
-                      />
-                      {screenshot.access_level === "paid" && userPlan === "free" && (
-                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">
-                          PRO
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
-                        {screenshot.title}
-                      </h3>
-                      {screenshot.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {screenshot.description}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between">
-                        {screenshot.category && (
-                          <span className="text-xs text-muted-foreground">
-                            {screenshot.category}
-                          </span>
+                {filteredSites.map((site) => (
+                  <Link key={site.id} href={`/browse/inspiration/${site.slug}`}>
+                    <Card className="overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group h-full">
+                      {/* Thumbnail - First screenshot or placeholder */}
+                      <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50">
+                        {/* We'll show the logo as a centered icon */}
+                        {site.logo_url && (
+                          <div className="absolute inset-0 flex items-center justify-center p-12">
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={site.logo_url}
+                                alt={site.name}
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                loading="lazy"
+                                quality={75}
+                              />
+                            </div>
+                          </div>
                         )}
-                        {screenshot.style_tags && screenshot.style_tags.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Tag className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              {screenshot.style_tags[0]}
+                        {site.access_level === "paid" && userPlan === "free" && (
+                          <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">
+                            PRO
+                          </div>
+                        )}
+                        {site.featured && (
+                          <div className="absolute top-3 left-3 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                            Featured
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="p-5">
+                        <div className="flex items-start gap-3 mb-3">
+                          {/* Small logo */}
+                          {site.logo_url && (
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border bg-white shrink-0">
+                              <Image
+                                src={site.logo_url}
+                                alt={site.name}
+                                fill
+                                className="object-contain p-1"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
+                              {site.name}
+                            </h3>
+                            {site.industry && (
+                              <p className="text-xs text-muted-foreground">{site.industry}</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {site.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {site.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">
+                            {site.screenshot_count} {site.screenshot_count === 1 ? 'screen' : 'screens'}
+                          </span>
+                          {site.style_tags && site.style_tags.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              <Tag className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {site.style_tags[0]}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {site.website_url && (
+                          <div className="mt-3 pt-3 border-t">
+                            <span className="inline-flex items-center gap-1 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                              View Screenshots
+                              <ExternalLink className="h-3 w-3" />
                             </span>
                           </div>
                         )}
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             )}
           </div>
         </main>
       </div>
-
-      {/* Screenshot Detail Modal */}
-      <Dialog open={!!selectedScreenshot} onOpenChange={() => setSelectedScreenshot(null)}>
-        <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] p-0 flex flex-col">
-          {selectedScreenshot && (
-            <>
-              {/* Header - Fixed */}
-              <div className="p-6 border-b border-border shrink-0">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2">{selectedScreenshot.title}</h2>
-                    {selectedScreenshot.description && (
-                      <p className="text-muted-foreground">{selectedScreenshot.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={copyScreenshot}
-                      className="gap-2"
-                    >
-                      {copySuccess ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          Copy
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={downloadScreenshot}
-                      className="gap-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </Button>
-                    <a
-                      href={selectedScreenshot.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                    >
-                      Visit Site
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {selectedScreenshot.category && (
-                    <span className="px-2 py-1 bg-muted rounded text-xs">
-                      {selectedScreenshot.category}
-                    </span>
-                  )}
-                  <span className="px-2 py-1 bg-muted rounded text-xs capitalize">
-                    {selectedScreenshot.platform}
-                  </span>
-                  {selectedScreenshot.style_tags?.map((tag) => (
-                    <span key={tag} className="px-2 py-1 bg-muted rounded text-xs">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Scrollable Screenshot - Takes remaining space */}
-              <div className="flex-1 overflow-y-auto bg-muted">
-                <div className="relative w-full min-h-full flex items-start justify-center p-3">
-                  <Image
-                    src={selectedScreenshot.image_url}
-                    alt={selectedScreenshot.title}
-                    width={1920}
-                    height={10000}
-                    className="w-full h-auto rounded shadow-lg"
-                    quality={90}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
@@ -423,4 +293,3 @@ export default function InspirationBrowsePage() {
     </Suspense>
   )
 }
-
