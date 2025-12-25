@@ -53,7 +53,7 @@ import {
   Wand2,
   X,
   Check,
-  Image,
+  Image as ImageIcon,
   FileImage,
   ChevronDown,
   Figma,
@@ -577,7 +577,7 @@ export default function DashboardBuilderPage() {
                     Copy for Figma Plugin
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsPNG}>
-                    <Image className="h-4 w-4 mr-2" />
+                    <ImageIcon className="h-4 w-4 mr-2" />
                     PNG Image (2x)
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsSVG}>
@@ -857,7 +857,7 @@ export default function DashboardBuilderPage() {
                     Copy for Figma Plugin
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsPNG}>
-                    <Image className="h-4 w-4 mr-2" />
+                    <ImageIcon className="h-4 w-4 mr-2" />
                     PNG Image
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportAsSVG}>
