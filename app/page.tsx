@@ -67,11 +67,11 @@ const categoryCards = [
     available: false,
   },
   {
-    id: "tools/contrast-checker",
+    id: "tools/palette-generator",
     title: "Tools",
     description: "Design tools for accessibility & workflows",
     image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
-    count: "New!",
+    count: "2 tools",
     available: true,
   },
 ]
