@@ -507,143 +507,144 @@ export default function DesignSystemGeneratorPage() {
 
                       {/* Colors */}
                       <Card>
-                  <CardHeader>
-                    <CardTitle>Color Palette</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Primary Colors */}
-                    <div>
-                      <h4 className="font-semibold mb-3">Primary Colors</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        {[
-                          { label: 'Primary', color: designSystem.colors.primary },
-                          { label: 'Secondary', color: designSystem.colors.secondary },
-                          { label: 'Accent', color: designSystem.colors.accent }
-                        ].map((item) => (
-                          <div key={item.label}>
-                            <div
-                              className="h-20 rounded-lg mb-2 border"
-                              style={{ backgroundColor: item.color }}
-                            />
-                            <p className="text-sm font-medium">{item.label}</p>
-                            <p className="text-xs text-muted-foreground font-mono">{item.color}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Neutrals */}
-                    <div>
-                      <h4 className="font-semibold mb-3">Neutral Colors</h4>
-                      <div className="grid grid-cols-6 gap-3">
-                        {designSystem.colors.neutral.map((color, i) => (
-                          <div key={i}>
-                            <div
-                              className="h-16 rounded-lg mb-2 border"
-                              style={{ backgroundColor: color }}
-                            />
-                            <p className="text-xs text-muted-foreground font-mono">{color}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Semantic */}
-                    <div>
-                      <h4 className="font-semibold mb-3">Semantic Colors</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        {[
-                          { label: 'Success', color: designSystem.colors.success },
-                          { label: 'Warning', color: designSystem.colors.warning },
-                          { label: 'Error', color: designSystem.colors.error }
-                        ].map((item) => (
-                          <div key={item.label}>
-                            <div
-                              className="h-16 rounded-lg mb-2 border"
-                              style={{ backgroundColor: item.color }}
-                            />
-                            <p className="text-sm font-medium">{item.label}</p>
-                            <p className="text-xs text-muted-foreground font-mono">{item.color}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Typography */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Typography</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Heading Font</p>
-                      <p className="text-3xl font-bold" style={{ fontFamily: designSystem.typography.headingFont }}>
-                        {designSystem.typography.headingFont}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Body Font</p>
-                      <p className="text-lg" style={{ fontFamily: designSystem.typography.bodyFont }}>
-                        {designSystem.typography.bodyFont}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Type Scale</p>
-                      <div className="flex flex-wrap gap-2">
-                        {designSystem.typography.scale.map((size) => (
-                          <span key={size} className="px-3 py-1 bg-muted rounded text-sm font-mono">
-                            {size}px
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Spacing & Radius */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Spacing Scale</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {designSystem.spacing.scale.map((space) => (
-                          <div key={space} className="flex items-center gap-3">
-                            <div
-                              className="bg-primary h-6 rounded"
-                              style={{ width: `${space}px` }}
-                            />
-                            <span className="text-sm font-mono">{space}px</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Border Radius</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {Object.entries(designSystem.borderRadius).map(([key, value]) => (
-                          <div key={key} className="flex items-center gap-3">
-                            <div
-                              className="w-16 h-16 bg-primary"
-                              style={{ borderRadius: value }}
-                            />
-                            <div>
-                              <p className="text-sm font-medium capitalize">{key}</p>
-                              <p className="text-xs text-muted-foreground">{value}</p>
+                        <CardHeader>
+                          <CardTitle>Color Palette</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {/* Primary Colors */}
+                          <div>
+                            <h4 className="font-semibold mb-3">Primary Colors</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                              {[
+                                { label: 'Primary', color: designSystem.colors.primary },
+                                { label: 'Secondary', color: designSystem.colors.secondary },
+                                { label: 'Accent', color: designSystem.colors.accent }
+                              ].map((item) => (
+                                <div key={item.label}>
+                                  <div
+                                    className="h-20 rounded-lg mb-2 border"
+                                    style={{ backgroundColor: item.color }}
+                                  />
+                                  <p className="text-sm font-medium">{item.label}</p>
+                                  <p className="text-xs text-muted-foreground font-mono">{item.color}</p>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
+
+                          {/* Neutrals */}
+                          <div>
+                            <h4 className="font-semibold mb-3">Neutral Colors</h4>
+                            <div className="grid grid-cols-6 gap-3">
+                              {designSystem.colors.neutral.map((color, i) => (
+                                <div key={i}>
+                                  <div
+                                    className="h-16 rounded-lg mb-2 border"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                  <p className="text-xs text-muted-foreground font-mono">{color}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Semantic */}
+                          <div>
+                            <h4 className="font-semibold mb-3">Semantic Colors</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                              {[
+                                { label: 'Success', color: designSystem.colors.success },
+                                { label: 'Warning', color: designSystem.colors.warning },
+                                { label: 'Error', color: designSystem.colors.error }
+                              ].map((item) => (
+                                <div key={item.label}>
+                                  <div
+                                    className="h-16 rounded-lg mb-2 border"
+                                    style={{ backgroundColor: item.color }}
+                                  />
+                                  <p className="text-sm font-medium">{item.label}</p>
+                                  <p className="text-xs text-muted-foreground font-mono">{item.color}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
                       </Card>
+
+                      {/* Typography */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Typography</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">Heading Font</p>
+                            <p className="text-3xl font-bold" style={{ fontFamily: designSystem.typography.headingFont }}>
+                              {designSystem.typography.headingFont}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">Body Font</p>
+                            <p className="text-lg" style={{ fontFamily: designSystem.typography.bodyFont }}>
+                              {designSystem.typography.bodyFont}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">Type Scale</p>
+                            <div className="flex flex-wrap gap-2">
+                              {designSystem.typography.scale.map((size) => (
+                                <span key={size} className="px-3 py-1 bg-muted rounded text-sm font-mono">
+                                  {size}px
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Spacing & Radius */}
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Spacing Scale</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {designSystem.spacing.scale.map((space) => (
+                                <div key={space} className="flex items-center gap-3">
+                                  <div
+                                    className="bg-primary h-6 rounded"
+                                    style={{ width: `${space}px` }}
+                                  />
+                                  <span className="text-sm font-mono">{space}px</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Border Radius</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {Object.entries(designSystem.borderRadius).map(([key, value]) => (
+                                <div key={key} className="flex items-center gap-3">
+                                  <div
+                                    className="w-16 h-16 bg-primary"
+                                    style={{ borderRadius: value }}
+                                  />
+                                  <div>
+                                    <p className="text-sm font-medium capitalize">{key}</p>
+                                    <p className="text-xs text-muted-foreground">{value}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
                   </TabsContent>
 
