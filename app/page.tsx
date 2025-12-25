@@ -5,18 +5,19 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Grid3x3, Sparkles, Wrench, Layers } from "lucide-react"
+import { Search, Grid3x3, Sparkles, Wrench, Layers, GraduationCap } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-client"
 import type { User } from "@supabase/supabase-js"
 
-type ContentType = "components" | "inspiration" | "tools" | "design-system"
+type ContentType = "components" | "inspiration" | "tools" | "academy" | "design-system"
 
 const contentTypes = [
   { id: "components", label: "Components", icon: Grid3x3 },
   { id: "inspiration", label: "Inspiration", icon: Sparkles },
   { id: "tools", label: "Tools", icon: Wrench },
+  { id: "academy", label: "Academy", icon: GraduationCap },
   { id: "design-system", label: "Design System", icon: Layers },
 ] as const
 
@@ -27,7 +28,9 @@ const getSuggestions = (type: ContentType) => {
     case "inspiration":
       return ["All Inspiration", "Landing Page", "Dashboard", "Hero Section", "Pricing Page"]
     case "tools":
-      return ["Palette Generator", "Contrast Checker", "Color Picker", "Gradient Maker"]
+      return ["Palette Generator", "Contrast Checker", "Style Matcher", "Component Finder"]
+    case "academy":
+      return ["Typography", "Color Theory", "Layout", "Accessibility", "Design Systems"]
     case "design-system":
       return ["Typography", "Colors", "Spacing", "Components", "Guidelines"]
     default:
@@ -61,11 +64,19 @@ const categoryCards = [
     available: false,
   },
   {
-    id: "tools/palette-generator",
+    id: "tools",
     title: "Tools",
     description: "Design tools for accessibility & workflows",
     image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
-    count: "2 tools",
+    count: "5 tools",
+    available: true,
+  },
+  {
+    id: "academy",
+    title: "Academy",
+    description: "Learn design fundamentals from experts",
+    image: "https://maxst.icons8.com/vue-static/illustrations/paywall/paywall.webp",
+    count: "6 articles",
     available: true,
   },
 ]
@@ -100,7 +111,9 @@ export default function HubPage() {
     e.preventDefault()
     if (searchQuery.trim()) {
       if (selectedType === "tools") {
-        router.push("/tools/palette-generator")
+        router.push("/tools")
+      } else if (selectedType === "academy") {
+        router.push("/academy")
       } else if (selectedType === "design-system") {
         alert("Design System coming soon!")
       } else {
@@ -117,9 +130,16 @@ export default function HubPage() {
         router.push("/tools/palette-generator")
       } else if (suggestion === "Contrast Checker") {
         router.push("/tools/contrast-checker")
+      } else if (suggestion === "Style Matcher") {
+        router.push("/tools/style-matcher")
+      } else if (suggestion === "Component Finder") {
+        router.push("/tools/component-finder")
       } else {
-        router.push("/tools/palette-generator") // Default to palette generator
+        router.push("/tools")
       }
+    } else if (type === "academy") {
+      // Navigate to academy with category filter
+      router.push("/academy")
     } else if (type === "design-system") {
       // Coming soon page - just stay on homepage for now
       alert("Design System coming soon!")
@@ -141,6 +161,8 @@ export default function HubPage() {
         return "Search design inspiration..."
       case "tools":
         return "Search design tools..."
+      case "academy":
+        return "Search articles..."
       case "design-system":
         return "Search design system..."
       default:
