@@ -3,9 +3,18 @@
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, FileText } from "lucide-react"
+import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, FileText, PenTool } from "lucide-react"
 
 const tools = [
+  {
+    id: "mood-board",
+    title: "Mood Board Creator",
+    description: "Create beautiful mood boards with an infinite canvas. Add images, shapes, sticky notes, and more. Share with clients instantly.",
+    icon: PenTool,
+    color: "bg-rose-500",
+    href: "/tools/mood-board",
+    tags: ["New", "Canvas"]
+  },
   {
     id: "proposal-generator",
     title: "Proposal Generator",
