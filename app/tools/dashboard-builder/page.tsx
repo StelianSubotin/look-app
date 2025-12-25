@@ -694,35 +694,35 @@ export default function DashboardBuilderPage() {
 
       {/* Full Screen Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 overflow-hidden">
-          <div className="flex flex-col h-full">
-            {/* Preview Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-background">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                  <div className="w-3 h-3 rounded-full bg-green-500" />
-                </div>
-                <span className="text-sm font-medium">Dashboard Preview</span>
+        <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 flex flex-col overflow-hidden">
+          {/* Preview Header - Fixed at top */}
+          <div className="flex items-center justify-between px-6 py-4 border-b bg-background shrink-0 z-10">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={copyCode}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Code
-                </Button>
-                <Button variant="outline" size="sm" onClick={downloadCode}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              <span className="text-sm font-medium">Dashboard Preview</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={copyCode}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Code
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadCode}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
-            {/* Preview Content */}
-            <div className="flex-1 overflow-auto bg-background p-8">
+          {/* Preview Content - Scrollable */}
+          <div className="flex-1 min-h-0 overflow-y-auto bg-background">
+            <div className="p-8">
               <div className="max-w-7xl mx-auto">
                 {/* Dashboard Header */}
                 <div className="mb-8">
