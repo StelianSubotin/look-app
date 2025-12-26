@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Send, Sparkles, Loader2, User } from 'lucide-react'
+import { Send, Sparkles, Loader2, User, CheckCircle } from 'lucide-react'
 import { DashboardConfig } from '@/lib/dashboard-schema'
 
 interface ChatInterfaceProps {
@@ -14,25 +14,26 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
+  const [userMessages, setUserMessages] = useState<string[]>([])
+  const [generatedCount, setGeneratedCount] = useState(0)
+  
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/ai-dashboard',
     onFinish: (message) => {
       // Try to parse JSON from the AI response
       try {
-        // Remove markdown code blocks if present
         let content = message.content.trim()
         
-        // Remove ```json and ``` wrappers if present
-        if (content.startsWith('```')) {
-          content = content.replace(/```json?\n?/g, '').replace(/```\n?$/g, '')
+        // Remove markdown code blocks if present
+        if (content.startsWith('\`\`\`')) {
+          content = content.replace(/\`\`\`json?\n?/g, '').replace(/\`\`\`\n?$/g, '')
         }
         
         const dashboardConfig = JSON.parse(content)
         onDashboardGenerated(dashboardConfig)
+        setGeneratedCount(prev => prev + 1)
       } catch (e) {
         console.error('Failed to parse dashboard config:', e)
-        console.log('Raw content:', message.content)
-        // Still show the message even if parsing fails
       }
     }
   })
@@ -40,6 +41,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
+      setUserMessages(prev => [...prev, input.trim()])
       handleSubmit(e)
     }
   }
@@ -63,7 +65,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
+        {userMessages.length === 0 && !isLoading && (
           <div className="text-center py-12 space-y-4">
             <div className="text-4xl">💬</div>
             <div>
@@ -95,41 +97,39 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
           </div>
         )}
 
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex gap-3 ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            {message.role === 'assistant' && (
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary/10">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                </AvatarFallback>
-              </Avatar>
-            )}
-
-            <Card
-              className={`max-w-[80%] ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
-              }`}
-            >
-              <CardContent className="p-3">
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
-              </CardContent>
-            </Card>
-
-            {message.role === 'user' && (
+        {/* Show user messages and success indicators only */}
+        {userMessages.map((msg, idx) => (
+          <div key={idx} className="space-y-3">
+            {/* User message */}
+            <div className="flex gap-3 justify-end">
+              <Card className="max-w-[80%] bg-primary text-primary-foreground">
+                <CardContent className="p-3">
+                  <p className="text-sm">{msg}</p>
+                </CardContent>
+              </Card>
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
+            </div>
+            
+            {/* Success indicator (if dashboard was generated) */}
+            {idx < generatedCount && (
+              <div className="flex gap-3 justify-start">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-green-100">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </AvatarFallback>
+                </Avatar>
+                <Card className="bg-green-50 border-green-200">
+                  <CardContent className="p-3">
+                    <p className="text-sm text-green-800 font-medium">
+                      ✨ Dashboard generated! Check the preview →
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         ))}
@@ -145,7 +145,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <p className="text-sm">Generating dashboard...</p>
+                  <p className="text-sm">Designing your dashboard...</p>
                 </div>
               </CardContent>
             </Card>
@@ -170,7 +170,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
             value={input}
             onChange={handleInputChange}
             placeholder="Describe the dashboard you want to create..."
-            className="min-h-[100px] resize-none"
+            className="min-h-[80px] resize-none"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault()
@@ -181,7 +181,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Enter to send
+              Press ⌘ + Enter to send
             </p>
             <Button type="submit" disabled={!input.trim() || isLoading}>
               {isLoading ? (
@@ -199,4 +199,3 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
     </div>
   )
 }
-
