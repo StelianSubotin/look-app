@@ -363,20 +363,12 @@ export default function AIGeneratorPage() {
         setFigmaExported(true)
         setTimeout(() => setFigmaExported(false), 3000)
         alert(
-          '✅ Copied to clipboard!
-
-' +
-          'Next steps:
-' +
-          '1. Open Figma
-' +
-          '2. Go to Plugins → LookScout Dashboard Importer
-' +
-          '3. Paste the copied data
-' +
-          '4. Click "Import"
-
-' +
+          '✅ Copied to clipboard!\n\n' +
+          'Next steps:\n' +
+          '1. Open Figma\n' +
+          '2. Go to Plugins → LookScout Dashboard Importer\n' +
+          '3. Paste the copied data\n' +
+          '4. Click "Import"\n\n' +
           'Your dashboard will be created with matching components!'
         )
       }
