@@ -215,8 +215,8 @@ function renderComponent(component: DashboardComponent): React.ReactNode {
       return (
         <DonutChart 
           data={props.data || defaultDonutData}
-          category={props.category || 'name'}
-          value={props.value || 'value'}
+          category={props.category || 'value'}
+          index={props.index || 'name'}
           colors={props.colors}
         />
       )
