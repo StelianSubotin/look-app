@@ -389,7 +389,7 @@ export default function DashboardBuilderPage() {
       // Generate SVG from the dashboard
       const svgDataUrl = await htmlToImage.toSvg(element, {
         quality: 1,
-        backgroundColor: theme.background,
+        backgroundColor: '#ffffff',
         style: {
           transform: 'scale(1)',
           transformOrigin: 'top left',
@@ -443,7 +443,7 @@ export default function DashboardBuilderPage() {
     } finally {
       setIsExporting(false)
     }
-  }, [theme.background])
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
