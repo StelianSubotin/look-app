@@ -1,23 +1,33 @@
-import { openai } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { Configuration, OpenAIApi } from 'openai-edge'
+import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { getSystemPrompt } from '@/lib/tremor-catalog'
 
 export const runtime = 'edge'
+
+const config = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
+const openai = new OpenAIApi(config)
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
 
     // Use Vercel AI SDK to stream response from OpenAI
-    const result = await streamText({
-      model: openai('gpt-4o'), // or gpt-4-turbo
-      system: getSystemPrompt(),
-      messages,
+    const response = await openai.createChatCompletion({
+      model: 'gpt-4o',
+      stream: true,
+      messages: [
+        { role: 'system', content: getSystemPrompt() },
+        ...messages,
+      ],
       temperature: 0.7,
-      maxTokens: 2000,
+      max_tokens: 2000,
     })
 
-    return result.toDataStreamResponse()
+    const stream = OpenAIStream(response)
+    return new StreamingTextResponse(stream)
   } catch (error) {
     console.error('AI Dashboard API Error:', error)
     return new Response(
@@ -32,4 +42,3 @@ export async function POST(req: Request) {
     )
   }
 }
-
