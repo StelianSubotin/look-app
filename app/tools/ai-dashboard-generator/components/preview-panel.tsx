@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Download, Code, Eye, Copy, Check } from 'lucide-react'
+import { Download, Code, Eye, Copy, Check, Figma } from 'lucide-react'
 import { DashboardRenderer } from './dashboard-renderer'
 import { DashboardConfig } from '@/lib/dashboard-schema'
+import { buildFigmaExport, copyToClipboard } from '@/lib/figma-export'
 
 interface PreviewPanelProps {
   dashboard: DashboardConfig | null
@@ -15,6 +16,7 @@ interface PreviewPanelProps {
 export function PreviewPanel({ dashboard }: PreviewPanelProps) {
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [copied, setCopied] = useState(false)
+  const [figmaExported, setFigmaExported] = useState(false)
 
   const handleCopyCode = async () => {
     if (!dashboard) return
@@ -38,12 +40,44 @@ export function PreviewPanel({ dashboard }: PreviewPanelProps) {
     URL.revokeObjectURL(url)
   }
 
+  const handleExportToFigma = async () => {
+    if (!dashboard) return
+    
+    try {
+      // Build Figma export data
+      const figmaData = buildFigmaExport(dashboard)
+      const jsonString = JSON.stringify(figmaData, null, 2)
+      
+      // Copy to clipboard
+      const success = await copyToClipboard(jsonString)
+      
+      if (success) {
+        setFigmaExported(true)
+        setTimeout(() => setFigmaExported(false), 3000)
+        
+        // Show instructions
+        alert(
+          '✅ Copied to clipboard!\n\n' +
+          'Next steps:\n' +
+          '1. Open Figma\n' +
+          '2. Go to Plugins → LookScout Dashboard Importer\n' +
+          '3. Paste the copied data\n' +
+          '4. Click "Import"\n\n' +
+          'Your dashboard will be created with matching components!'
+        )
+      }
+    } catch (error) {
+      console.error('Export to Figma failed:', error)
+      alert('Failed to export. Please try again.')
+    }
+  }
+
   return (
     <div className="flex flex-col h-full bg-muted/30">
       {/* Header with Actions */}
       <div className="border-b p-4 bg-background flex items-center justify-between">
         <div>
-          <h3 className="font-semibold">Preview</h3>
+          <h3 className="font-semibold">Live Preview</h3>
           <p className="text-xs text-muted-foreground">
             {dashboard ? 'Live dashboard preview' : 'Waiting for generation'}
           </p>
@@ -71,6 +105,25 @@ export function PreviewPanel({ dashboard }: PreviewPanelProps) {
             >
               <Download className="h-4 w-4 mr-2" />
               Export JSON
+            </Button>
+
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={handleExportToFigma}
+              className="gap-2 bg-violet-600 hover:bg-violet-700"
+            >
+              {figmaExported ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Figma className="h-4 w-4" />
+                  Export to Figma
+                </>
+              )}
             </Button>
           </div>
         )}
