@@ -484,17 +484,18 @@ export default function AIGeneratorPage() {
               <h2 className="font-semibold text-sm">Preview</h2>
             </div>
             {dashboardConfig && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setIsFullscreen(true)}
-                className="gap-2"
-              >
-                <Maximize2 className="h-4 w-4" />
-                Full Preview
-              </Button>
-              <Button 
-                variant="default" 
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsFullscreen(true)}
+                  className="gap-2"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                  Full Preview
+                </Button>
+                <Button 
+                  variant="default" 
                 size="sm"
                 onClick={handleExportToFigma}
                 className="gap-2 bg-violet-600 hover:bg-violet-700"
@@ -511,6 +512,7 @@ export default function AIGeneratorPage() {
                   </>
                 )}
               </Button>
+              </div>
             )}
           </div>
           <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-950">
