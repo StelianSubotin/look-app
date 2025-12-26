@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@tremor/react'
-import { ArrowLeft, Send, Sparkles, Loader2 } from 'lucide-react'
+import { ArrowLeft, Send, Sparkles, Loader2, Maximize2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 // Template Components
@@ -38,7 +38,7 @@ function KpiCards({ data, title }: { data?: KpiData[], title?: string }) {
   return (
     <div className="space-y-4">
       {title && <h3 className="text-lg font-semibold text-tremor-content-strong">{title}</h3>}
-      <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {metrics.map((item) => (
           <Card key={item.name}>
             <dt className="text-tremor-default font-medium text-tremor-content">
@@ -101,6 +101,8 @@ function AreaChartWithSummary({
     { date: 'Apr', Revenue: 3010, Expenses: 2000 },
     { date: 'May', Revenue: 3180, Expenses: 2200 },
     { date: 'Jun', Revenue: 3050, Expenses: 2100 },
+    { date: 'Jul', Revenue: 3500, Expenses: 2300 },
+    { date: 'Aug', Revenue: 3800, Expenses: 2400 },
   ];
 
   const chartData = data || defaultData;
@@ -111,7 +113,7 @@ function AreaChartWithSummary({
     `$${Intl.NumberFormat('us').format(number)}`;
 
   return (
-    <Card className="max-w-2xl">
+    <Card>
       <h3 className="font-medium text-tremor-content-strong">{title || 'Performance Overview'}</h3>
       <AreaChart 
         data={chartData} 
@@ -122,7 +124,7 @@ function AreaChartWithSummary({
         showLegend={true} 
         showYAxis={true} 
         showGradient={true} 
-        className="mt-6 h-48" 
+        className="mt-6 h-72" 
       />
     </Card>
   );
@@ -133,15 +135,15 @@ function AreaChartWithSummary({
 // ============================================
 function MonitoringChart({ title, subtitle }: { title?: string, subtitle?: string }) {
   const data = [
-    { date: 'Aug 01', 'Successful': 1040, 'Errors': 0 },
-    { date: 'Aug 05', 'Successful': 920, 'Errors': 0 },
-    { date: 'Aug 10', 'Successful': 1232, 'Errors': 0 },
-    { date: 'Aug 15', 'Successful': 1140, 'Errors': 0 },
-    { date: 'Aug 20', 'Successful': 1230, 'Errors': 0 },
+    { date: 'Aug 01', 'Successful': 1040, 'Errors': 20 },
+    { date: 'Aug 05', 'Successful': 920, 'Errors': 15 },
+    { date: 'Aug 10', 'Successful': 1232, 'Errors': 25 },
+    { date: 'Aug 15', 'Successful': 1140, 'Errors': 30 },
+    { date: 'Aug 20', 'Successful': 1230, 'Errors': 22 },
     { date: 'Aug 23', 'Successful': 610, 'Errors': 81 },
     { date: 'Aug 25', 'Successful': 610, 'Errors': 92 },
     { date: 'Aug 28', 'Successful': 471, 'Errors': 120 },
-    { date: 'Aug 31', 'Successful': 500, 'Errors': 56 },
+    { date: 'Aug 31', 'Successful': 680, 'Errors': 56 },
   ];
 
   const numberFormatter = (number: number) => Intl.NumberFormat('us').format(number).toString();
@@ -152,8 +154,8 @@ function MonitoringChart({ title, subtitle }: { title?: string, subtitle?: strin
   ];
 
   return (
-    <Card className="p-0">
-      <div className="rounded-t-lg p-6">
+    <Card className="p-0 overflow-hidden">
+      <div className="p-6">
         <h3 className="font-medium text-tremor-content-strong">{title || 'System Monitoring'}</h3>
         <p className="text-tremor-default text-tremor-content">{subtitle || 'Real-time performance metrics'}</p>
       </div>
@@ -175,7 +177,17 @@ function MonitoringChart({ title, subtitle }: { title?: string, subtitle?: strin
                   </li>
                 ))}
               </ul>
-              <AreaChart data={data} index="date" categories={tab.categories} colors={tab.colors as any} showLegend={false} showGradient={false} yAxisWidth={45} valueFormatter={numberFormatter} className="mt-10 h-72" />
+              <AreaChart 
+                data={data} 
+                index="date" 
+                categories={tab.categories} 
+                colors={tab.colors as any} 
+                showLegend={false} 
+                showGradient={true} 
+                yAxisWidth={45} 
+                valueFormatter={numberFormatter} 
+                className="mt-8 h-72" 
+              />
             </TabPanel>
           ))}
         </TabPanels>
@@ -200,8 +212,9 @@ function DashboardPreview({ config }: { config: DashboardConfig | null }) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
         <div className="text-center">
-          <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p>Describe your dashboard and I&apos;ll build it</p>
+          <Sparkles className="h-16 w-16 mx-auto mb-4 opacity-20" />
+          <p className="text-lg">Describe your dashboard</p>
+          <p className="text-sm mt-1">and I&apos;ll build it for you</p>
         </div>
       </div>
     );
@@ -229,6 +242,44 @@ function DashboardPreview({ config }: { config: DashboardConfig | null }) {
 }
 
 // ============================================
+// FULLSCREEN MODAL
+// ============================================
+function FullscreenModal({ 
+  isOpen, 
+  onClose, 
+  config 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  config: DashboardConfig | null;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-5 w-5 text-violet-500" />
+            <span className="font-semibold">{config?.title || 'Dashboard Preview'}</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-8 bg-gray-50 dark:bg-gray-950">
+          <div className="max-w-6xl mx-auto">
+            <DashboardPreview config={config} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // MAIN PAGE
 // ============================================
 interface Message {
@@ -242,6 +293,7 @@ export default function AIGeneratorPage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -274,17 +326,16 @@ export default function AIGeneratorPage() {
 
       const data = await response.json()
       
-      // Parse the AI response
       if (data.config) {
         setDashboardConfig(data.config)
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: data.message || '✨ Dashboard generated! Check the preview panel →'
+          content: data.message || '✨ Dashboard ready!'
         }])
       } else {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: data.message || 'I can help you build dashboards. Try asking for something like "Create a sales dashboard" or "Build me analytics for a hotel"'
+          content: data.message || 'Try asking for a dashboard like "Create a sales dashboard"'
         }])
       }
     } catch (error) {
@@ -304,7 +355,7 @@ export default function AIGeneratorPage() {
       
       {/* Header */}
       <div className="border-b bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3">
           <Button
             variant="ghost"
             size="sm"
@@ -312,7 +363,7 @@ export default function AIGeneratorPage() {
             className="gap-2 mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Tools
+            Back
           </Button>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
@@ -320,101 +371,116 @@ export default function AIGeneratorPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold">AI Dashboard Generator</h1>
-              <p className="text-sm text-muted-foreground">
-                Describe what you need and I&apos;ll build it
-              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Split View */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-          
-          {/* Chat Panel */}
-          <div className="flex flex-col bg-white dark:bg-gray-900 rounded-xl border overflow-hidden">
-            <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
-              <h2 className="font-semibold">Chat</h2>
-              <p className="text-xs text-muted-foreground">Tell me what dashboard you need</p>
-            </div>
-            
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  <p className="text-sm">Try asking:</p>
-                  <div className="mt-3 space-y-2">
-                    {[
-                      "Create a sales dashboard",
-                      "Build analytics for a hotel",
-                      "Show me e-commerce metrics"
-                    ].map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        onClick={() => setInput(suggestion)}
-                        className="block w-full text-left px-4 py-2 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        &quot;{suggestion}&quot;
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    msg.role === 'user' 
-                      ? 'bg-violet-600 text-white' 
-                      : 'bg-gray-100 dark:bg-gray-800'
-                  }`}>
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-              
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            
-            {/* Input */}
-            <form onSubmit={handleSubmit} className="p-4 border-t">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Describe your dashboard..."
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-800 dark:border-gray-700"
-                  disabled={isLoading}
-                />
-                <Button type="submit" disabled={isLoading || !input.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </form>
+      {/* Main Content - Adjusted Proportions */}
+      <div className="flex h-[calc(100vh-120px)]">
+        
+        {/* Chat Panel - Narrow sidebar */}
+        <div className="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-gray-900 border-r">
+          <div className="p-3 border-b bg-gray-50 dark:bg-gray-800">
+            <h2 className="font-semibold text-sm">Chat</h2>
           </div>
           
-          {/* Preview Panel */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl border overflow-hidden flex flex-col">
-            <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
-              <h2 className="font-semibold">Preview</h2>
-              <p className="text-xs text-muted-foreground">Live dashboard preview</p>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {messages.length === 0 && (
+              <div className="text-muted-foreground py-4">
+                <p className="text-xs mb-2">Try:</p>
+                <div className="space-y-1.5">
+                  {[
+                    "Sales dashboard",
+                    "Hotel analytics",
+                    "E-commerce metrics"
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => setInput(suggestion)}
+                      className="block w-full text-left px-3 py-2 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[90%] rounded-lg px-3 py-2 text-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-violet-600 text-white' 
+                    : 'bg-gray-100 dark:bg-gray-800'
+                }`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          {/* Input */}
+          <form onSubmit={handleSubmit} className="p-3 border-t">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Describe dashboard..."
+                className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-800 dark:border-gray-700"
+                disabled={isLoading}
+              />
+              <Button type="submit" size="sm" disabled={isLoading || !input.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
+          </form>
+        </div>
+        
+        {/* Preview Panel - Takes remaining space */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-3 border-b bg-white dark:bg-gray-900 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-sm">Preview</h2>
+            </div>
+            {dashboardConfig && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsFullscreen(true)}
+                className="gap-2"
+              >
+                <Maximize2 className="h-4 w-4" />
+                Full Preview
+              </Button>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-950">
+            <div className="max-w-5xl mx-auto">
               <DashboardPreview config={dashboardConfig} />
             </div>
           </div>
-          
         </div>
+        
       </div>
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal 
+        isOpen={isFullscreen} 
+        onClose={() => setIsFullscreen(false)} 
+        config={dashboardConfig} 
+      />
     </div>
   )
 }
