@@ -55,7 +55,7 @@ export function ChatInterface({ onDashboardGenerated }: ChatInterfaceProps) {
           <div>
             <h3 className="font-semibold">AI Dashboard Generator</h3>
             <p className="text-xs text-muted-foreground">
-              Describe your dashboard and I'll design it
+              Describe your dashboard and I&apos;ll design it
             </p>
           </div>
         </div>
