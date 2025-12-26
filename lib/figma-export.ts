@@ -24,6 +24,11 @@ export interface FigmaExportComponent {
   figmaComponentId: string
   data: any
   position: { x: number; y: number }
+  styles?: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }
 }
 
 export interface FigmaExportData {
