@@ -373,9 +373,8 @@ export default function DashboardBuilderPage() {
     setTimeout(() => setCopied(false), 2000)
   }, [components, theme])
 
-  // Copy for Figma Direct (No Plugin - Beta)
-  // This attempts to copy in a format Figma can paste directly
-  const copyForFigmaDirect = useCallback(async () => {
+  // Download SVG for Figma (drag into Figma to import as editable vectors)
+  const downloadForFigma = useCallback(async () => {
     if (!previewRef.current) {
       setShowPreview(true)
       await new Promise(resolve => setTimeout(resolve, 500))
@@ -411,35 +410,24 @@ export default function DashboardBuilderPage() {
         
         const cleanSvg = new XMLSerializer().serializeToString(svgElement)
         
-        // Try to write to clipboard in multiple formats
-        try {
-          // Method 1: Use ClipboardItem with SVG blob
-          const svgBlob = new Blob([cleanSvg], { type: 'image/svg+xml' })
-          const htmlContent = `<svg xmlns="http://www.w3.org/2000/svg">${svgElement.innerHTML}</svg>`
-          const htmlBlob = new Blob([htmlContent], { type: 'text/html' })
-          const textBlob = new Blob([cleanSvg], { type: 'text/plain' })
-
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              'image/svg+xml': svgBlob,
-              'text/html': htmlBlob,
-              'text/plain': textBlob,
-            })
-          ])
-        } catch {
-          // Fallback: Just copy as text
-          await navigator.clipboard.writeText(cleanSvg)
-        }
+        // Download the SVG file
+        const blob = new Blob([cleanSvg], { type: 'image/svg+xml' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'lookscout-dashboard-for-figma.svg'
+        a.click()
+        URL.revokeObjectURL(url)
 
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
         
-        // Show success message with instructions
-        alert('SVG copied! In Figma:\n1. Press Cmd/Ctrl + V to paste\n2. The design will be imported as vector shapes\n\nNote: Complex elements may be simplified to vectors.')
+        // Show instructions
+        alert('SVG Downloaded! To import into Figma:\n\n1. Open Figma\n2. Drag the downloaded SVG file onto your canvas\n3. Figma will import it as editable vector shapes\n\nTip: After importing, you can ungroup (Cmd/Ctrl+Shift+G) to edit individual elements.')
       }
     } catch (error) {
-      console.error('Failed to copy for Figma:', error)
-      alert('Failed to generate Figma-compatible format. Try using the Plugin option instead.')
+      console.error('Failed to generate SVG for Figma:', error)
+      alert('Failed to generate SVG. Try using the Plugin option instead.')
     } finally {
       setIsExporting(false)
     }
@@ -639,14 +627,13 @@ export default function DashboardBuilderPage() {
                     React Code (.tsx)
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={copyForFigmaDirect}>
+                  <DropdownMenuItem onClick={downloadForFigma}>
                     <Figma className="h-4 w-4 mr-2" />
-                    Copy for Figma (Beta)
-                    <span className="ml-auto text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">NEW</span>
+                    SVG for Figma (Drag & Drop)
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={copyForFigma}>
                     <Figma className="h-4 w-4 mr-2" />
-                    Copy for Figma Plugin
+                    JSON for Figma Plugin
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={exportAsPNG}>
@@ -921,14 +908,13 @@ export default function DashboardBuilderPage() {
                     React Code
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={copyForFigmaDirect}>
+                  <DropdownMenuItem onClick={downloadForFigma}>
                     <Figma className="h-4 w-4 mr-2" />
-                    Copy for Figma (Beta)
-                    <span className="ml-auto text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">NEW</span>
+                    SVG for Figma (Drag & Drop)
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={copyForFigma}>
                     <Figma className="h-4 w-4 mr-2" />
-                    Copy for Figma Plugin
+                    JSON for Figma Plugin
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={exportAsPNG}>
