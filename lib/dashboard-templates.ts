@@ -18,11 +18,10 @@ export const dashboardTemplates: DashboardTemplate[] = [
   {
     id: 'area-chart-1',
     name: 'Area Chart with Summary List',
-    description: 'Beautiful area chart with gradient, summary list below, and color-coded legend. Perfect for time-series metrics.',
+    description: 'Beautiful area chart with gradient, summary list below, and color-coded legend.',
     category: 'chart',
-    tags: ['area', 'chart', 'metrics', 'followers', 'organic', 'time-series', 'trends'],
+    tags: ['area', 'chart', 'metrics', 'followers', 'time-series', 'trends'],
     component: `'use client';
-
 import { AreaChart, Card, List, ListItem } from '@tremor/react';
 
 function classNames(...classes: (string | boolean | undefined)[]) {
@@ -49,45 +48,22 @@ const summary = [
   { name: 'Sponsored', value: 120 },
 ];
 
-const valueFormatter = (number: number) =>
-  Intl.NumberFormat('us').format(number).toString();
-
-const statusColor: Record<string, string> = {
-  Organic: 'bg-blue-500',
-  Sponsored: 'bg-violet-500',
-};
+const valueFormatter = (number: number) => Intl.NumberFormat('us').format(number).toString();
+const statusColor: Record<string, string> = { Organic: 'bg-blue-500', Sponsored: 'bg-violet-500' };
 
 export function AreaChart1() {
   return (
     <Card className="sm:mx-auto sm:max-w-lg">
-      <h3 className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
-        Follower metrics
-      </h3>
-      <AreaChart
-        data={data}
-        index="date"
-        categories={['Organic', 'Sponsored']}
-        colors={['blue', 'violet']}
-        valueFormatter={valueFormatter}
-        showLegend={false}
-        showYAxis={false}
-        showGradient={false}
-        startEndOnly={true}
-        className="mt-6 h-32"
-      />
+      <h3 className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">Follower metrics</h3>
+      <AreaChart data={data} index="date" categories={['Organic', 'Sponsored']} colors={['blue', 'violet']} valueFormatter={valueFormatter} showLegend={false} showYAxis={false} showGradient={false} startEndOnly={true} className="mt-6 h-32" />
       <List className="mt-2">
         {summary.map((item) => (
           <ListItem key={item.name}>
             <div className="flex items-center space-x-2">
-              <span
-                className={classNames(statusColor[item.name], 'h-0.5 w-3')}
-                aria-hidden={true}
-              />
+              <span className={classNames(statusColor[item.name], 'h-0.5 w-3')} aria-hidden={true} />
               <span>{item.name}</span>
             </div>
-            <span className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
-              {valueFormatter(item.value)}
-            </span>
+            <span className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">{valueFormatter(item.value)}</span>
           </ListItem>
         ))}
       </List>
@@ -102,164 +78,147 @@ export function AreaChart1() {
   {
     id: 'area-chart-13',
     name: 'Monitoring Chart with Tabs',
-    description: 'Advanced monitoring dashboard with tabbed views for API requests and incident response. Includes summary stats and responsive charts.',
+    description: 'Advanced monitoring dashboard with tabbed views for API requests and incident response.',
     category: 'chart',
-    tags: ['area', 'chart', 'monitoring', 'tabs', 'api', 'requests', 'errors', 'incidents', 'devops', 'analytics'],
+    tags: ['area', 'chart', 'monitoring', 'tabs', 'api', 'requests', 'errors', 'devops'],
     component: `'use client';
-
-import {
-  AreaChart,
-  Card,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from '@tremor/react';
+import { AreaChart, Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
 
 function classNames(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
 const data = [
-  { date: 'Aug 01', 'Successful requests': 1040, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 02', 'Successful requests': 1200, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 03', 'Successful requests': 1130, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 04', 'Successful requests': 1050, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 05', 'Successful requests': 920, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 06', 'Successful requests': 870, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 07', 'Successful requests': 790, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 08', 'Successful requests': 910, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 09', 'Successful requests': 951, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 10', 'Successful requests': 1232, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 11', 'Successful requests': 1230, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 12', 'Successful requests': 1289, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 13', 'Successful requests': 1002, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 14', 'Successful requests': 1034, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 15', 'Successful requests': 1140, Errors: 0, 'Mean time to detect': 0, 'Mean time to resolve': 0 },
-  { date: 'Aug 23', 'Successful requests': 610, Errors: 81, 'Mean time to detect': 1060, 'Mean time to resolve': 2180 },
-  { date: 'Aug 24', 'Successful requests': 610, Errors: 87, 'Mean time to detect': 1460, 'Mean time to resolve': 3140 },
-  { date: 'Aug 25', 'Successful requests': 610, Errors: 92, 'Mean time to detect': 2460, 'Mean time to resolve': 4120 },
-  { date: 'Aug 26', 'Successful requests': 501, Errors: 120, 'Mean time to detect': 2920, 'Mean time to resolve': 5120 },
-  { date: 'Aug 27', 'Successful requests': 480, Errors: 120, 'Mean time to detect': 3120, 'Mean time to resolve': 4910 },
-  { date: 'Aug 28', 'Successful requests': 471, Errors: 120, 'Mean time to detect': 3150, 'Mean time to resolve': 4210 },
-  { date: 'Aug 29', 'Successful requests': 610, Errors: 89, 'Mean time to detect': 2350, 'Mean time to resolve': 4620 },
-  { date: 'Aug 30', 'Successful requests': 513, Errors: 199, 'Mean time to detect': 2350, 'Mean time to resolve': 4130 },
-  { date: 'Aug 31', 'Successful requests': 500, Errors: 56, 'Mean time to detect': 2431, 'Mean time to resolve': 4130 },
+  { date: 'Aug 01', 'Successful requests': 1040, Errors: 0 },
+  { date: 'Aug 05', 'Successful requests': 920, Errors: 0 },
+  { date: 'Aug 10', 'Successful requests': 1232, Errors: 0 },
+  { date: 'Aug 15', 'Successful requests': 1140, Errors: 0 },
+  { date: 'Aug 20', 'Successful requests': 1230, Errors: 0 },
+  { date: 'Aug 23', 'Successful requests': 610, Errors: 81 },
+  { date: 'Aug 25', 'Successful requests': 610, Errors: 92 },
+  { date: 'Aug 28', 'Successful requests': 471, Errors: 120 },
+  { date: 'Aug 31', 'Successful requests': 500, Errors: 56 },
 ];
 
-const timeFormatter = (seconds: number) => {
-  const minutes = Math.floor((seconds % 3600) / 60);
-  return minutes + 'm';
-};
-
-const numberFormatter = (number: number) =>
-  Intl.NumberFormat('us').format(number).toString();
+const numberFormatter = (number: number) => Intl.NumberFormat('us').format(number).toString();
 
 const tabs = [
-  {
-    name: 'API requests',
-    data: data,
-    valueFormatter: numberFormatter,
-    categories: ['Successful requests', 'Errors'],
-    colors: ['blue', 'red'],
-    summary: [
-      { name: 'Successful requests', total: '23,450', color: 'bg-blue-500' },
-      { name: 'Errors', total: '1,397', color: 'bg-red-500' },
-    ],
-  },
-  {
-    name: 'Incident response',
-    data: data,
-    valueFormatter: timeFormatter,
-    categories: ['Mean time to resolve', 'Mean time to detect'],
-    colors: ['blue', 'red'],
-    summary: [
-      { name: 'Mean time to resolve', total: '47min 44s', color: 'bg-blue-500' },
-      { name: 'Mean time to detect', total: '31min 8s', color: 'bg-red-500' },
-    ],
-  },
+  { name: 'API requests', categories: ['Successful requests', 'Errors'], colors: ['blue', 'red'], summary: [{ name: 'Successful requests', total: '23,450', color: 'bg-blue-500' }, { name: 'Errors', total: '1,397', color: 'bg-red-500' }] },
 ];
 
 export function AreaChart13() {
   return (
     <Card className="p-0">
       <div className="rounded-t-lg p-6">
-        <h3 className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
-          Monitoring
-        </h3>
-        <p className="text-tremor-default leading-6 text-tremor-content dark:text-dark-tremor-content">
-          API performance and incident response metrics
-        </p>
+        <h3 className="font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">Monitoring</h3>
+        <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">API performance metrics</p>
       </div>
       <TabGroup>
         <TabList className="px-6">
-          {tabs.map((tab) => (
-            <Tab
-              key={tab.name}
-              className="font-medium hover:border-tremor-content-subtle dark:hover:border-dark-tremor-content-subtle dark:hover:text-dark-tremor-content"
-            >
-              {tab.name}
-            </Tab>
-          ))}
+          {tabs.map((tab) => (<Tab key={tab.name} className="font-medium">{tab.name}</Tab>))}
         </TabList>
         <TabPanels>
           {tabs.map((tab) => (
-            <TabPanel key={tab.name} className="mt-0 p-6">
-              <div className="md:flex md:items-start md:justify-between">
-                <ul
-                  role="list"
-                  className="flex flex-wrap items-center gap-x-10 gap-y-4"
-                >
-                  {tab.summary.map((item) => (
-                    <li key={item.name}>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={classNames(
-                            item.color,
-                            'size-3 shrink-0 rounded-sm',
-                          )}
-                          aria-hidden={true}
-                        />
-                        <p className="font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong">
-                          {item.total}
-                        </p>
-                      </div>
-                      <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">
-                        {item.name}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <AreaChart
-                data={data}
-                index="date"
-                categories={tab.categories}
-                colors={tab.colors as ('blue' | 'red')[]}
-                showLegend={false}
-                showGradient={false}
-                yAxisWidth={45}
-                valueFormatter={tab.valueFormatter}
-                className="mt-10 hidden h-72 sm:block"
-              />
-              <AreaChart
-                data={data}
-                index="date"
-                categories={tab.categories}
-                colors={tab.colors as ('blue' | 'red')[]}
-                showLegend={false}
-                showGradient={false}
-                showYAxis={false}
-                startEndOnly={true}
-                valueFormatter={tab.valueFormatter}
-                className="mt-6 h-72 sm:hidden"
-              />
+            <TabPanel key={tab.name} className="p-6">
+              <ul className="flex flex-wrap items-center gap-x-10 gap-y-4">
+                {tab.summary.map((item) => (
+                  <li key={item.name}>
+                    <div className="flex items-center space-x-2">
+                      <span className={classNames(item.color, 'size-3 shrink-0 rounded-sm')} />
+                      <p className="font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong">{item.total}</p>
+                    </div>
+                    <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">{item.name}</p>
+                  </li>
+                ))}
+              </ul>
+              <AreaChart data={data} index="date" categories={tab.categories} colors={tab.colors as any} showLegend={false} showGradient={false} yAxisWidth={45} valueFormatter={numberFormatter} className="mt-10 h-72" />
             </TabPanel>
           ))}
         </TabPanels>
       </TabGroup>
     </Card>
+  );
+}`
+  },
+
+  // ============================================
+  // TABLE ACTION 4 - Workspace Table with Checkboxes
+  // ============================================
+  {
+    id: 'table-action-4',
+    name: 'Data Table with Checkboxes',
+    description: 'Advanced data table with row selection, sorting, hover states, and selection indicator.',
+    category: 'table',
+    tags: ['table', 'data', 'checkbox', 'selection', 'sorting', 'workspace', 'admin', 'list'],
+    component: `'use client';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from '@tremor/react';
+
+function classNames(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+function IndeterminateCheckbox({ indeterminate, className, ...rest }: any) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (typeof indeterminate === 'boolean' && ref.current) {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [ref, indeterminate, rest.checked]);
+  return <input type="checkbox" ref={ref} className={classNames('size-4 rounded border-tremor-border text-tremor-brand', className)} {...rest} />;
+}
+
+const workspaces = [
+  { workspace: 'sales_by_day_api', owner: 'John Doe', status: 'live', costs: '$3,509.00', region: 'US-West 1', capacity: '99%', lastEdited: '23/09/2023 13:00' },
+  { workspace: 'marketing_campaign', owner: 'Jane Smith', status: 'live', costs: '$5,720.00', region: 'US-East 2', capacity: '80%', lastEdited: '22/09/2023 10:45' },
+  { workspace: 'development_env', owner: 'Mike Johnson', status: 'live', costs: '$4,200.00', region: 'EU-West 1', capacity: '60%', lastEdited: '21/09/2023 14:30' },
+  { workspace: 'analytics_dashboard', owner: 'Sarah Wilson', status: 'live', costs: '$6,500.00', region: 'US-West 1', capacity: '90%', lastEdited: '26/09/2023 11:30' },
+  { workspace: 'test_environment', owner: 'David Clark', status: 'inactive', costs: '$800.00', region: 'EU-Central 1', capacity: '40%', lastEdited: '25/09/2023 16:20' },
+];
+
+export function TableAction4() {
+  const [rowSelection, setRowSelection] = useState({});
+  
+  const columns = useMemo(() => [
+    { id: 'select', header: ({ table }: any) => <IndeterminateCheckbox checked={table.getIsAllRowsSelected()} indeterminate={table.getIsSomeRowsSelected()} onChange={table.getToggleAllRowsSelectedHandler()} />, cell: ({ row }: any) => <IndeterminateCheckbox checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} />, enableSorting: false, meta: { align: 'text-left' } },
+    { header: 'Workspace', accessorKey: 'workspace', meta: { align: 'text-left' } },
+    { header: 'Owner', accessorKey: 'owner', meta: { align: 'text-left' } },
+    { header: 'Status', accessorKey: 'status', meta: { align: 'text-left' } },
+    { header: 'Region', accessorKey: 'region', meta: { align: 'text-left' } },
+    { header: 'Capacity', accessorKey: 'capacity', meta: { align: 'text-left' } },
+    { header: 'Costs', accessorKey: 'costs', meta: { align: 'text-right' } },
+    { header: 'Last edited', accessorKey: 'lastEdited', meta: { align: 'text-right' } },
+  ], []);
+
+  const table = useReactTable({ data: workspaces, columns, enableRowSelection: true, onRowSelectionChange: setRowSelection, getCoreRowModel: getCoreRowModel(), getSortedRowModel: getSortedRowModel(), state: { rowSelection } });
+
+  return (
+    <Table>
+      <TableHead>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id} className="border-b border-tremor-border dark:border-dark-tremor-border">
+            {headerGroup.headers.map((header) => (
+              <TableHeaderCell key={header.id} className={(header.column.columnDef.meta as any)?.align}>
+                {flexRender(header.column.columnDef.header, header.getContext())}
+              </TableHeaderCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id} onClick={() => row.toggleSelected(!row.getIsSelected())} className="select-none hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted cursor-pointer">
+            {row.getVisibleCells().map((cell, index) => (
+              <TableCell key={cell.id} className={classNames(row.getIsSelected() ? 'bg-tremor-background-muted dark:bg-dark-tremor-background-muted' : '', (cell.column.columnDef.meta as any)?.align, 'relative')}>
+                {index === 0 && row.getIsSelected() && <div className="absolute inset-y-0 left-0 w-0.5 bg-tremor-brand dark:bg-dark-tremor-brand" />}
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }`
   },
@@ -274,12 +233,10 @@ export const templateCategories = [
   { id: 'full-dashboard', name: 'Full Dashboards', description: 'Complete dashboard templates' },
 ]
 
-// Helper to get templates by category
 export function getTemplatesByCategory(category: string): DashboardTemplate[] {
   return dashboardTemplates.filter(t => t.category === category)
 }
 
-// Helper to search templates by tags
 export function searchTemplates(query: string): DashboardTemplate[] {
   const lowerQuery = query.toLowerCase()
   return dashboardTemplates.filter(t => 
@@ -289,7 +246,6 @@ export function searchTemplates(query: string): DashboardTemplate[] {
   )
 }
 
-// Get all template IDs for AI prompt
 export function getTemplateList(): string {
   return dashboardTemplates.map(t => 
     `- ${t.id}: ${t.name} - ${t.description} [Tags: ${t.tags.join(', ')}]`
