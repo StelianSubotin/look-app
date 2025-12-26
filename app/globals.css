@@ -64,7 +64,8 @@
 }
 
 @layer base {
-  * {
+  /* Only apply border to non-Tremor elements */
+  *:not([class*="tremor"]):not([class*="Tremor"]) {
     @apply border-border;
   }
   body {
@@ -72,3 +73,54 @@
   }
 }
 
+/* ============================================
+   TREMOR COMPONENT STYLING
+   Ensure Tremor components display correctly
+   ============================================ */
+
+/* Reset border colors for ALL Tremor elements */
+[class*="tremor-"] {
+  border-color: #e5e7eb !important;
+}
+
+/* Tremor Card styling */
+[class*="tremor-Card"] {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity)) !important;
+  border-width: 1px !important;
+  border-radius: 0.5rem !important;
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+  box-shadow: var(--tw-shadow) !important;
+  background-color: white !important;
+}
+
+/* Dark mode for Tremor cards */
+.dark [class*="tremor-Card"] {
+  border-color: rgb(31 41 55) !important;
+  background-color: rgb(17 24 39) !important;
+}
+
+/* Tremor typography */
+.text-tremor-metric {
+  font-size: 1.875rem !important;
+  line-height: 2.25rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+}
+
+.dark .text-tremor-metric {
+  color: #f9fafb !important;
+}
+
+.text-tremor-content {
+  color: #6b7280 !important;
+}
+
+.text-tremor-content-strong {
+  color: #111827 !important;
+  font-weight: 500 !important;
+}
+
+.dark .text-tremor-content-strong {
+  color: #f9fafb !important;
+}
