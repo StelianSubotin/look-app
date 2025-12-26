@@ -7,6 +7,15 @@ import { Palette, RefreshCw, Contrast, Search, Layers, Sparkles, ArrowRight, Fil
 
 const tools = [
   {
+    id: "ai-dashboard-generator",
+    title: "AI Dashboard Generator",
+    description: "Chat with AI to instantly generate complete dashboards. Just describe what you need and watch it build in real-time with Tremor components.",
+    icon: Sparkles,
+    color: "bg-gradient-to-br from-violet-500 to-purple-500",
+    href: "/tools/ai-dashboard-generator",
+    tags: ["New", "AI-Powered", "Chat"]
+  },
+  {
     id: "dashboard-builder",
     title: "Dashboard Builder",
     description: "Build beautiful dashboards with drag-and-drop. Use pre-built components, customize with AI prompts, and export clean React code.",
