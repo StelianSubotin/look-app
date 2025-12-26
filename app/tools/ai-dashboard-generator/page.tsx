@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@tremor/react'
-import { ArrowLeft, Send, Sparkles, Loader2, Maximize2, X } from 'lucide-react'
+import { ArrowLeft, Send, Sparkles, Loader2, Maximize2, X, Figma, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { buildFigmaExport, copyToClipboard } from '@/lib/figma-export'
 
 // Template Components
 import { AreaChart, List, ListItem, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
@@ -295,6 +296,7 @@ export default function AIGeneratorPage() {
   const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [figmaExported, setFigmaExported] = useState(false)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -346,6 +348,41 @@ export default function AIGeneratorPage() {
       }])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleExportToFigma = async () => {
+    if (!dashboardConfig) return
+    
+    try {
+      const figmaData = buildFigmaExport(dashboardConfig)
+      const jsonString = JSON.stringify(figmaData, null, 2)
+      const success = await copyToClipboard(jsonString)
+      
+      if (success) {
+        setFigmaExported(true)
+        setTimeout(() => setFigmaExported(false), 3000)
+        alert(
+          '✅ Copied to clipboard!
+
+' +
+          'Next steps:
+' +
+          '1. Open Figma
+' +
+          '2. Go to Plugins → LookScout Dashboard Importer
+' +
+          '3. Paste the copied data
+' +
+          '4. Click "Import"
+
+' +
+          'Your dashboard will be created with matching components!'
+        )
+      }
+    } catch (error) {
+      console.error('Export to Figma failed:', error)
+      alert('Failed to export. Please try again.')
     }
   }
 
