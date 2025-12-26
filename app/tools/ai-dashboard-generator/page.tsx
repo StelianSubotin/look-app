@@ -493,6 +493,24 @@ export default function AIGeneratorPage() {
                 <Maximize2 className="h-4 w-4" />
                 Full Preview
               </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={handleExportToFigma}
+                className="gap-2 bg-violet-600 hover:bg-violet-700"
+              >
+                {figmaExported ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Figma className="h-4 w-4" />
+                    Export to Figma
+                  </>
+                )}
+              </Button>
             )}
           </div>
           <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-950">
