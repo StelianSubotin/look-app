@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "lib": ["ES2015"],
+    "typeRoots": ["../node_modules/@types", "../node_modules/@figma"],
+    "types": ["@figma/plugin-typings"],
+    "skipLibCheck": true
+  },
+  "include": ["code.ts"]
+}

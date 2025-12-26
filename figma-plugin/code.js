@@ -1,937 +1,340 @@
-// Lookscout Dashboard Importer - Figma Plugin v4 (Stable)
+// LookScout Dashboard Importer - Figma Plugin v2.0
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-// Chart data
-const lineChartData = [
-    { name: 'Jan', value: 4000 },
-    { name: 'Feb', value: 3000 },
-    { name: 'Mar', value: 5000 },
-    { name: 'Apr', value: 4500 },
-    { name: 'May', value: 6000 },
-    { name: 'Jun', value: 5500 },
-];
-
-const barChartData = [
-    { name: 'Mon', value: 120 },
-    { name: 'Tue', value: 150 },
-    { name: 'Wed', value: 180 },
-    { name: 'Thu', value: 140 },
-    { name: 'Fri', value: 200 },
-];
-
-const pieChartData = [
-    { name: 'Desktop', value: 400, color: { r: 0.231, g: 0.510, b: 0.965 } },
-    { name: 'Mobile', value: 300, color: { r: 0.063, g: 0.725, b: 0.506 } },
-    { name: 'Tablet', value: 200, color: { r: 0.961, g: 0.620, b: 0.357 } },
-];
-
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16) / 255,
-        g: parseInt(result[2], 16) / 255,
-        b: parseInt(result[3], 16) / 255,
-    } : { r: 0.231, g: 0.510, b: 0.965 };
-}
-
-// Load fonts helper
-function loadFonts() {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
-        yield figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
-    });
-}
-
-// Create simple icon (circle with symbol)
-function createIcon(type, size, color) {
-    const frame = figma.createFrame();
-    frame.name = 'Icon';
-    frame.resize(size, size);
-    frame.fills = [];
-    
-    if (type === 'dollar') {
-        const circle = figma.createEllipse();
-        circle.resize(size, size);
-        circle.fills = [];
-        circle.strokes = [{ type: 'SOLID', color: color }];
-        circle.strokeWeight = 1.5;
-        frame.appendChild(circle);
-        
-        const text = figma.createText();
-        text.characters = '$';
-        text.fontSize = size * 0.6;
-        text.fills = [{ type: 'SOLID', color: color }];
-        text.x = size * 0.32;
-        text.y = size * 0.15;
-        frame.appendChild(text);
-    } else if (type === 'cart') {
-        const rect = figma.createRectangle();
-        rect.resize(size * 0.8, size * 0.6);
-        rect.x = size * 0.1;
-        rect.y = size * 0.2;
-        rect.cornerRadius = 2;
-        rect.fills = [];
-        rect.strokes = [{ type: 'SOLID', color: color }];
-        rect.strokeWeight = 1.5;
-        frame.appendChild(rect);
-    } else if (type === 'users') {
-        const head = figma.createEllipse();
-        head.resize(size * 0.4, size * 0.4);
-        head.x = size * 0.3;
-        head.y = size * 0.1;
-        head.fills = [];
-        head.strokes = [{ type: 'SOLID', color: color }];
-        head.strokeWeight = 1.5;
-        frame.appendChild(head);
-        
-        const body = figma.createRectangle();
-        body.resize(size * 0.6, size * 0.3);
-        body.x = size * 0.2;
-        body.y = size * 0.55;
-        body.topLeftRadius = size * 0.3;
-        body.topRightRadius = size * 0.3;
-        body.fills = [];
-        body.strokes = [{ type: 'SOLID', color: color }];
-        body.strokeWeight = 1.5;
-        frame.appendChild(body);
-    } else {
-        // Activity/default - simple chart icon
-        const line1 = figma.createRectangle();
-        line1.resize(size * 0.15, size * 0.5);
-        line1.x = size * 0.15;
-        line1.y = size * 0.4;
-        line1.cornerRadius = 1;
-        line1.fills = [{ type: 'SOLID', color: color }];
-        frame.appendChild(line1);
-        
-        const line2 = figma.createRectangle();
-        line2.resize(size * 0.15, size * 0.7);
-        line2.x = size * 0.42;
-        line2.y = size * 0.2;
-        line2.cornerRadius = 1;
-        line2.fills = [{ type: 'SOLID', color: color }];
-        frame.appendChild(line2);
-        
-        const line3 = figma.createRectangle();
-        line3.resize(size * 0.15, size * 0.4);
-        line3.x = size * 0.7;
-        line3.y = size * 0.5;
-        line3.cornerRadius = 1;
-        line3.fills = [{ type: 'SOLID', color: color }];
-        frame.appendChild(line3);
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
-    
-    return frame;
 }
 
-// Stat Card
-function createStatCard(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Stat Card - ' + (props.title || 'Metric');
-        card.resize(280, 140);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        
-        // Title
-        const title = figma.createText();
-        title.characters = props.title || 'Metric';
-        title.fontSize = 14;
-        title.fontName = { family: 'Inter', style: 'Medium' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        // Icon
-        const icon = createIcon(props.icon || 'activity', 20, { r: 0.6, g: 0.6, b: 0.6 });
-        icon.x = 236;
-        icon.y = 18;
-        card.appendChild(icon);
-        
-        // Value
-        const value = figma.createText();
-        value.characters = props.value || '$0';
-        value.fontSize = 30;
-        value.fontName = { family: 'Inter', style: 'Bold' };
-        value.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        value.x = 24;
-        value.y = 50;
-        card.appendChild(value);
-        
-        // Change
-        const isPositive = props.changeType === 'positive';
-        const changeColor = isPositive 
-            ? { r: 0.13, g: 0.55, b: 0.13 }
-            : { r: 0.86, g: 0.08, b: 0.24 };
-        
-        const arrow = figma.createText();
-        arrow.characters = isPositive ? '↗' : '↘';
-        arrow.fontSize = 14;
-        arrow.fontName = { family: 'Inter', style: 'Medium' };
-        arrow.fills = [{ type: 'SOLID', color: changeColor }];
-        arrow.x = 24;
-        arrow.y = 98;
-        card.appendChild(arrow);
-        
-        const change = figma.createText();
-        change.characters = (props.change || '+0%') + ' from last month';
-        change.fontSize = 12;
-        change.fontName = { family: 'Inter', style: 'Regular' };
-        change.fills = [{ type: 'SOLID', color: changeColor }];
-        change.x = 42;
-        change.y = 100;
-        card.appendChild(change);
-        
-        return card;
-    });
-}
-
-// Mini Stat Card
-function createMiniStatCard(props) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Mini Stat - ' + (props.label || 'Label');
-        card.resize(280, 120);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        
-        const colorMap = {
-            blue: { bg: { r: 0.92, g: 0.95, b: 1 }, text: { r: 0.23, g: 0.51, b: 0.97 } },
-            green: { bg: { r: 0.92, g: 0.98, b: 0.95 }, text: { r: 0.06, g: 0.73, b: 0.51 } },
-            red: { bg: { r: 1, g: 0.93, b: 0.93 }, text: { r: 0.86, g: 0.08, b: 0.24 } },
-            purple: { bg: { r: 0.95, g: 0.93, b: 1 }, text: { r: 0.55, g: 0.36, b: 0.97 } },
-            orange: { bg: { r: 1, g: 0.96, b: 0.92 }, text: { r: 0.96, g: 0.62, b: 0.36 } },
-        };
-        const colors = colorMap[props.color] || colorMap.blue;
-        
-        // Badge
-        const badge = figma.createFrame();
-        badge.cornerRadius = 4;
-        badge.fills = [{ type: 'SOLID', color: colors.bg }];
-        badge.x = 24;
-        badge.y = 24;
-        badge.layoutMode = 'HORIZONTAL';
-        badge.paddingLeft = 10;
-        badge.paddingRight = 10;
-        badge.paddingTop = 4;
-        badge.paddingBottom = 4;
-        badge.primaryAxisSizingMode = 'AUTO';
-        badge.counterAxisSizingMode = 'AUTO';
-        
-        const badgeText = figma.createText();
-        badgeText.characters = props.label || 'Label';
-        badgeText.fontSize = 12;
-        badgeText.fontName = { family: 'Inter', style: 'Medium' };
-        badgeText.fills = [{ type: 'SOLID', color: colors.text }];
-        badge.appendChild(badgeText);
-        card.appendChild(badge);
-        
-        // Value
-        const value = figma.createText();
-        value.characters = props.value || '0';
-        value.fontSize = 36;
-        value.fontName = { family: 'Inter', style: 'Bold' };
-        value.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        value.x = 24;
-        value.y = 60;
-        card.appendChild(value);
-        
-        return card;
-    });
-}
-
-// Line Chart
-function createLineChart(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Line Chart - ' + (props.title || 'Chart');
-        card.resize(580, 300);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        card.clipsContent = true;
-        
-        // Title
-        const title = figma.createText();
-        title.characters = props.title || 'Revenue Over Time';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'Semi Bold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const chartX = 55;
-        const chartY = 55;
-        const chartWidth = 490;
-        const chartHeight = 180;
-        const data = lineChartData;
-        const maxValue = 6000;
-        
-        // Grid lines
-        const gridValues = [0, 1500, 3000, 4500, 6000];
-        for (let i = 0; i < gridValues.length; i++) {
-            const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
-            
-            const gridLine = figma.createLine();
-            gridLine.x = chartX;
-            gridLine.y = yPos;
-            gridLine.resize(chartWidth, 0);
-            gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-            gridLine.dashPattern = [4, 4];
-            card.appendChild(gridLine);
-            
-            const yLabel = figma.createText();
-            yLabel.characters = (gridValues[i] / 1000).toFixed(0) + 'k';
-            yLabel.fontSize = 11;
-            yLabel.fontName = { family: 'Inter', style: 'Regular' };
-            yLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            yLabel.x = 20;
-            yLabel.y = yPos - 6;
-            card.appendChild(yLabel);
-        }
-        
-        // Calculate points
-        const points = data.map((d, i) => ({
-            x: chartX + (chartWidth / (data.length - 1)) * i,
-            y: chartY + chartHeight - (d.value / maxValue) * chartHeight
-        }));
-        
-        // Draw line segments
-        for (let i = 0; i < points.length - 1; i++) {
-            const line = figma.createLine();
-            line.x = points[i].x;
-            line.y = points[i].y;
-            
-            const dx = points[i + 1].x - points[i].x;
-            const dy = points[i + 1].y - points[i].y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            
-            line.resize(length, 0);
-            line.rotation = -angle;
-            line.strokes = [{ type: 'SOLID', color: primaryColor }];
-            line.strokeWeight = 2;
-            line.strokeCap = 'ROUND';
-            card.appendChild(line);
-        }
-        
-        // Data points and X labels
-        for (let i = 0; i < points.length; i++) {
-            const point = figma.createEllipse();
-            point.resize(8, 8);
-            point.x = points[i].x - 4;
-            point.y = points[i].y - 4;
-            point.fills = [{ type: 'SOLID', color: primaryColor }];
-            point.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-            point.strokeWeight = 2;
-            card.appendChild(point);
-            
-            const xLabel = figma.createText();
-            xLabel.characters = data[i].name;
-            xLabel.fontSize = 11;
-            xLabel.fontName = { family: 'Inter', style: 'Regular' };
-            xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            xLabel.x = points[i].x - 10;
-            xLabel.y = chartY + chartHeight + 10;
-            card.appendChild(xLabel);
-        }
-        
-        return card;
-    });
-}
-
-// Bar Chart
-function createBarChart(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Bar Chart - ' + (props.title || 'Chart');
-        card.resize(580, 300);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Sales by Day';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'Semi Bold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const chartX = 55;
-        const chartY = 55;
-        const chartWidth = 490;
-        const chartHeight = 180;
-        const data = barChartData;
-        const maxValue = 200;
-        
-        // Grid
-        const gridValues = [0, 50, 100, 150, 200];
-        for (let i = 0; i < gridValues.length; i++) {
-            const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
-            
-            const gridLine = figma.createLine();
-            gridLine.x = chartX;
-            gridLine.y = yPos;
-            gridLine.resize(chartWidth, 0);
-            gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-            gridLine.dashPattern = [4, 4];
-            card.appendChild(gridLine);
-            
-            const yLabel = figma.createText();
-            yLabel.characters = gridValues[i].toString();
-            yLabel.fontSize = 11;
-            yLabel.fontName = { family: 'Inter', style: 'Regular' };
-            yLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            yLabel.x = 25;
-            yLabel.y = yPos - 6;
-            card.appendChild(yLabel);
-        }
-        
-        // Bars
-        const barWidth = 50;
-        const gap = (chartWidth - barWidth * data.length) / (data.length + 1);
-        
-        for (let i = 0; i < data.length; i++) {
-            const barHeight = (data[i].value / maxValue) * chartHeight;
-            const barX = chartX + gap + (barWidth + gap) * i;
-            const barY = chartY + chartHeight - barHeight;
-            
-            const bar = figma.createRectangle();
-            bar.x = barX;
-            bar.y = barY;
-            bar.resize(barWidth, barHeight);
-            bar.topLeftRadius = 4;
-            bar.topRightRadius = 4;
-            bar.fills = [{ type: 'SOLID', color: primaryColor }];
-            card.appendChild(bar);
-            
-            // Value on top
-            const valueLabel = figma.createText();
-            valueLabel.characters = data[i].value.toString();
-            valueLabel.fontSize = 11;
-            valueLabel.fontName = { family: 'Inter', style: 'Medium' };
-            valueLabel.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-            valueLabel.x = barX + barWidth / 2 - 10;
-            valueLabel.y = barY - 18;
-            card.appendChild(valueLabel);
-            
-            // X label
-            const xLabel = figma.createText();
-            xLabel.characters = data[i].name;
-            xLabel.fontSize = 11;
-            xLabel.fontName = { family: 'Inter', style: 'Regular' };
-            xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            xLabel.x = barX + barWidth / 2 - 12;
-            xLabel.y = chartY + chartHeight + 10;
-            card.appendChild(xLabel);
-        }
-        
-        return card;
-    });
-}
-
-// Pie Chart
-function createPieChart(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Pie Chart - ' + (props.title || 'Chart');
-        card.resize(580, 300);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Traffic by Device';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'Semi Bold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const data = pieChartData;
-        const total = data.reduce((sum, d) => sum + d.value, 0);
-        const centerX = 170;
-        const centerY = 165;
-        const outerRadius = 80;
-        const innerRadius = 45;
-        
-        let currentAngle = -Math.PI / 2;
-        
-        for (let i = 0; i < data.length; i++) {
-            const segmentAngle = (data[i].value / total) * Math.PI * 2;
-            
-            const arc = figma.createEllipse();
-            arc.resize(outerRadius * 2, outerRadius * 2);
-            arc.x = centerX - outerRadius;
-            arc.y = centerY - outerRadius;
-            arc.arcData = {
-                startingAngle: currentAngle,
-                endingAngle: currentAngle + segmentAngle - 0.02,
-                innerRadius: innerRadius / outerRadius
-            };
-            arc.fills = [{ type: 'SOLID', color: data[i].color }];
-            card.appendChild(arc);
-            
-            currentAngle += segmentAngle;
-        }
-        
-        // Legend
-        const legendX = 320;
-        const legendY = 90;
-        
-        for (let i = 0; i < data.length; i++) {
-            const dot = figma.createEllipse();
-            dot.resize(10, 10);
-            dot.x = legendX;
-            dot.y = legendY + i * 50;
-            dot.fills = [{ type: 'SOLID', color: data[i].color }];
-            card.appendChild(dot);
-            
-            const label = figma.createText();
-            label.characters = data[i].name;
-            label.fontSize = 13;
-            label.fontName = { family: 'Inter', style: 'Medium' };
-            label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
-            label.x = legendX + 18;
-            label.y = legendY + i * 50 - 2;
-            card.appendChild(label);
-            
-            const pct = ((data[i].value / total) * 100).toFixed(0);
-            const pctText = figma.createText();
-            pctText.characters = pct + '%';
-            pctText.fontSize = 12;
-            pctText.fontName = { family: 'Inter', style: 'Regular' };
-            pctText.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
-            pctText.x = legendX + 18;
-            pctText.y = legendY + i * 50 + 16;
-            card.appendChild(pctText);
-        }
-        
-        return card;
-    });
-}
-
-// Area Chart
-function createAreaChart(props, primaryColor) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Area Chart - ' + (props.title || 'Chart');
-        card.resize(580, 300);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        card.clipsContent = true;
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Traffic Overview';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'Semi Bold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const chartX = 55;
-        const chartY = 55;
-        const chartWidth = 490;
-        const chartHeight = 180;
-        const data = lineChartData;
-        const maxValue = 6000;
-        
-        // Grid
-        const gridValues = [0, 1500, 3000, 4500, 6000];
-        for (let i = 0; i < gridValues.length; i++) {
-            const yPos = chartY + chartHeight - (gridValues[i] / maxValue) * chartHeight;
-            
-            const gridLine = figma.createLine();
-            gridLine.x = chartX;
-            gridLine.y = yPos;
-            gridLine.resize(chartWidth, 0);
-            gridLine.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-            gridLine.dashPattern = [4, 4];
-            card.appendChild(gridLine);
-            
-            const yLabel = figma.createText();
-            yLabel.characters = (gridValues[i] / 1000).toFixed(0) + 'k';
-            yLabel.fontSize = 11;
-            yLabel.fontName = { family: 'Inter', style: 'Regular' };
-            yLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            yLabel.x = 20;
-            yLabel.y = yPos - 6;
-            card.appendChild(yLabel);
-        }
-        
-        const points = data.map((d, i) => ({
-            x: chartX + (chartWidth / (data.length - 1)) * i,
-            y: chartY + chartHeight - (d.value / maxValue) * chartHeight
-        }));
-        
-        // Area fill (simplified)
-        for (let i = 0; i < points.length - 1; i++) {
-            const rect = figma.createRectangle();
-            const minY = Math.min(points[i].y, points[i + 1].y);
-            rect.x = points[i].x;
-            rect.y = minY;
-            rect.resize(points[i + 1].x - points[i].x, chartY + chartHeight - minY);
-            rect.fills = [{ type: 'SOLID', color: primaryColor, opacity: 0.15 }];
-            card.appendChild(rect);
-        }
-        
-        // Lines
-        for (let i = 0; i < points.length - 1; i++) {
-            const line = figma.createLine();
-            line.x = points[i].x;
-            line.y = points[i].y;
-            
-            const dx = points[i + 1].x - points[i].x;
-            const dy = points[i + 1].y - points[i].y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            
-            line.resize(length, 0);
-            line.rotation = -angle;
-            line.strokes = [{ type: 'SOLID', color: primaryColor }];
-            line.strokeWeight = 2;
-            card.appendChild(line);
-        }
-        
-        // X labels
-        for (let i = 0; i < data.length; i++) {
-            const xLabel = figma.createText();
-            xLabel.characters = data[i].name;
-            xLabel.fontSize = 11;
-            xLabel.fontName = { family: 'Inter', style: 'Regular' };
-            xLabel.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }];
-            xLabel.x = points[i].x - 10;
-            xLabel.y = chartY + chartHeight + 10;
-            card.appendChild(xLabel);
-        }
-        
-        return card;
-    });
-}
-
-// Data Table
-function createDataTable(props) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const card = figma.createFrame();
-        card.name = 'Table - ' + (props.title || 'Data');
-        card.resize(580, 260);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-        card.strokes = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }];
-        card.strokeWeight = 1;
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Recent Transactions';
-        title.fontSize = 16;
-        title.fontName = { family: 'Inter', style: 'Semi Bold' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 24;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const colX = [24, 130, 310, 420];
-        const headers = ['Name', 'Email', 'Amount', 'Status'];
-        
-        for (let i = 0; i < headers.length; i++) {
-            const h = figma.createText();
-            h.characters = headers[i];
-            h.fontSize = 12;
-            h.fontName = { family: 'Inter', style: 'Medium' };
-            h.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
-            h.x = colX[i];
-            h.y = 56;
-            card.appendChild(h);
-        }
-        
-        const div = figma.createLine();
-        div.x = 24;
-        div.y = 80;
-        div.resize(532, 0);
-        div.strokes = [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93 } }];
-        card.appendChild(div);
-        
-        const rows = [
-            { name: 'John Doe', email: 'john@example.com', amount: '$250.00', status: 'Completed' },
-            { name: 'Jane Smith', email: 'jane@example.com', amount: '$150.00', status: 'Pending' },
-            { name: 'Bob Wilson', email: 'bob@example.com', amount: '$350.00', status: 'Completed' },
-        ];
-        
-        for (let r = 0; r < rows.length; r++) {
-            const rowY = 96 + r * 48;
-            const row = rows[r];
-            
-            const name = figma.createText();
-            name.characters = row.name;
-            name.fontSize = 13;
-            name.fontName = { family: 'Inter', style: 'Medium' };
-            name.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-            name.x = colX[0];
-            name.y = rowY;
-            card.appendChild(name);
-            
-            const email = figma.createText();
-            email.characters = row.email;
-            email.fontSize = 13;
-            email.fontName = { family: 'Inter', style: 'Regular' };
-            email.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
-            email.x = colX[1];
-            email.y = rowY;
-            card.appendChild(email);
-            
-            const amount = figma.createText();
-            amount.characters = row.amount;
-            amount.fontSize = 13;
-            amount.fontName = { family: 'Inter', style: 'Medium' };
-            amount.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-            amount.x = colX[2];
-            amount.y = rowY;
-            card.appendChild(amount);
-            
-            // Status badge
-            const isCompleted = row.status === 'Completed';
-            const badge = figma.createFrame();
-            badge.x = colX[3];
-            badge.y = rowY - 4;
-            badge.cornerRadius = 12;
-            badge.fills = [{ 
-                type: 'SOLID', 
-                color: isCompleted 
-                    ? { r: 0.86, g: 0.97, b: 0.9 }
-                    : { r: 1, g: 0.95, b: 0.88 }
-            }];
-            badge.layoutMode = 'HORIZONTAL';
-            badge.paddingLeft = 10;
-            badge.paddingRight = 10;
-            badge.paddingTop = 4;
-            badge.paddingBottom = 4;
-            badge.primaryAxisSizingMode = 'AUTO';
-            badge.counterAxisSizingMode = 'AUTO';
-            
-            const statusText = figma.createText();
-            statusText.characters = row.status;
-            statusText.fontSize = 12;
-            statusText.fontName = { family: 'Inter', style: 'Medium' };
-            statusText.fills = [{ 
-                type: 'SOLID', 
-                color: isCompleted 
-                    ? { r: 0.13, g: 0.55, b: 0.27 }
-                    : { r: 0.8, g: 0.52, b: 0.13 }
-            }];
-            badge.appendChild(statusText);
-            card.appendChild(badge);
-            
-            if (r < rows.length - 1) {
-                const rowDiv = figma.createLine();
-                rowDiv.x = 24;
-                rowDiv.y = rowY + 32;
-                rowDiv.resize(532, 0);
-                rowDiv.strokes = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
-                card.appendChild(rowDiv);
+// Load fonts
+function loadFonts() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    return [4, figma.loadFontAsync({ family: 'Inter', style: 'Regular' })];
+                case 1:
+                    _a.sent();
+                    return [4, figma.loadFontAsync({ family: 'Inter', style: 'Medium' })];
+                case 2:
+                    _a.sent();
+                    return [4, figma.loadFontAsync({ family: 'Inter', style: 'Bold' })];
+                case 3:
+                    _a.sent();
+                    return [3, 5];
+                case 4:
+                    error_1 = _a.sent();
+                    console.log('Font loading error (using default):', error_1);
+                    return [3, 5];
+                case 5: return [2];
             }
-        }
-        
-        return card;
+        });
     });
 }
 
-// Alert Card
-function createAlertCard(props) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const alertColors = {
-            info: { border: { r: 0.23, g: 0.51, b: 0.97 }, bg: { r: 0.95, g: 0.97, b: 1 } },
-            warning: { border: { r: 0.96, g: 0.62, b: 0.36 }, bg: { r: 1, g: 0.97, b: 0.94 } },
-            error: { border: { r: 0.86, g: 0.08, b: 0.24 }, bg: { r: 1, g: 0.95, b: 0.95 } },
-            success: { border: { r: 0.13, g: 0.55, b: 0.27 }, bg: { r: 0.94, g: 0.98, b: 0.95 } }
-        };
-        const colors = alertColors[props.type] || alertColors.info;
-        
-        const card = figma.createFrame();
-        card.name = 'Alert - ' + (props.title || 'Alert');
-        card.resize(280, 100);
-        card.cornerRadius = 12;
-        card.fills = [{ type: 'SOLID', color: colors.bg }];
-        card.strokes = [{ type: 'SOLID', color: colors.border }];
-        card.strokeWeight = 1;
-        
-        const title = figma.createText();
-        title.characters = props.title || 'Alert';
-        title.fontSize = 14;
-        title.fontName = { family: 'Inter', style: 'Medium' };
-        title.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        title.x = 20;
-        title.y = 20;
-        card.appendChild(title);
-        
-        const msg = figma.createText();
-        msg.characters = props.message || 'Alert message';
-        msg.fontSize = 13;
-        msg.fontName = { family: 'Inter', style: 'Regular' };
-        msg.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-        msg.x = 20;
-        msg.y = 48;
-        card.appendChild(msg);
-        
-        return card;
+// Find component by ID
+function findComponentById(nodeId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var cleanId, node, allComponents, _i, allComponents_1, comp, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    cleanId = nodeId.replace('-', ':');
+                    return [4, figma.getNodeByIdAsync(cleanId)];
+                case 1:
+                    node = _a.sent();
+                    if (node && node.type === 'COMPONENT') {
+                        return [2, node];
+                    }
+                    allComponents = figma.root.findAll(function (node) { return node.type === 'COMPONENT'; });
+                    for (_i = 0, allComponents_1 = allComponents; _i < allComponents_1.length; _i++) {
+                        comp = allComponents_1[_i];
+                        if (comp.id === cleanId || comp.id === nodeId) {
+                            return [2, comp];
+                        }
+                    }
+                    return [2, null];
+                case 2:
+                    error_2 = _a.sent();
+                    console.error('Error finding component:', error_2);
+                    return [2, null];
+                case 3: return [2];
+            }
+        });
     });
 }
 
-// Main create dashboard
-function createDashboard(data) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield loadFonts();
-        
-        const primaryColor = hexToRgb((data.theme && data.theme.primaryColor) || '#3b82f6');
-        
-        const dashboard = figma.createFrame();
-        dashboard.name = data.name || 'Lookscout Dashboard';
-        dashboard.resize(1280, 900);
-        dashboard.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
-        dashboard.layoutMode = 'VERTICAL';
-        dashboard.paddingLeft = 40;
-        dashboard.paddingRight = 40;
-        dashboard.paddingTop = 40;
-        dashboard.paddingBottom = 40;
-        dashboard.itemSpacing = 24;
-        
-        // Header
-        const header = figma.createFrame();
-        header.name = 'Header';
-        header.resize(1200, 60);
-        header.fills = [];
-        header.layoutMode = 'VERTICAL';
-        header.itemSpacing = 4;
-        
-        const heading = figma.createText();
-        heading.characters = 'Dashboard';
-        heading.fontSize = 30;
-        heading.fontName = { family: 'Inter', style: 'Bold' };
-        heading.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }];
-        header.appendChild(heading);
-        
-        const subheading = figma.createText();
-        subheading.characters = "Welcome back! Here's what's happening today.";
-        subheading.fontSize = 14;
-        subheading.fontName = { family: 'Inter', style: 'Regular' };
-        subheading.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
-        header.appendChild(subheading);
-        
-        dashboard.appendChild(header);
-        
-        // Grid
-        const grid = figma.createFrame();
-        grid.name = 'Components';
-        grid.fills = [];
-        grid.layoutMode = 'HORIZONTAL';
-        grid.layoutWrap = 'WRAP';
-        grid.itemSpacing = 20;
-        grid.counterAxisSpacing = 20;
-        grid.resize(1200, 700);
-        
-        for (const comp of data.components) {
-            let node = null;
-            
-            try {
-                switch (comp.type) {
-                    case 'stat-card':
-                        node = yield createStatCard(comp.props, primaryColor);
-                        break;
-                    case 'stat-card-mini':
-                        node = yield createMiniStatCard(comp.props);
-                        break;
-                    case 'line-chart':
-                        node = yield createLineChart(comp.props, primaryColor);
-                        break;
-                    case 'area-chart':
-                        node = yield createAreaChart(comp.props, primaryColor);
-                        break;
-                    case 'bar-chart':
-                        node = yield createBarChart(comp.props, primaryColor);
-                        break;
-                    case 'pie-chart':
-                        node = yield createPieChart(comp.props, primaryColor);
-                        break;
-                    case 'data-table':
-                        node = yield createDataTable(comp.props);
-                        break;
-                    case 'alert-card':
-                        node = yield createAlertCard(comp.props);
-                        break;
+// Create KPI card instance
+function createKpiCardInstance(component, data, x, y) {
+    return __awaiter(this, void 0, void 0, function () {
+        var instance, textNodes, _i, textNodes_1, textNode, name_1, error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    instance = component.createInstance();
+                    instance.x = x;
+                    instance.y = y;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4, loadFonts()];
+                case 2:
+                    _a.sent();
+                    textNodes = instance.findAll(function (node) { return node.type === 'TEXT'; });
+                    for (_i = 0, textNodes_1 = textNodes; _i < textNodes_1.length; _i++) {
+                        textNode = textNodes_1[_i];
+                        name_1 = textNode.name.toLowerCase();
+                        if (name_1.includes('metric') || name_1.includes('name') || name_1.includes('title')) {
+                            textNode.characters = data.name || 'Metric';
+                        }
+                        else if (name_1.includes('stat') || name_1.includes('value')) {
+                            textNode.characters = data.stat || '0';
+                        }
+                        else if (name_1.includes('previous') || name_1.includes('from')) {
+                            textNode.characters = "from " + (data.previousStat || '0');
+                        }
+                        else if (name_1.includes('change') || name_1.includes('percent')) {
+                            textNode.characters = data.change || '0%';
+                        }
+                    }
+                    return [3, 4];
+                case 3:
+                    error_3 = _a.sent();
+                    console.log('Text update error:', error_3);
+                    return [3, 4];
+                case 4: return [2, instance];
+            }
+        });
+    });
+}
+
+// Fallback KPI card
+function createFallbackKpiCard(data, x, y) {
+    return __awaiter(this, void 0, void 0, function () {
+        var card, nameText, valueRow, statText, fromText, changeRow, isPositive, changeText, periodText;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, loadFonts()];
+                case 1:
+                    _a.sent();
+                    card = figma.createFrame();
+                    card.name = "KPI Card - " + data.name;
+                    card.resize(320, 160);
+                    card.x = x;
+                    card.y = y;
+                    card.cornerRadius = 8;
+                    card.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+                    card.strokes = [{ type: 'SOLID', color: { r: 0.898, g: 0.906, b: 0.922 } }];
+                    card.strokeWeight = 1;
+                    card.effects = [{
+                            type: 'DROP_SHADOW',
+                            color: { r: 0, g: 0, b: 0, a: 0.1 },
+                            offset: { x: 0, y: 1 },
+                            radius: 3,
+                            visible: true,
+                            blendMode: 'NORMAL'
+                        }];
+                    card.layoutMode = 'VERTICAL';
+                    card.paddingLeft = 24;
+                    card.paddingRight = 24;
+                    card.paddingTop = 20;
+                    card.paddingBottom = 20;
+                    card.itemSpacing = 12;
+                    nameText = figma.createText();
+                    nameText.characters = data.name || 'Metric';
+                    nameText.fontSize = 14;
+                    nameText.fontName = { family: 'Inter', style: 'Medium' };
+                    nameText.fills = [{ type: 'SOLID', color: { r: 0.42, g: 0.447, b: 0.502 } }];
+                    card.appendChild(nameText);
+                    valueRow = figma.createFrame();
+                    valueRow.name = 'Value Row';
+                    valueRow.layoutMode = 'HORIZONTAL';
+                    valueRow.itemSpacing = 10;
+                    valueRow.fills = [];
+                    statText = figma.createText();
+                    statText.characters = data.stat || '0';
+                    statText.fontSize = 30;
+                    statText.fontName = { family: 'Inter', style: 'Bold' };
+                    statText.fills = [{ type: 'SOLID', color: { r: 0.067, g: 0.094, b: 0.157 } }];
+                    valueRow.appendChild(statText);
+                    fromText = figma.createText();
+                    fromText.characters = "from " + (data.previousStat || '0');
+                    fromText.fontSize = 14;
+                    fromText.fontName = { family: 'Inter', style: 'Regular' };
+                    fromText.fills = [{ type: 'SOLID', color: { r: 0.42, g: 0.447, b: 0.502 } }];
+                    valueRow.appendChild(fromText);
+                    card.appendChild(valueRow);
+                    changeRow = figma.createFrame();
+                    changeRow.name = 'Change Row';
+                    changeRow.layoutMode = 'HORIZONTAL';
+                    changeRow.itemSpacing = 8;
+                    changeRow.fills = [];
+                    isPositive = data.changeType === 'positive';
+                    changeText = figma.createText();
+                    changeText.characters = "" + (data.change || '0%');
+                    changeText.fontSize = 14;
+                    changeText.fontName = { family: 'Inter', style: 'Medium' };
+                    changeText.fills = [{
+                            type: 'SOLID',
+                            color: isPositive
+                                ? { r: 0.047, g: 0.435, b: 0.188 }
+                                : { r: 0.565, g: 0.110, b: 0.110 }
+                        }];
+                    changeRow.appendChild(changeText);
+                    periodText = figma.createText();
+                    periodText.characters = 'from previous month';
+                    periodText.fontSize = 14;
+                    periodText.fontName = { family: 'Inter', style: 'Regular' };
+                    periodText.fills = [{ type: 'SOLID', color: { r: 0.42, g: 0.447, b: 0.502 } }];
+                    changeRow.appendChild(periodText);
+                    card.appendChild(changeRow);
+                    return [2, card];
+            }
+        });
+    });
+}
+
+// Main import function
+function importDashboard(data) {
+    return __awaiter(this, void 0, void 0, function () {
+        var dashboard, titleText, container, _i, _a, comp, node, figmaComponent, _b, _c, error_4;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0: return [4, loadFonts()];
+                case 1:
+                    _d.sent();
+                    dashboard = figma.createFrame();
+                    dashboard.name = data.title || 'LookScout Dashboard';
+                    dashboard.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.99 } }];
+                    dashboard.layoutMode = 'VERTICAL';
+                    dashboard.paddingLeft = 40;
+                    dashboard.paddingRight = 40;
+                    dashboard.paddingTop = 40;
+                    dashboard.paddingBottom = 40;
+                    dashboard.itemSpacing = 24;
+                    titleText = figma.createText();
+                    titleText.characters = data.title || 'Dashboard';
+                    titleText.fontSize = 32;
+                    titleText.fontName = { family: 'Inter', style: 'Bold' };
+                    titleText.fills = [{ type: 'SOLID', color: { r: 0.067, g: 0.094, b: 0.157 } }];
+                    dashboard.appendChild(titleText);
+                    container = figma.createFrame();
+                    container.name = 'Components';
+                    container.fills = [];
+                    container.layoutMode = 'HORIZONTAL';
+                    container.layoutWrap = 'WRAP';
+                    container.itemSpacing = 24;
+                    container.counterAxisSpacing = 24;
+                    _i = 0, _a = data.components;
+                    _d.label = 2;
+                case 2:
+                    if (!(_i < _a.length)) return [3, 11];
+                    comp = _a[_i];
+                    node = null;
+                    if (!(comp.type === 'kpi-card')) return [3, 9];
+                    return [4, findComponentById(comp.figmaComponentId)];
+                case 3:
+                    figmaComponent = _d.sent();
+                    if (!figmaComponent) return [3, 6];
+                    _b = node;
+                    return [4, createKpiCardInstance(figmaComponent, comp.data, comp.position.x, comp.position.y)];
+                case 4:
+                    _b = _d.sent();
+                    return [3, 8];
+                case 5: return [3, 8];
+                case 6:
+                    console.log("Component " + comp.figmaComponentId + " not found, using fallback");
+                    _c = node;
+                    return [4, createFallbackKpiCard(comp.data, comp.position.x, comp.position.y)];
+                case 7:
+                    _c = _d.sent();
+                    _d.label = 8;
+                case 8: return [3, 10];
+                case 9:
+                    _d.label = 10;
+                case 10:
+                    if (node) {
+                        container.appendChild(node);
+                    }
+                    _i++;
+                    return [3, 2];
+                case 11:
+                    dashboard.appendChild(container);
+                    dashboard.resize(Math.max(800, container.width + 80), titleText.height + container.height + 104);
+                    figma.currentPage.appendChild(dashboard);
+                    figma.viewport.scrollAndZoomIntoView([dashboard]);
+                    figma.currentPage.selection = [dashboard];
+                    return [2, dashboard];
+            }
+        });
+    });
+}
+// Show UI
+figma.showUI(__html__, { width: 500, height: 600 });
+// Handle messages
+figma.ui.onmessage = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+    var data, error_5, errorMsg;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!(msg.type === 'import-dashboard')) return [3, 5];
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                data = JSON.parse(msg.data);
+                if (!data.components || data.components.length === 0) {
+                    throw new Error('No components to import');
                 }
-            } catch (e) {
-                console.error('Error creating component:', comp.type, e);
-            }
-            
-            if (node) grid.appendChild(node);
-        }
-        
-        dashboard.appendChild(grid);
-        figma.currentPage.appendChild(dashboard);
-        figma.viewport.scrollAndZoomIntoView([dashboard]);
-        
-        return dashboard;
-    });
-}
-
-// Plugin UI
-figma.showUI(__html__, { width: 400, height: 500 });
-
-figma.ui.onmessage = function(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (msg.type === 'import-dashboard') {
-            try {
-                const data = JSON.parse(msg.data);
-                yield createDashboard(data);
-                figma.ui.postMessage({ type: 'success', message: 'Dashboard imported!' });
-                figma.notify('Dashboard imported! 🎉');
-            } catch (error) {
-                console.error(error);
-                figma.ui.postMessage({ type: 'error', message: 'Error: ' + error.message });
-                figma.notify('Failed to import', { error: true });
-            }
-        }
-        if (msg.type === 'cancel') {
-            figma.closePlugin();
+                return [4, importDashboard(data)];
+            case 2:
+                _a.sent();
+                figma.ui.postMessage({ type: 'success', message: 'Dashboard imported successfully!' });
+                figma.notify('✨ Dashboard imported successfully!', { timeout: 3000 });
+                return [3, 4];
+            case 3:
+                error_5 = _a.sent();
+                errorMsg = error_5 instanceof Error ? error_5.message : 'Unknown error';
+                figma.ui.postMessage({ type: 'error', message: "Error: " + errorMsg });
+                figma.notify("\u274C Import failed: " + errorMsg, { error: true });
+                return [3, 4];
+            case 4: return [3, 6];
+            case 5:
+                if (msg.type === 'cancel') {
+                    figma.closePlugin();
+                }
+                _a.label = 6;
+            case 6: return [2];
         }
     });
-};
+}); };
