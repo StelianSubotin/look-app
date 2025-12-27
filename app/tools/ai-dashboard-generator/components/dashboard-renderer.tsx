@@ -27,30 +27,29 @@ import {
   ListItem
 } from '@tremor/react'
 import type { DashboardComponent, DashboardConfig } from '@/lib/dashboard-schema'
+import { EditableKpiCard } from './editable-kpi-card'
 
 interface DashboardRendererProps {
   config: DashboardConfig | null
   className?: string
+  customStyles?: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }
+  onStylesChange?: (styles: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }) => void
 }
 
-// Default chart data for when AI doesn't provide data
-const defaultChartData = [
-  { date: 'Jan', value: 100 },
-  { date: 'Feb', value: 120 },
-  { date: 'Mar', value: 115 },
-  { date: 'Apr', value: 140 },
-  { date: 'May', value: 155 },
-  { date: 'Jun', value: 170 },
-]
-
-const defaultDonutData = [
-  { name: 'Category A', value: 40 },
-  { name: 'Category B', value: 30 },
-  { name: 'Category C', value: 20 },
-  { name: 'Category D', value: 10 },
-]
-
-export function DashboardRenderer({ config, className = '' }: DashboardRendererProps) {
+export function DashboardRenderer({ 
+  config, 
+  className = '',
+  customStyles,
+  onStylesChange
+}: DashboardRendererProps) {
   if (!config) {
     return (
       <div className="flex items-center justify-center h-full p-12 text-center">
@@ -77,13 +76,26 @@ export function DashboardRenderer({ config, className = '' }: DashboardRendererP
 
       {/* Render Components */}
       <div>
-        {renderLayout(config.layout, config.components)}
+        {renderLayout(config.layout, config.components, customStyles, onStylesChange)}
       </div>
     </div>
   )
 }
 
-function renderLayout(layout: DashboardConfig['layout'], components: DashboardComponent[]) {
+function renderLayout(
+  layout: DashboardConfig['layout'], 
+  components: DashboardComponent[],
+  customStyles?: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  },
+  onStylesChange?: (styles: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }) => void
+) {
   if (layout.type === 'grid') {
     return (
       <Grid 
@@ -94,7 +106,7 @@ function renderLayout(layout: DashboardConfig['layout'], components: DashboardCo
       >
         {components.map(component => (
           <div key={component.id}>
-            {renderComponent(component)}
+            {renderComponent(component, customStyles, onStylesChange)}
           </div>
         ))}
       </Grid>
@@ -106,7 +118,7 @@ function renderLayout(layout: DashboardConfig['layout'], components: DashboardCo
       <Flex className="gap-6">
         {components.map(component => (
           <div key={component.id}>
-            {renderComponent(component)}
+            {renderComponent(component, customStyles, onStylesChange)}
           </div>
         ))}
       </Flex>
@@ -118,21 +130,33 @@ function renderLayout(layout: DashboardConfig['layout'], components: DashboardCo
     <div className="space-y-6">
       {components.map(component => (
         <div key={component.id}>
-          {renderComponent(component)}
+          {renderComponent(component, customStyles, onStylesChange)}
         </div>
       ))}
     </div>
   )
 }
 
-function renderComponent(component: DashboardComponent): React.ReactNode {
+function renderComponent(
+  component: DashboardComponent,
+  customStyles?: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  },
+  onStylesChange?: (styles: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }) => void
+): React.ReactNode {
   const { type, props = {}, children } = component
 
   // Recursively render children
   const renderedChildren = Array.isArray(children)
     ? children.map(child => (
         <div key={child.id}>
-          {renderComponent(child)}
+          {renderComponent(child, customStyles, onStylesChange)}
         </div>
       ))
     : children
@@ -176,50 +200,18 @@ function renderComponent(component: DashboardComponent): React.ReactNode {
     case 'BadgeDelta':
       return <BadgeDelta {...props}>{props.children || renderedChildren}</BadgeDelta>
 
-    // CHARTS - with default props to satisfy TypeScript
+    // CHARTS
     case 'AreaChart':
-      return (
-        <AreaChart 
-          data={props.data || defaultChartData}
-          index={props.index || 'date'}
-          categories={props.categories || ['value']}
-          colors={props.colors}
-          showLegend={props.showLegend}
-          showGridLines={props.showGridLines}
-        />
-      )
+      return <AreaChart {...props} />
 
     case 'BarChart':
-      return (
-        <BarChart 
-          data={props.data || defaultChartData}
-          index={props.index || 'date'}
-          categories={props.categories || ['value']}
-          colors={props.colors}
-          stack={props.stack}
-          layout={props.layout}
-        />
-      )
+      return <BarChart {...props} />
 
     case 'LineChart':
-      return (
-        <LineChart 
-          data={props.data || defaultChartData}
-          index={props.index || 'date'}
-          categories={props.categories || ['value']}
-          colors={props.colors}
-        />
-      )
+      return <LineChart {...props} />
 
     case 'DonutChart':
-      return (
-        <DonutChart 
-          data={props.data || defaultDonutData}
-          category={props.category || 'value'}
-          index={props.index || 'name'}
-          colors={props.colors}
-        />
-      )
+      return <DonutChart {...props} />
 
     // DATA
     case 'Table':
@@ -238,6 +230,16 @@ function renderComponent(component: DashboardComponent): React.ReactNode {
     case 'DateRangePicker':
       return <DateRangePicker {...props} />
 
+    case 'kpi':
+      return (
+        <EditableKpiCard
+          data={props.data || []}
+          title={props.title}
+          styles={customStyles}
+          onStylesChange={onStylesChange}
+        />
+      )
+
     default:
       console.warn(`Unknown component type: ${type}`)
       return (
@@ -248,15 +250,14 @@ function renderComponent(component: DashboardComponent): React.ReactNode {
   }
 }
 
-function renderTable(props: Record<string, unknown>) {
-  const data = (props.data || []) as Record<string, unknown>[]
-  const columns = (props.columns || []) as { header?: string; label?: string; accessor?: string; key?: string }[]
+function renderTable(props: any) {
+  const { data = [], columns = [] } = props
 
   return (
     <Table>
       <TableHead>
         <TableRow>
-          {columns.map((col, idx: number) => (
+          {columns.map((col: any, idx: number) => (
             <TableHeaderCell key={idx}>
               {col.header || col.label}
             </TableHeaderCell>
@@ -264,11 +265,11 @@ function renderTable(props: Record<string, unknown>) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {data.map((row, rowIdx: number) => (
+        {data.map((row: any, rowIdx: number) => (
           <TableRow key={rowIdx}>
-            {columns.map((col, colIdx: number) => (
+            {columns.map((col: any, colIdx: number) => (
               <TableCell key={colIdx}>
-                {String(row[col.accessor || col.key || ''] || '')}
+                {row[col.accessor || col.key]}
               </TableCell>
             ))}
           </TableRow>
@@ -278,34 +279,31 @@ function renderTable(props: Record<string, unknown>) {
   )
 }
 
-function renderList(props: Record<string, unknown>) {
-  const items = (props.items || []) as (string | { name?: string; label?: string })[]
+function renderList(props: any) {
+  const { items = [] } = props
 
   return (
     <List>
-      {items.map((item, idx: number) => (
+      {items.map((item: any, idx: number) => (
         <ListItem key={idx}>
-          {typeof item === 'string' ? item : item.name || item.label || ''}
+          {item.name || item.label || item}
         </ListItem>
       ))}
     </List>
   )
 }
 
-function renderSelect(props: Record<string, unknown>) {
-  const options = (props.options || []) as (string | { value?: string; label?: string })[]
-  const { options: _, ...rest } = props
+function renderSelect(props: any) {
+  const { options = [], ...rest } = props
 
   return (
     <Select {...rest}>
-      {options.map((option, idx: number) => (
-        <SelectItem 
-          key={idx} 
-          value={typeof option === 'string' ? option : option.value || ''}
-        >
-          {typeof option === 'string' ? option : option.label || option.value || ''}
+      {options.map((option: any, idx: number) => (
+        <SelectItem key={idx} value={option.value || option}>
+          {option.label || option}
         </SelectItem>
       ))}
     </Select>
   )
 }
+

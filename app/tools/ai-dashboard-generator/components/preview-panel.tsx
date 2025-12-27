@@ -11,9 +11,19 @@ import { buildFigmaExport, copyToClipboard } from '@/lib/figma-export'
 
 interface PreviewPanelProps {
   dashboard: DashboardConfig | null
+  customStyles?: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }
+  onStylesChange?: (styles: {
+    backgroundColor?: string
+    textColor?: string
+    borderColor?: string
+  }) => void
 }
 
-export function PreviewPanel({ dashboard }: PreviewPanelProps) {
+export function PreviewPanel({ dashboard, customStyles, onStylesChange }: PreviewPanelProps) {
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [copied, setCopied] = useState(false)
   const [figmaExported, setFigmaExported] = useState(false)
@@ -44,8 +54,8 @@ export function PreviewPanel({ dashboard }: PreviewPanelProps) {
     if (!dashboard) return
     
     try {
-      // Build Figma export data
-      const figmaData = buildFigmaExport(dashboard)
+      // Build Figma export data with current custom styles
+      const figmaData = buildFigmaExport(dashboard, customStyles)
       const jsonString = JSON.stringify(figmaData, null, 2)
       
       // Copy to clipboard
@@ -133,7 +143,11 @@ export function PreviewPanel({ dashboard }: PreviewPanelProps) {
       <div className="flex-1 overflow-auto">
         {activeTab === 'preview' ? (
           <div className="p-6">
-            <DashboardRenderer config={dashboard} />
+            <DashboardRenderer 
+              config={dashboard} 
+              customStyles={customStyles}
+              onStylesChange={onStylesChange}
+            />
           </div>
         ) : (
           <div className="relative">
