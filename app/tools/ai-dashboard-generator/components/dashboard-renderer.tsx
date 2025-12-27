@@ -202,16 +202,36 @@ function renderComponent(
 
     // CHARTS
     case 'AreaChart':
-      return <AreaChart {...props} />
+      return <AreaChart 
+        data={props.data || []} 
+        categories={props.categories || []} 
+        index={props.index || 'name'}
+        {...props} 
+      />
 
     case 'BarChart':
-      return <BarChart {...props} />
+      return <BarChart 
+        data={props.data || []} 
+        categories={props.categories || []} 
+        index={props.index || 'name'}
+        {...props} 
+      />
 
     case 'LineChart':
-      return <LineChart {...props} />
+      return <LineChart 
+        data={props.data || []} 
+        categories={props.categories || []} 
+        index={props.index || 'name'}
+        {...props} 
+      />
 
     case 'DonutChart':
-      return <DonutChart {...props} />
+      return <DonutChart 
+        data={props.data || []} 
+        category={props.category || 'value'} 
+        index={props.index || 'name'}
+        {...props} 
+      />
 
     // DATA
     case 'Table':
