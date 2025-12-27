@@ -76,14 +76,20 @@ export function DashboardRenderer({
 
       {/* Render Components */}
       <div>
-        {renderLayout(config.layout, config.components, customStyles, onStylesChange)}
+        {config.components && Array.isArray(config.components) && config.components.length > 0 ? (
+          renderLayout(config.layout, config.components, customStyles, onStylesChange)
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <Text>No components to display</Text>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 function renderLayout(
-  layout: DashboardConfig['layout'], 
+  layout: DashboardConfig['layout'] | undefined, 
   components: DashboardComponent[],
   customStyles?: {
     backgroundColor?: string
@@ -96,6 +102,19 @@ function renderLayout(
     borderColor?: string
   }) => void
 ) {
+  if (!layout) {
+    // Default to stack layout if no layout specified
+    return (
+      <div className="space-y-6">
+        {components.map(component => (
+          <div key={component.id || Math.random()}>
+            {renderComponent(component, customStyles, onStylesChange)}
+          </div>
+        ))}
+      </div>
+    )
+  }
+  
   if (layout.type === 'grid') {
     return (
       <Grid 
@@ -150,7 +169,13 @@ function renderComponent(
     borderColor?: string
   }) => void
 ): React.ReactNode {
-  const { type, props = {}, children } = component
+  try {
+    if (!component || !component.type) {
+      console.warn('Invalid component:', component)
+      return null
+    }
+    
+    const { type, props = {}, children } = component
 
   // Recursively render children
   const renderedChildren = Array.isArray(children)
@@ -269,6 +294,14 @@ function renderComponent(
           <Text>Unknown component: {type}</Text>
         </Card>
       )
+  }
+  } catch (error) {
+    console.error('Error rendering component:', error, component)
+    return (
+      <Card>
+        <Text>Error rendering component: {component?.type || 'unknown'}</Text>
+      </Card>
+    )
   }
 }
 

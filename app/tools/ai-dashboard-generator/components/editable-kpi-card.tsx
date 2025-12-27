@@ -160,42 +160,53 @@ export function EditableKpiCard({
         <div className="text-sm text-muted-foreground p-4">No KPI data available</div>
       ) : (
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kpiData.map((item) => (
-          <Card
-            key={item.name}
-            style={{
-              backgroundColor: localStyles.backgroundColor,
-              color: localStyles.textColor,
-              borderColor: localStyles.borderColor,
-            }}
-            className="transition-all"
-          >
-            <dt className="text-sm font-medium opacity-80">
-              {item.name}
-            </dt>
-            <dd className="mt-1 flex items-baseline space-x-2.5">
-              <p className="text-2xl font-semibold">
-                {item.stat}
-              </p>
-              <p className="text-sm opacity-70">
-                from {item.previousStat}
-              </p>
-            </dd>
-            <dd className="mt-4 flex items-center space-x-2">
-              <p className="flex items-center space-x-0.5">
-                {item.changeType === 'positive' ? (
-                  <ArrowUp className="h-4 w-4 text-emerald-700" />
-                ) : (
-                  <ArrowDown className="h-4 w-4 text-red-700" />
-                )}
-                <span className={item.changeType === 'positive' ? 'text-emerald-700' : 'text-red-700'}>
-                  {item.change}
-                </span>
-              </p>
-              <p className="text-sm opacity-70">from previous month</p>
-            </dd>
-          </Card>
-        ))}
+          {kpiData.map((item, index) => {
+            // Ensure all required properties exist
+            const safeItem = {
+              name: item?.name || `Metric ${index + 1}`,
+              stat: item?.stat || '0',
+              previousStat: item?.previousStat || '0',
+              change: item?.change || '0%',
+              changeType: item?.changeType || 'positive' as 'positive' | 'negative'
+            }
+            
+            return (
+              <Card
+                key={safeItem.name || index}
+                style={{
+                  backgroundColor: localStyles.backgroundColor,
+                  color: localStyles.textColor,
+                  borderColor: localStyles.borderColor,
+                }}
+                className="transition-all"
+              >
+                <dt className="text-sm font-medium opacity-80">
+                  {safeItem.name}
+                </dt>
+                <dd className="mt-1 flex items-baseline space-x-2.5">
+                  <p className="text-2xl font-semibold">
+                    {safeItem.stat}
+                  </p>
+                  <p className="text-sm opacity-70">
+                    from {safeItem.previousStat}
+                  </p>
+                </dd>
+                <dd className="mt-4 flex items-center space-x-2">
+                  <p className="flex items-center space-x-0.5">
+                    {safeItem.changeType === 'positive' ? (
+                      <ArrowUp className="h-4 w-4 text-emerald-700" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-red-700" />
+                    )}
+                    <span className={safeItem.changeType === 'positive' ? 'text-emerald-700' : 'text-red-700'}>
+                      {safeItem.change}
+                    </span>
+                  </p>
+                  <p className="text-sm opacity-70">from previous month</p>
+                </dd>
+              </Card>
+            )
+          })}
         </dl>
       )}
     </div>

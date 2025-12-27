@@ -90,7 +90,7 @@ export default function AIGeneratorPage() {
               <div className="flex items-center gap-4">
                 <div className="text-sm text-muted-foreground">
                   <span className="font-medium text-foreground">
-                    {currentDashboard.components.length}
+                    {currentDashboard.components?.length || 0}
                   </span>{' '}
                   components generated
                 </div>
