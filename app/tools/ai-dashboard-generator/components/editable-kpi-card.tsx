@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@tremor/react'
 import { Palette, X, ArrowUp, ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -29,17 +29,31 @@ interface EditableKpiCardProps {
 }
 
 export function EditableKpiCard({ 
-  data, 
+  data = [], 
   title, 
   styles = {},
   onStylesChange 
 }: EditableKpiCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [localStyles, setLocalStyles] = useState({
-    backgroundColor: styles.backgroundColor || '#ffffff',
-    textColor: styles.textColor || '#111827',
-    borderColor: styles.borderColor || '#e5e7eb',
+    backgroundColor: styles?.backgroundColor || '#ffffff',
+    textColor: styles?.textColor || '#111827',
+    borderColor: styles?.borderColor || '#e5e7eb',
   })
+
+  // Sync local styles when prop changes
+  useEffect(() => {
+    if (styles) {
+      setLocalStyles({
+        backgroundColor: styles.backgroundColor || '#ffffff',
+        textColor: styles.textColor || '#111827',
+        borderColor: styles.borderColor || '#e5e7eb',
+      })
+    }
+  }, [styles])
+
+  // Ensure data is an array
+  const kpiData = Array.isArray(data) ? data : []
 
   const handleStyleChange = (key: string, value: string) => {
     const newStyles = { ...localStyles, [key]: value }
@@ -142,8 +156,11 @@ export function EditableKpiCard({
 
       {/* KPI Cards */}
       {title && <h3 className="text-lg font-semibold">{title}</h3>}
-      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data.map((item) => (
+      {kpiData.length === 0 ? (
+        <div className="text-sm text-muted-foreground p-4">No KPI data available</div>
+      ) : (
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {kpiData.map((item) => (
           <Card
             key={item.name}
             style={{
@@ -179,7 +196,8 @@ export function EditableKpiCard({
             </dd>
           </Card>
         ))}
-      </dl>
+        </dl>
+      )}
     </div>
   )
 }

@@ -251,10 +251,12 @@ function renderComponent(
       return <DateRangePicker {...props} />
 
     case 'kpi':
+      // Ensure data is an array
+      const kpiData = Array.isArray(props.data) ? props.data : []
       return (
         <EditableKpiCard
-          data={props.data || []}
-          title={props.title}
+          data={kpiData}
+          title={props.title as string | undefined}
           styles={customStyles}
           onStylesChange={onStylesChange}
         />
