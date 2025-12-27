@@ -3,12 +3,31 @@
 
 // Load fonts
 async function loadFonts() {
-  try {
-    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' })
-    await figma.loadFontAsync({ family: 'Inter', style: 'Medium' })
-    await figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
-  } catch (error) {
-    console.log('Font loading error (using default):', error)
+  const fontsToLoad = [
+    // Inter fonts
+    { family: 'Inter', style: 'Regular' },
+    { family: 'Inter', style: 'Medium' },
+    { family: 'Inter', style: 'Bold' },
+    { family: 'Inter', style: 'SemiBold' },
+    // Geist fonts (used in components)
+    { family: 'Geist', style: 'Regular' },
+    { family: 'Geist', style: 'Medium' },
+    { family: 'Geist', style: 'Bold' },
+    { family: 'Geist', style: 'SemiBold' },
+    // Common fallbacks
+    { family: 'SF Pro Text', style: 'Regular' },
+    { family: 'SF Pro Text', style: 'Medium' },
+    { family: 'Roboto', style: 'Regular' },
+    { family: 'Roboto', style: 'Medium' },
+  ]
+  
+  for (const font of fontsToLoad) {
+    try {
+      await figma.loadFontAsync(font)
+    } catch (error) {
+      // Font might not be available, that's okay - skip it
+      console.log(`Font ${font.family} ${font.style} not available, skipping`)
+    }
   }
 }
 
@@ -131,6 +150,15 @@ async function createKpiCardInstance(component, data, x, y) {
           if (node.fills && node.fills.length > 0 && node.fills[0].type === 'SOLID') {
             node.fills[0].color = color
           }
+        })
+      }
+      
+      if (data.styles.borderColor) {
+        const borderColor = hexToRgb(data.styles.borderColor)
+        if (instance.strokes && instance.strokes.length > 0 && instance.strokes[0].type === 'SOLID') {
+          instance.strokes[0].color = borderColor
+        }
+      }
         })
       }
     }

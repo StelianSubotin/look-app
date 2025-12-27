@@ -38,8 +38,17 @@ export interface FigmaExportData {
   version: string
 }
 
+export interface StyleOverrides {
+  backgroundColor?: string
+  textColor?: string
+  borderColor?: string
+}
+
 // Export builder
-export function buildFigmaExport(dashboardConfig: any): FigmaExportData {
+export function buildFigmaExport(
+  dashboardConfig: any,
+  styleOverrides?: StyleOverrides
+): FigmaExportData {
   const components: FigmaExportComponent[] = []
   let yPosition = 0
   
@@ -61,7 +70,13 @@ export function buildFigmaExport(dashboardConfig: any): FigmaExportData {
           position: {
             x: kpiIndex * 350, // Space cards horizontally
             y: yPosition
-          }
+          },
+          // Apply style overrides to all KPI cards
+          styles: styleOverrides ? {
+            backgroundColor: styleOverrides.backgroundColor,
+            textColor: styleOverrides.textColor,
+            borderColor: styleOverrides.borderColor,
+          } : undefined
         })
       })
       
